@@ -175,6 +175,87 @@ async function main() {
     assert(rejected, 'double-spend correctly rejected');
   }
 
+  console.log('\n=== Phase 9: Multi-deposit anonymity set ===');
+  // The privacy argument requires anonymity set > 1.
+  // Create 3 deposits, prove withdrawal of the middle one.
+  const deposits = [];
+  for (let i = 0; i < 3; i++) {
+    deposits.push({
+      secret: randomField(),
+      nullifier: randomField(),
+      amount: 2000000000000000n, // different amount than Phase 1
+    });
+    deposits[i].commitment = computeCommitment(deposits[i].secret, deposits[i].nullifier, deposits[i].amount);
+  }
+  console.log(`  Created ${deposits.length} deposits`);
+
+  const multiTree = buildTreeFromCommitments(deposits.map(d => d.commitment));
+  // Withdraw deposit at index 1 (the middle one)
+  const targetIdx = 1;
+  const multiProof = multiTree.getProof(targetIdx);
+  assert(multiProof.pathElements.length === 24, 'multi-deposit: path has 24 elements');
+
+  const multiWitness = {
+    root: multiProof.root,
+    secret: deposits[targetIdx].secret,
+    nullifier: deposits[targetIdx].nullifier,
+    amount: deposits[targetIdx].amount,
+    recipient: deploy.owner,
+    pathElements: multiProof.pathElements,
+    pathIndices: multiProof.pathIndices,
+  };
+
+  const multiResult = await generateBridgeProof(multiWitness, { wasmPath: WASM_PATH, zkeyPath: ZKEY_PATH });
+  assert(multiResult.proof !== undefined, 'multi-deposit: proof generated');
+
+  const multiCalldata = generateGaragaCalldata(
+    multiResult.proof,
+    multiResult.publicSignals,
+    VK_PATH,
+    '/opt/homebrew/bin/python3.10'
+  );
+  assert(multiCalldata.length > 100, `multi-deposit: garaga calldata (${multiCalldata.length} felts)`);
+
+  // Set the new root
+  const multiRootBig = BigInt(multiResult.publicSignals[0]);
+  const multiRootLow = multiRootBig & ((1n << 128n) - 1n);
+  const multiRootHigh = multiRootBig >> 128n;
+
+  const setMultiRootTx = await account.execute({
+    contractAddress: deploy.bridge_address,
+    entrypoint: 'set_merkle_root',
+    calldata: CallData.compile({ root: { low: multiRootLow.toString(), high: multiRootHigh.toString() } }),
+  });
+  await provider.waitForTransaction(setMultiRootTx.transaction_hash);
+
+  try {
+    const multiMintTx = await account.execute({
+      contractAddress: deploy.bridge_address,
+      entrypoint: 'mint',
+      calldata: CallData.compile({
+        full_proof_with_hints: multiCalldata,
+        storacha_cid: '0x0',
+      }),
+    });
+    await provider.waitForTransaction(multiMintTx.transaction_hash);
+    console.log(`  TX: ${multiMintTx.transaction_hash}`);
+    assert(true, 'multi-deposit: mint from pool of 3 succeeded');
+  } catch (e) {
+    const msg = (e.message || '').slice(0, 300);
+    assert(false, `multi-deposit: mint failed: ${msg}`);
+  }
+
+  // Verify the correct nullifier was spent
+  const multiNullBig = BigInt(multiResult.publicSignals[1]);
+  const multiNullLow = multiNullBig & ((1n << 128n) - 1n);
+  const multiNullHigh = multiNullBig >> 128n;
+  const multiSpent = await provider.callContract({
+    contractAddress: deploy.bridge_address,
+    entrypoint: 'is_nullifier_spent',
+    calldata: CallData.compile({ nullifier_hash: { low: multiNullLow.toString(), high: multiNullHigh.toString() } }),
+  });
+  assert(BigInt(multiSpent[0]) === 1n, 'multi-deposit: correct nullifier spent');
+
   console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
   if (failed > 0) process.exit(1);
 }
