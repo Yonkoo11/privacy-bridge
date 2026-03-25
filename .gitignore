@@ -1,0 +1,11 @@
+node_modules/
+.env
+build/
+out/
+*.ptau
+*.zkey
+*.wasm
+*.r1cs
+*.sym
+target/
+.snfoundry_cache/

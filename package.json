@@ -1,0 +1,23 @@
+{
+  "name": "privacy-bridge",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Cross-chain bridge with cryptographic privacy. Lock on Flow EVM, prove with Groth16, mint on Starknet.",
+  "license": "MIT",
+  "scripts": {
+    "setup": "bash circuits/setup.sh",
+    "bridge": "node scripts/bridge.mjs",
+    "test": "node tests/circuit.test.mjs",
+    "test:e2e": "node tests/bridge.test.mjs"
+  },
+  "dependencies": {
+    "snarkjs": "^0.7.5",
+    "poseidon-lite": "^0.3.0",
+    "ethers": "^6.13.0",
+    "starknet": "^6.23.1",
+    "@web3-storage/w3up-client": "^17.3.0"
+  },
+  "devDependencies": {
+    "circomlib": "^2.0.5"
+  }
+}
