@@ -40,7 +40,6 @@ template MerkleTreeChecker(depth) {
     signal input pathIndices[depth];
 
     component hashers[depth];
-    component mux[depth];
 
     signal hashes[depth + 1];
     hashes[0] <== leaf;

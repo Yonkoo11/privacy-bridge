@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Bridge — Cross-Chain Privacy</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --border: #1e1e2e;
+    --text: #e0e0e8;
+    --text-dim: #8888a0;
+    --accent: #6366f1;
+    --accent-dim: #4f46e5;
+    --green: #22c55e;
+    --orange: #f59e0b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    padding: 80px 0 60px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    max-width: 600px;
+    margin: 0 auto 32px;
+  }
+  .badge-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .badge.live { border-color: var(--green); color: var(--green); }
+
+  /* Flow diagram */
+  .flow {
+    padding: 60px 0;
+  }
+  .flow h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 40px;
+    font-weight: 600;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+  }
+  .step-num {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .step h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .step p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .step .chain {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+
+  /* Tech */
+  .tech {
+    padding: 60px 0;
+    border-top: 1px solid var(--border);
+  }
+  .tech h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 32px;
+    font-weight: 600;
+  }
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .tech-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .tech-item .label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    min-width: 80px;
+  }
+  .tech-item .value {
+    font-size: 0.9rem;
+  }
+
+  /* Privacy */
+  .privacy {
+    padding: 60px 0;
+    border-top: 1px solid var(--border);
+  }
+  .privacy h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 32px;
+    font-weight: 600;
+  }
+  .privacy-list {
+    list-style: none;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .privacy-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .privacy-list li:last-child { border-bottom: none; }
+  .check {
+    color: var(--green);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .privacy-list strong { color: var(--text); }
+  .privacy-list span { color: var(--text-dim); font-size: 0.9rem; }
+
+  /* Stats */
+  .stats {
+    padding: 40px 0 60px;
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat .num {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat .label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* Footer */
+  footer {
+    padding: 40px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2rem; }
+    .hero p { font-size: 1rem; }
+    .stats { gap: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <section class="hero">
+    <h1>Privacy <span>Bridge</span></h1>
+    <p>Lock tokens on Flow EVM. Prove with zero knowledge. Claim on Starknet. No visible link between source and destination.</p>
+    <div class="badge-row">
+      <span class="badge">Groth16 / BN254</span>
+      <span class="badge">garaga on-chain verifier</span>
+      <span class="badge">Poseidon commitments</span>
+      <span class="badge live">E2E verified on devnet</span>
+    </div>
+  </section>
+
+  <section class="flow">
+    <h2>How It Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Lock</h3>
+        <p>Deposit FLOW tokens with a Poseidon commitment. The commitment hides your secret, nullifier, and amount.</p>
+        <div class="chain">Flow EVM</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Prove</h3>
+        <p>Off-chain, build a Merkle tree from all deposits. Generate a Groth16 proof that you know a valid leaf without revealing which one.</p>
+        <div class="chain">Off-chain (snarkjs)</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Verify</h3>
+        <p>Submit the proof to Starknet. The garaga verifier checks the Groth16 proof on-chain in ~1977 felts of calldata.</p>
+        <div class="chain">Starknet</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Claim</h3>
+        <p>If the proof is valid and the nullifier hasn't been used, your shielded balance is minted. Receipt stored on IPFS via Storacha.</p>
+        <div class="chain">Starknet + IPFS</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="num">6,634</div>
+      <div class="label">Circuit constraints</div>
+    </div>
+    <div class="stat">
+      <div class="num">24</div>
+      <div class="label">Merkle depth</div>
+    </div>
+    <div class="stat">
+      <div class="num">1,977</div>
+      <div class="label">Calldata felts</div>
+    </div>
+    <div class="stat">
+      <div class="num">8/8</div>
+      <div class="label">E2E tests passing</div>
+    </div>
+  </div>
+
+  <section class="tech">
+    <h2>Tech Stack</h2>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <span class="label">Circuit</span>
+        <span class="value">Circom 2.1.9 + snarkjs (Groth16 over BN254)</span>
+      </div>
+      <div class="tech-item">
+        <span class="label">Source</span>
+        <span class="value">Flow EVM &mdash; Solidity 0.8.20</span>
+      </div>
+      <div class="tech-item">
+        <span class="label">Dest</span>
+        <span class="value">Starknet &mdash; Cairo 2.14.0</span>
+      </div>
+      <div class="tech-item">
+        <span class="label">Verifier</span>
+        <span class="value">garaga 1.0.1 (ECIP MSM + BN254 pairing)</span>
+      </div>
+      <div class="tech-item">
+        <span class="label">Hash</span>
+        <span class="value">Poseidon (BN254 scalar field)</span>
+      </div>
+      <div class="tech-item">
+        <span class="label">Storage</span>
+        <span class="value">Storacha (w3up-client / IPFS)</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="privacy">
+    <h2>Privacy Guarantees</h2>
+    <ul class="privacy-list">
+      <li>
+        <span class="check">&#10003;</span>
+        <div><strong>Commitment hiding</strong><br><span>Poseidon(Poseidon(secret, nullifier), amount). On-chain data cannot reveal secret or link to withdrawal.</span></div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
+        <div><strong>Nullifier binding</strong><br><span>Each deposit has a unique nullifier. Double-spend prevented on-chain.</span></div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
+        <div><strong>Amount hidden from events</strong><br><span>Lock events emit only the commitment hash. Amount is in calldata but not indexed.</span></div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
+        <div><strong>No on-chain link</strong><br><span>ZK proof demonstrates knowledge of a valid commitment without revealing which one.</span></div>
+      </li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Built for <strong>PL_Genesis Hackathon</strong> &mdash; <a href="https://github.com/yonkoo11/privacy-bridge">GitHub</a></p>
+  </footer>
+</div>
+
+</body>
+</html>

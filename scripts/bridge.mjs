@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 import { computeCommitment, computeNullifierHash, poseidonHash } from '../sdk/src/poseidon.mjs';
 import { buildTreeFromCommitments } from '../sdk/src/merkle.mjs';
-import { generateBridgeProof, serializeProofToFelts } from '../sdk/src/prover.mjs';
+import { generateBridgeProof, generateGaragaCalldata } from '../sdk/src/prover.mjs';
 import { getFlowProvider, lockTokens, fetchAllCommitments } from '../sdk/src/flow.mjs';
 import { createReceipt } from '../sdk/src/storacha.mjs';
 
@@ -126,14 +126,18 @@ async function cmdProve(args) {
   const result = await generateBridgeProof(witness, { wasmPath, zkeyPath });
   console.log('  Proof generated and verified locally.');
 
-  const felts = serializeProofToFelts(result.proof, result.publicSignals);
+  const vkPath = path.join(__dirname, '..', 'circuits', 'target', 'verification_key.json');
+  console.log('Generating garaga calldata...');
+  const garagaCalldata = generateGaragaCalldata(result.proof, result.publicSignals, vkPath);
+  console.log(`  Got ${garagaCalldata.length} felts`);
+
   const nullifierHash = result.nullifierHash;
 
   // Save proof for mint step
   const proofData = {
     proof: result.proof,
     publicSignals: result.publicSignals,
-    felts: felts.map(String),
+    garagaCalldata,
     nullifierHash: '0x' + nullifierHash.toString(16),
     recipient,
     amount: note.amount,
@@ -156,9 +160,56 @@ async function cmdProve(args) {
 }
 
 async function cmdMint(args) {
-  console.log('Starknet mint: requires devnet running + Cairo contract deployed.');
-  console.log('See contracts/starknet/ for the Cairo contract.');
-  console.log('This step will be implemented after garaga verifier integration.');
+  const proofFile = args['--proof'];
+
+  if (!proofFile) {
+    console.error('Usage: bridge.mjs mint --proof <proof-file.json>');
+    console.error('Env: STARKNET_PRIVATE_KEY, STARKNET_ADDRESS, STARKNET_RPC_URL');
+    process.exit(1);
+  }
+
+  const proofData = JSON.parse(fs.readFileSync(proofFile, 'utf-8'));
+  if (!proofData.garagaCalldata || proofData.garagaCalldata.length < 30) {
+    console.error('Proof file missing garagaCalldata. Re-run: bridge.mjs prove');
+    process.exit(1);
+  }
+
+  // Load deployment info
+  const deployPath = path.join(__dirname, '..', 'deploy.json');
+  if (!fs.existsSync(deployPath)) {
+    console.error('deploy.json not found. Run: node scripts/deploy-devnet.mjs');
+    process.exit(1);
+  }
+  const deploy = JSON.parse(fs.readFileSync(deployPath, 'utf-8'));
+
+  const { RpcProvider, Account, Contract, CallData } = await import('starknet');
+
+  const rpcUrl = process.env.STARKNET_RPC_URL || deploy.rpc || 'http://127.0.0.1:5051';
+  const provider = new RpcProvider({ nodeUrl: rpcUrl });
+
+  const accountAddr = process.env.STARKNET_ADDRESS || deploy.owner;
+  const privateKey = process.env.STARKNET_PRIVATE_KEY || '0xb137668388dbe9acdfa3bc734cc2c469';
+  const account = new Account(provider, accountAddr, privateKey);
+
+  console.log('Submitting proof to Starknet bridge...');
+  console.log(`  Bridge: ${deploy.bridge_address}`);
+  console.log(`  Calldata felts: ${proofData.garagaCalldata.length}`);
+
+  // Encode a short felt for storacha_cid (placeholder — real CID comes from Storacha upload)
+  const storachaCid = '0x0';
+
+  const tx = await account.execute({
+    contractAddress: deploy.bridge_address,
+    entrypoint: 'mint',
+    calldata: CallData.compile({
+      full_proof_with_hints: proofData.garagaCalldata,
+      storacha_cid: storachaCid,
+    }),
+  });
+
+  console.log(`  TX hash: ${tx.transaction_hash}`);
+  await provider.waitForTransaction(tx.transaction_hash);
+  console.log('  Mint confirmed on Starknet.');
 }
 
 // Parse CLI args

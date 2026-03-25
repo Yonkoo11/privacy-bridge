@@ -24,9 +24,10 @@ contract PrivacyBridge {
     mapping(uint256 => uint256) public commitments; // index => commitment
     mapping(uint256 => bool) public commitmentExists; // commitment => exists (prevent duplicates)
 
-    // Events — commitment is NOT indexed to reduce linkability surface
+    // Events — commitment is NOT indexed to reduce linkability surface.
+    // Amount is deliberately excluded from events to preserve privacy.
+    // Leaf index is derivable from CommitmentLocked event order.
     event CommitmentLocked(uint256 commitment, address token);
-    event DepositETH(uint256 indexed leafIndex, uint256 commitment, uint256 amount);
 
     /**
      * Lock native FLOW tokens with a commitment hash.
@@ -43,7 +44,6 @@ contract PrivacyBridge {
         nextLeafIndex++;
 
         emit CommitmentLocked(commitment, address(0)); // address(0) = native FLOW
-        emit DepositETH(leafIndex, commitment, msg.value);
     }
 
     /**

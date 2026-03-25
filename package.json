@@ -8,7 +8,10 @@
     "setup": "bash circuits/setup.sh",
     "bridge": "node scripts/bridge.mjs",
     "test": "node tests/circuit.test.mjs",
-    "test:e2e": "node tests/bridge.test.mjs"
+    "test:e2e": "node tests/e2e-devnet.test.mjs",
+    "test:storacha": "node tests/storacha.test.mjs",
+    "deploy:devnet": "node scripts/deploy-devnet.mjs",
+    "deploy:flow": "node scripts/deploy-flow.mjs"
   },
   "dependencies": {
     "snarkjs": "^0.7.5",

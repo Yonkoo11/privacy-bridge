@@ -9,3 +9,12 @@ out/
 *.sym
 target/
 .snfoundry_cache/
+
+# Secret note files (contain deposit secrets — never commit)
+note-*.json
+proof-*.json
+receipt-*.json
+
+# Deployment files (contain local addresses, regen with deploy scripts)
+deploy.json
+deploy-flow.json

@@ -8,7 +8,6 @@ const PRIVACY_BRIDGE_ABI = [
   'function getCommitment(uint256 index) view returns (uint256)',
   'function getDepositCount() view returns (uint256)',
   'event CommitmentLocked(uint256 commitment, address token)',
-  'event DepositETH(uint256 indexed leafIndex, uint256 commitment, uint256 amount)',
 ];
 
 const FLOW_EVM_TESTNET = {
@@ -40,35 +39,32 @@ export async function lockTokens(contractAddress, wallet, commitment, amountWei)
   const tx = await contract.lock(commitment, { value: amountWei });
   const receipt = await tx.wait();
 
-  const event = receipt.logs
-    .map(log => {
-      try { return contract.interface.parseLog(log); }
-      catch { return null; }
-    })
-    .find(e => e && e.name === 'DepositETH');
+  // Leaf index is derivable from deposit count (event order).
+  // We read it from contract state since the event deliberately omits amount/index.
+  const depositCount = await contract.getDepositCount();
+  const leafIndex = Number(depositCount) - 1;
 
   return {
     txHash: receipt.hash,
-    leafIndex: Number(event.args.leafIndex),
-    commitment: event.args.commitment,
-    amount: event.args.amount,
+    leafIndex,
+    commitment,
+    amount: amountWei,
   };
 }
 
 /**
- * Fetch all commitments from the bridge contract (for Merkle tree reconstruction).
+ * Fetch all commitments from the bridge contract via event logs.
+ * Returns commitments in deposit order (chronological) for Merkle tree reconstruction.
  */
 export async function fetchAllCommitments(contractAddress, provider) {
   const contract = getBridgeContract(contractAddress, provider);
-  const count = await contract.getDepositCount();
 
-  const commitments = [];
-  for (let i = 0; i < count; i++) {
-    const c = await contract.getCommitment(i);
-    commitments.push(BigInt(c));
-  }
+  // Query all CommitmentLocked events from block 0 to latest.
+  // Events are returned in block order = deposit order.
+  const filter = contract.filters.CommitmentLocked();
+  const events = await contract.queryFilter(filter, 0, 'latest');
 
-  return commitments;
+  return events.map(e => BigInt(e.args[0]));
 }
 
 export { FLOW_EVM_TESTNET, PRIVACY_BRIDGE_ABI };
