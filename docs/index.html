@@ -3,48 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Bridge — Cross-Chain Privacy</title>
-<meta name="description" content="Lock tokens on Flow EVM. Prove with zero knowledge. Claim on Starknet. No visible link between source and destination.">
-<meta property="og:title" content="Privacy Bridge">
-<meta property="og:description" content="Zero-knowledge cross-chain bridge. Flow EVM to Starknet with Groth16 proofs, on-chain Poseidon Merkle tree, and 7 privacy properties.">
-<meta property="og:type" content="website">
+<title>Privacy Bridge — Declassified</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   /* ===== RESET ===== */
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   /* ===== TOKENS ===== */
   :root {
-    --bg: #08080c;
-    --surface: #111118;
-    --surface-hover: #18181f;
-    --grid-line: rgba(255, 255, 255, 0.06);
-    --border-default: rgba(255, 255, 255, 0.10);
-    --border-strong: rgba(255, 255, 255, 0.16);
-    --text-primary: #e4e4e8;
-    --text-secondary: #b0b0b8;
-    --text-muted: #8a8a96;
-    --amber: #f59e0b;
-    --amber-glow: rgba(245, 158, 11, 0.15);
-    --cyan: #06b6d4;
-    --green: #22c55e;
+    --bg: #0c0c10;
+    --surface: #14141c;
+    --surface-raised: #1a1a24;
+
+    --text-heading: #f4f4f5;
+    --text-body: #a8a8b3;
+    --text-label: #64647a;
+    --text-stamp: #e8e4d9;
+
+    --redact-bar: #f4f4f5;
+    --redact-bg: #0c0c10;
 
     --font-heading: 'Space Grotesk', system-ui, sans-serif;
     --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 
-    --space-xs: 4px;
-    --space-sm: 8px;
-    --space-md: 16px;
-    --space-lg: 24px;
-    --space-xl: 48px;
-    --space-2xl: 80px;
-    --space-3xl: 120px;
+    --space-unit: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-16: 64px;
 
-    --radius: 2px;
-
-    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --radius: 0px;
   }
 
   /* ===== BASE ===== */
@@ -56,1094 +49,584 @@
 
   body {
     background-color: var(--bg);
-    color: var(--text-primary);
-    font-family: var(--font-heading);
-    font-size: 15px;
-    line-height: 1.6;
+    color: var(--text-body);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.65;
     min-height: 100vh;
-    background-image:
-      repeating-linear-gradient(
-        90deg,
-        var(--grid-line) 0,
-        var(--grid-line) 1px,
-        transparent 1px,
-        transparent 48px
-      ),
-      repeating-linear-gradient(
-        0deg,
-        var(--grid-line) 0,
-        var(--grid-line) 1px,
-        transparent 1px,
-        transparent 48px
-      );
-    background-size: 48px 48px;
   }
 
   /* ===== LAYOUT ===== */
-  .container {
-    max-width: 1200px;
+  .page {
+    max-width: 800px;
     margin: 0 auto;
-    padding: 0 var(--space-md);
+    padding: 0 var(--space-6);
   }
 
-  /* ===== SCROLL REVEAL ===== */
-  .reveal {
-    opacity: 0.01;
-    transform: translateY(24px);
-    transition: opacity 600ms var(--ease-out-expo),
-                transform 600ms var(--ease-out-expo);
-  }
-
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .reveal-delay-1 { transition-delay: 100ms; }
-  .reveal-delay-2 { transition-delay: 200ms; }
-  .reveal-delay-3 { transition-delay: 300ms; }
-
-  /* Staggered children inside visible parents */
-  .stagger-children > * {
-    opacity: 0.01;
-    transform: translateY(12px);
-    transition: opacity 400ms var(--ease-out-expo),
-                transform 400ms var(--ease-out-expo);
-  }
-
-  .stagger-children.visible > * {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .stagger-children.visible > *:nth-child(1) { transition-delay: 50ms; }
-  .stagger-children.visible > *:nth-child(2) { transition-delay: 100ms; }
-  .stagger-children.visible > *:nth-child(3) { transition-delay: 150ms; }
-  .stagger-children.visible > *:nth-child(4) { transition-delay: 200ms; }
-  .stagger-children.visible > *:nth-child(5) { transition-delay: 250ms; }
-  .stagger-children.visible > *:nth-child(6) { transition-delay: 300ms; }
-  .stagger-children.visible > *:nth-child(7) { transition-delay: 350ms; }
-
-  /* ===== ANIMATIONS ===== */
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  @keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 var(--amber-glow); }
-    50% { box-shadow: 0 0 20px 4px var(--amber-glow); }
-  }
-
-  @keyframes arrow-breathe {
-    0%, 100% { opacity: 0.35; }
-    50% { opacity: 0.7; }
-  }
-
-  @keyframes cursor-blink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
-  }
-
-  @keyframes border-draw {
-    from { transform: scaleY(0); }
-    to { transform: scaleY(1); }
-  }
-
-  @keyframes hero-word-reveal {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-      filter: blur(4px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0);
-    }
-  }
-
-  .pulse-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: var(--amber);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-    vertical-align: middle;
-    margin-right: 6px;
-  }
-
-  .pulse-dot--green {
-    background: var(--green);
-  }
-
-  /* ===== CTA BUTTONS ===== */
-  .hero__cta {
-    margin-top: var(--space-lg);
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    flex-wrap: wrap;
-  }
-
-  .cta-btn {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: var(--bg);
-    background: var(--amber);
-    padding: 12px 28px;
-    border-radius: var(--radius);
-    text-decoration: none;
-    transition: background 0.15s ease-out, transform 0.15s ease-out, box-shadow 0.3s ease-out;
-    animation: glow-pulse 3s ease-in-out infinite;
-  }
-
-  .cta-btn:hover {
-    background: #d97706;
-    transform: translateY(-1px);
-    animation: none;
-    box-shadow: 0 4px 20px var(--amber-glow);
-  }
-
-  .cta-btn:active {
-    transform: translateY(0) scale(0.98);
-  }
-
-  .cta-link {
-    font-family: var(--font-mono);
-    font-size: 14px;
-    color: var(--text-muted);
-    text-decoration: none;
-    border-bottom: 1px solid var(--border-default);
-    padding-bottom: 1px;
-    transition: color 0.15s ease-out, border-color 0.15s ease-out;
-  }
-
-  .cta-link:hover {
-    color: var(--text-primary);
-    border-color: var(--text-primary);
-  }
-
-  /* ===== REDUCED MOTION ===== */
-  @media (prefers-reduced-motion: reduce) {
-    .pulse-dot { animation: none; opacity: 1; }
-    .cta-btn { animation: none; }
-    .reveal, .stagger-children > * {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
-    .flow-cell:not(:last-child)::after { animation: none; }
-    .hero__line { animation: none; opacity: 1; filter: none; }
-    .terminal__cursor { animation: none; }
-    .matrix__property::before { animation: none; }
-  }
-
-  /* ===== 1. HEADER BAR ===== */
+  /* ===== HEADER BAR ===== */
   .header {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    padding: var(--space-md) var(--space-lg);
-    border-bottom: 1px solid var(--border-default);
-    background: var(--surface);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    backdrop-filter: blur(12px);
-    background: rgba(17, 17, 24, 0.85);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid #1e1e2a;
+    margin-bottom: var(--space-16);
   }
 
   .header__brand {
     font-family: var(--font-heading);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-primary);
-    white-space: nowrap;
+    color: var(--text-heading);
   }
 
-  .header__status {
-    font-family: var(--font-heading);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 0;
-  }
-
-  .header__meta {
+  .header__route {
     font-family: var(--font-mono);
     font-size: 12px;
-    color: var(--text-muted);
-    white-space: nowrap;
+    color: var(--text-label);
+    letter-spacing: 0.04em;
   }
 
-  /* ===== 2. HERO GRID ===== */
+  /* ===== HERO ===== */
   .hero {
-    display: grid;
-    grid-template-columns: 55fr 45fr;
-    gap: var(--space-lg);
-    padding: var(--space-3xl) 0 var(--space-2xl);
+    padding: var(--space-12) 0 var(--space-8) 0;
   }
 
-  .hero__text {
-    padding-right: var(--space-xl);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .hero__heading {
-    font-family: var(--font-heading);
-    font-size: 52px;
-    font-weight: 700;
-    line-height: 1.08;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-    margin-bottom: var(--space-lg);
-  }
-
-  /* Per-line stagger on hero heading */
   .hero__line {
-    display: block;
-    opacity: 0;
-    transform: translateY(20px);
-    filter: blur(4px);
-    animation: hero-word-reveal 700ms var(--ease-out-expo) forwards;
+    font-family: var(--font-heading);
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--text-heading);
+    margin-bottom: var(--space-2);
   }
 
-  .hero__line:nth-child(1) { animation-delay: 100ms; }
-  .hero__line:nth-child(2) { animation-delay: 250ms; }
-  .hero__line:nth-child(3) { animation-delay: 400ms; }
+  .hero__line--redacted {
+    display: inline-block;
+    background: var(--text-heading);
+    color: var(--bg);
+    padding: 2px 12px;
+    margin-bottom: var(--space-2);
+  }
 
   .hero__sub {
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    max-width: 480px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-body);
+    margin-top: var(--space-6);
+    max-width: 640px;
   }
 
-  .hero__proof {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 12px;
+  /* ===== SPECS ROW ===== */
+  .specs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: #1e1e2a;
+    border: 1px solid #1e1e2a;
+    margin-top: var(--space-12);
+    margin-bottom: var(--space-16);
+  }
+
+  .spec {
+    background: var(--surface);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .spec__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-label);
+    margin-bottom: var(--space-unit);
+  }
+
+  .spec__value {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-heading);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== SECTION STAMP ===== */
+  .stamp {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-stamp);
+    border: 1px solid #3a3a40;
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-8);
+    transform: rotate(-0.5deg);
+  }
+
+  .section {
+    margin-bottom: var(--space-16);
+  }
+
+  /* ===== PROTOCOL FLOW ===== */
+  .flow {
+    position: relative;
+    padding-left: var(--space-8);
+  }
+
+  .flow::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: #2a2a36;
+  }
+
+  .flow__step {
+    position: relative;
+    margin-bottom: var(--space-8);
+  }
+
+  .flow__step:last-child {
+    margin-bottom: 0;
+  }
+
+  .flow__number {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-heading);
+    position: absolute;
+    left: calc(-1 * var(--space-8));
+    top: -2px;
+    width: 24px;
+    text-align: center;
+  }
+
+  .flow__title {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-heading);
+    margin-bottom: var(--space-unit);
+    letter-spacing: 0.02em;
+  }
+
+  .flow__desc {
     font-family: var(--font-mono);
     font-size: 13px;
-    color: var(--green);
+    line-height: 1.65;
+    color: var(--text-body);
+    margin-bottom: var(--space-2);
+    max-width: 600px;
   }
 
-  .hero__panel {
-    background: var(--surface);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius);
-    padding: var(--space-lg);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .hero__panel-title {
-    font-family: var(--font-heading);
-    font-size: 12px;
-    font-weight: 500;
+  .flow__chain {
+    font-family: var(--font-mono);
+    font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--grid-line);
+    color: var(--text-label);
   }
 
-  /* Data rows with dot leaders */
-  .data-row {
+  /* ===== SECURITY PROPERTIES ===== */
+  .security-list {
+    list-style: none;
+  }
+
+  .security-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 0;
+    margin-bottom: 1px;
+  }
+
+  .security-item__name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-heading);
+    background: var(--surface);
+    padding: var(--space-3) var(--space-4);
+    border-right: 1px solid #1e1e2a;
+  }
+
+  .security-item__impl {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-body);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg);
+  }
+
+  /* ===== CONTRACTS PANEL ===== */
+  .doc-panel {
+    border: 1px solid #2a2a36;
+    background: var(--surface);
+  }
+
+  .doc-panel__header {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-stamp);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid #2a2a36;
+    background: var(--surface-raised);
+  }
+
+  .doc-panel__body {
+    padding: var(--space-4) var(--space-4);
+  }
+
+  .contract-row {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 7px 0;
+    gap: var(--space-4);
+    padding: var(--space-2) 0;
+  }
+
+  .contract-row__name {
     font-family: var(--font-mono);
     font-size: 13px;
-    line-height: 1.4;
-    gap: var(--space-sm);
-    transition: background 0.15s ease-out;
-    margin: 0 calc(-1 * var(--space-sm));
-    padding-left: var(--space-sm);
-    padding-right: var(--space-sm);
-    border-radius: var(--radius);
-  }
-
-  .data-row:hover {
-    background: var(--surface-hover);
-  }
-
-  .data-row__label {
-    color: var(--text-muted);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .data-row__dots {
-    flex: 1;
-    border-bottom: 1px dotted var(--border-default);
-    margin-bottom: 3px;
-    min-width: 20px;
-  }
-
-  .data-row__value {
-    color: var(--cyan);
     font-weight: 500;
-    white-space: nowrap;
+    color: var(--text-heading);
     flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
   }
 
-  /* ===== 3. PROTOCOL FLOW ===== */
-  .section-gap {
-    padding-top: var(--space-2xl);
-    padding-bottom: var(--space-2xl);
-  }
-
-  .section-title {
-    font-family: var(--font-heading);
+  .contract-row__addr {
+    font-family: var(--font-mono);
     font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: var(--space-lg);
+    color: var(--text-stamp);
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+    text-align: right;
   }
 
-  .flow-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    border: 1px solid var(--grid-line);
-    position: relative;
-  }
-
-  .flow-cell {
-    padding: var(--space-lg);
-    border-right: 1px solid var(--grid-line);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    position: relative;
-    transition: background 0.2s ease-out, transform 0.2s ease-out;
-  }
-
-  .flow-cell:hover {
-    background: var(--surface-hover);
-    transform: translateY(-2px);
-    z-index: 1;
-  }
-
-  .flow-cell:last-child {
-    border-right: none;
-  }
-
-  /* Animated connecting arrows between flow steps */
-  .flow-cell:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    right: -7px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-top: 6px solid transparent;
-    border-bottom: 6px solid transparent;
-    border-left: 6px solid var(--amber);
-    z-index: 2;
-    animation: arrow-breathe 2.5s ease-in-out infinite;
-  }
-
-  .flow-cell:nth-child(2):not(:last-child)::after { animation-delay: 0.4s; }
-  .flow-cell:nth-child(3):not(:last-child)::after { animation-delay: 0.8s; }
-
-  .flow-cell__step {
+  .doc-panel__meta {
     font-family: var(--font-mono);
     font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    color: var(--text-muted);
+    color: var(--text-label);
+    padding-top: var(--space-3);
+    margin-top: var(--space-3);
+    border-top: 1px solid #2a2a36;
   }
 
-  .flow-cell__verb {
-    font-family: var(--font-heading);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--amber);
-    letter-spacing: -0.01em;
+  /* ===== KNOWN LIMITATIONS ===== */
+  .limitations {
+    list-style: none;
+    counter-reset: lim;
   }
 
-  .flow-cell__desc {
-    font-size: 14px;
+  .limitations li {
+    counter-increment: lim;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid #1a1a24;
+    font-family: var(--font-mono);
+    font-size: 13px;
     line-height: 1.6;
-    color: var(--text-secondary);
-    flex: 1;
-  }
-
-  .flow-cell__chain {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-top: var(--space-xs);
-  }
-
-  /* ===== 4. SECURITY MATRIX ===== */
-  .matrix {
-    width: 100%;
-    border-collapse: collapse;
-    border: 1px solid var(--grid-line);
-  }
-
-  .matrix th,
-  .matrix td {
-    padding: 16px var(--space-lg);
-    text-align: left;
-    border: 1px solid var(--grid-line);
-    vertical-align: middle;
-  }
-
-  .matrix th {
-    font-family: var(--font-heading);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    background: var(--surface);
-  }
-
-  .matrix td {
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  .matrix tr {
-    transition: background 0.15s ease-out;
-  }
-
-  .matrix tbody tr:hover {
-    background: var(--surface-hover);
-  }
-
-  .matrix__property {
-    font-weight: 500;
-    color: var(--text-primary);
-    white-space: nowrap;
+    color: var(--text-body);
+    padding-left: var(--space-6);
     position: relative;
-    padding-left: 22px !important;
   }
 
-  /* Animated green border indicator */
-  .matrix__property::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--green);
-    transform-origin: top;
-  }
-
-  .reveal.visible .matrix__property::before {
-    animation: border-draw 400ms var(--ease-out-expo) forwards;
-  }
-
-  .matrix tbody tr:nth-child(1) .matrix__property::before { animation-delay: 100ms; }
-  .matrix tbody tr:nth-child(2) .matrix__property::before { animation-delay: 150ms; }
-  .matrix tbody tr:nth-child(3) .matrix__property::before { animation-delay: 200ms; }
-  .matrix tbody tr:nth-child(4) .matrix__property::before { animation-delay: 250ms; }
-  .matrix tbody tr:nth-child(5) .matrix__property::before { animation-delay: 300ms; }
-  .matrix tbody tr:nth-child(6) .matrix__property::before { animation-delay: 350ms; }
-  .matrix tbody tr:nth-child(7) .matrix__property::before { animation-delay: 400ms; }
-
-  .matrix__detail {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--text-muted);
-    word-break: break-word;
-  }
-
-  /* ===== 5. DEPLOYMENT PANEL ===== */
-  .terminal {
-    background: var(--surface);
-    border: 1px solid var(--grid-line);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  .terminal__titlebar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px var(--space-lg);
-    border-bottom: 1px solid var(--grid-line);
-  }
-
-  .terminal__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--text-muted);
-    opacity: 0.3;
-  }
-
-  .terminal__dot:first-child { background: #ff5f57; opacity: 0.7; }
-  .terminal__dot:nth-child(2) { background: #febc2e; opacity: 0.7; }
-  .terminal__dot:nth-child(3) { background: #28c840; opacity: 0.7; }
-
-  .terminal__body {
-    padding: var(--space-lg);
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.8;
-    overflow-x: auto;
-  }
-
-  .terminal__prompt {
-    color: var(--amber);
-  }
-
-  .terminal__comment {
-    color: var(--text-muted);
-  }
-
-  .terminal__cursor {
-    display: inline-block;
-    width: 8px;
-    height: 15px;
-    background: var(--amber);
-    vertical-align: text-bottom;
-    margin-left: 4px;
-    animation: cursor-blink 1s step-end infinite;
-  }
-
-  .terminal__addr {
-    color: var(--cyan);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .terminal__name {
-    color: var(--text-primary);
-    display: inline-block;
-    min-width: 180px;
-  }
-
-  .terminal__meta {
-    color: var(--text-muted);
-    margin-top: var(--space-md);
-    padding-top: var(--space-md);
-    border-top: 1px solid var(--grid-line);
-  }
-
-  /* ===== 6. KNOWN LIMITATIONS ===== */
-  .limits {
-    border: 1px solid var(--grid-line);
-  }
-
-  .limit-row {
-    display: flex;
-    gap: var(--space-lg);
-    padding: 16px var(--space-lg);
-    border-bottom: 1px solid var(--grid-line);
-    font-size: 14px;
-    line-height: 1.5;
-    transition: background 0.15s ease-out;
-  }
-
-  .limit-row:last-child {
+  .limitations li:last-child {
     border-bottom: none;
   }
 
-  .limit-row:hover {
-    background: var(--surface-hover);
-  }
-
-  .limit-row__label {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-primary);
-    white-space: nowrap;
-    flex-shrink: 0;
-    min-width: 170px;
-  }
-
-  .limit-row__desc {
-    color: var(--text-muted);
-  }
-
-  /* ===== 7. FOOTER ===== */
-  .footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-md) var(--space-lg);
-    border-top: 1px solid var(--border-default);
-    background: var(--surface);
-    margin-top: var(--space-2xl);
-  }
-
-  .footer__left {
+  .limitations li::before {
+    content: counter(lim, decimal-leading-zero);
+    position: absolute;
+    left: 0;
     font-family: var(--font-heading);
     font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--text-label);
+  }
+
+  /* ===== CTA ===== */
+  .cta-wrap {
+    margin-top: var(--space-16);
+    margin-bottom: var(--space-12);
+  }
+
+  .cta-btn {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  .footer__right {
-    display: flex;
-    align-items: center;
-    gap: var(--space-lg);
-  }
-
-  .footer__right a {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--text-muted);
+    color: var(--bg);
+    background: var(--text-heading);
+    border: none;
+    padding: 14px 40px;
+    cursor: pointer;
     text-decoration: none;
-    border-bottom: 1px solid var(--grid-line);
-    padding-bottom: 1px;
-    transition: color 0.15s ease-out, border-color 0.15s ease-out;
   }
 
-  .footer__right a:hover {
-    color: var(--text-primary);
-    border-color: var(--text-primary);
+  .cta-btn:active {
+    background: #d4d4d8;
   }
 
-  .footer__right a:focus-visible {
-    outline: 2px solid var(--cyan);
-    outline-offset: 2px;
+  .cta-btn:focus-visible {
+    outline: 2px solid var(--text-stamp);
+    outline-offset: 4px;
   }
 
-  /* ===== FOCUS STATES ===== */
-  a:focus-visible,
-  button:focus-visible {
-    outline: 2px solid var(--cyan);
+  /* ===== FOOTER ===== */
+  .footer {
+    padding: var(--space-6) 0;
+    border-top: 1px solid #1e1e2a;
+    margin-top: var(--space-12);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-label);
+  }
+
+  .footer a {
+    color: var(--text-label);
+    text-decoration: none;
+    border-bottom: 1px solid #2a2a36;
+  }
+
+  .footer a:hover {
+    color: var(--text-body);
+    border-color: var(--text-body);
+  }
+
+  .footer a:focus-visible {
+    outline: 2px solid var(--text-stamp);
     outline-offset: 2px;
   }
 
   /* ===== RESPONSIVE ===== */
-
-  /* Tablets and small desktops */
-  @media (max-width: 960px) {
-    .hero {
-      grid-template-columns: 1fr;
-      gap: var(--space-lg);
-      padding: var(--space-2xl) 0 var(--space-xl);
+  @media (max-width: 640px) {
+    .hero__line {
+      font-size: 28px;
     }
 
-    .hero__text {
-      padding-right: 0;
+    .hero__line--redacted {
+      padding: 1px 8px;
     }
 
-    .hero__heading {
-      font-size: 40px;
-    }
-
-    .flow-grid {
+    .specs {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    .flow-cell:nth-child(2) {
-      border-right: none;
-    }
-
-    .flow-cell:nth-child(1),
-    .flow-cell:nth-child(2) {
-      border-bottom: 1px solid var(--grid-line);
-    }
-
-    .flow-cell:nth-child(3) {
-      border-right: 1px solid var(--grid-line);
-    }
-
-    .flow-cell:nth-child(2)::after {
-      display: none;
-    }
-
-    .flow-cell:hover {
-      transform: none;
-    }
-
-    .terminal__name {
-      min-width: 140px;
-    }
-
-    .section-gap {
-      padding-top: var(--space-xl);
-      padding-bottom: var(--space-xl);
-    }
-  }
-
-  /* Mobile */
-  @media (max-width: 600px) {
-    .header {
-      flex-wrap: wrap;
-      gap: var(--space-sm);
-      padding: var(--space-sm) var(--space-md);
-    }
-
-    .header__status {
-      order: 3;
-      width: 100%;
-      justify-content: center;
-      padding-top: var(--space-xs);
-      border-top: 1px solid var(--grid-line);
-    }
-
-    .hero {
-      padding: var(--space-xl) 0 var(--space-lg);
-    }
-
-    .hero__heading {
-      font-size: 28px;
-      letter-spacing: -0.01em;
-    }
-
-    .hero__sub {
-      font-size: 15px;
-    }
-
-    .flow-grid {
+    .security-item {
       grid-template-columns: 1fr;
     }
 
-    .flow-cell {
+    .security-item__name {
       border-right: none;
-      border-bottom: 1px solid var(--grid-line);
+      border-bottom: 1px solid #1e1e2a;
     }
 
-    .flow-cell:last-child {
-      border-bottom: none;
-    }
-
-    .flow-cell::after {
-      display: none !important;
-    }
-
-    .flow-cell:hover {
-      transform: none;
-    }
-
-    /* Convert matrix to card layout on mobile */
-    .matrix-wrap {
-      overflow-x: visible;
-    }
-
-    .matrix { min-width: 0; }
-
-    .matrix thead { display: none; }
-
-    .matrix,
-    .matrix tbody,
-    .matrix tr,
-    .matrix td {
-      display: block;
-      border: none;
-    }
-
-    .matrix tr {
-      border: 1px solid var(--grid-line);
-      border-left: 2px solid var(--green);
-      padding: var(--space-md);
-      margin-bottom: var(--space-sm);
-    }
-
-    .matrix td {
-      padding: 0;
-    }
-
-    .matrix__property {
-      padding-left: 0 !important;
-      margin-bottom: var(--space-xs);
-    }
-
-    .matrix__property::before {
-      display: none;
-    }
-
-    .matrix__detail {
-      margin-bottom: 0;
-    }
-
-    .limit-row {
+    .contract-row {
       flex-direction: column;
-      gap: var(--space-xs);
+      gap: var(--space-unit);
     }
 
-    .limit-row__label {
-      min-width: auto;
+    .contract-row__addr {
+      text-align: left;
     }
 
-    .footer {
-      flex-direction: column;
-      gap: var(--space-sm);
-      text-align: center;
+    .header {
+      margin-bottom: var(--space-8);
     }
 
-    .terminal__name {
-      min-width: auto;
-      display: block;
-    }
-
-    .terminal__addr {
-      display: block;
-      word-break: break-all;
-    }
-
-    .section-gap {
-      padding-top: var(--space-xl);
-      padding-bottom: var(--space-xl);
+    .section {
+      margin-bottom: var(--space-12);
     }
   }
 
-  /* Very small screens */
-  @media (max-width: 380px) {
-    .hero__heading {
+  @media (max-width: 400px) {
+    .hero__line {
       font-size: 24px;
     }
 
-    .container {
-      padding: 0 var(--space-sm);
+    .specs {
+      grid-template-columns: 1fr;
+    }
+
+    .page {
+      padding: 0 var(--space-4);
     }
   }
 </style>
 </head>
 <body>
 
-  <!-- 1. HEADER BAR -->
-  <header class="header">
-    <div class="header__brand">Privacy Bridge</div>
-    <div class="header__status">
-      <span class="pulse-dot" aria-hidden="true"></span>
-      System Active
-    </div>
-    <div class="header__meta">v1.0 // Flow EVM &rarr; Starknet</div>
-  </header>
+  <div class="page">
 
-  <main class="container">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header__brand">Privacy Bridge</div>
+      <div class="header__route">Flow EVM &rarr; Starknet</div>
+    </header>
 
-    <!-- 2. HERO GRID -->
+    <!-- HERO -->
     <section class="hero" aria-label="Overview">
-      <div class="hero__text reveal">
-        <h1 class="hero__heading">
-          <span class="hero__line">Deposit on one chain.</span>
-          <span class="hero__line">Withdraw on another.</span>
-          <span class="hero__line">No link between them.</span>
-        </h1>
-        <p class="hero__sub">Groth16 proofs break the on-chain trail between Flow EVM deposits and Starknet withdrawals. Fixed denomination pools, on-chain Poseidon Merkle tree, relayer pattern.</p>
-        <div class="hero__proof">
-          <span class="pulse-dot pulse-dot--green" aria-hidden="true" style="margin-right:0"></span>
-          20/20 E2E tests passing on devnet
-        </div>
-        <div class="hero__cta">
-          <a href="https://github.com/Yonkoo11/privacy-bridge" class="cta-btn" target="_blank" rel="noopener noreferrer">View Source</a>
-          <a href="#flow" class="cta-link">How it works &darr;</a>
-        </div>
-      </div>
-      <div class="hero__panel reveal reveal-delay-1 stagger-children" role="region" aria-label="System parameters">
-        <div class="hero__panel-title">System Parameters</div>
-        <div class="data-row">
-          <span class="data-row__label">CIRCUIT</span>
-          <span class="data-row__dots" aria-hidden="true"></span>
-          <span class="data-row__value">6,634 constraints</span>
-        </div>
-        <div class="data-row">
-          <span class="data-row__label">TREE</span>
-          <span class="data-row__dots" aria-hidden="true"></span>
-          <span class="data-row__value">depth-24 Poseidon</span>
-        </div>
-        <div class="data-row">
-          <span class="data-row__label">CALLDATA</span>
-          <span class="data-row__dots" aria-hidden="true"></span>
-          <span class="data-row__value">1,977 felts</span>
-        </div>
-        <div class="data-row">
-          <span class="data-row__label">TESTS</span>
-          <span class="data-row__dots" aria-hidden="true"></span>
-          <span class="data-row__value">20/20 PASS</span>
-        </div>
-        <div class="data-row">
-          <span class="data-row__label">DENOMINATIONS</span>
-          <span class="data-row__dots" aria-hidden="true"></span>
-          <span class="data-row__value">4 pools</span>
-        </div>
-        <div class="data-row">
-          <span class="data-row__label">ROOT BUFFER</span>
-          <span class="data-row__dots" aria-hidden="true"></span>
-          <span class="data-row__value">30 entries</span>
-        </div>
-      </div>
+      <div class="hero__line">Deposit on one chain.</div>
+      <div class="hero__line">Withdraw on another.</div>
+      <div class="hero__line hero__line--redacted">No link between them.</div>
+
+      <p class="hero__sub">Groth16 proofs sever the on-chain trail between Flow EVM deposits and Starknet withdrawals. Fixed denomination pools, Poseidon Merkle tree, relayer pattern.</p>
     </section>
 
-    <!-- 3. PROTOCOL FLOW -->
-    <section id="flow" class="section-gap" aria-label="Protocol flow">
-      <div class="section-title reveal">Protocol Flow</div>
-      <div class="flow-grid reveal reveal-delay-1 stagger-children">
-        <div class="flow-cell">
-          <div class="flow-cell__step">01</div>
-          <div class="flow-cell__verb">Lock</div>
-          <div class="flow-cell__desc">Deposit a fixed denomination into the PrivacyBridge contract. A Poseidon commitment is inserted into the on-chain Merkle tree.</div>
-          <div class="flow-cell__chain">Flow EVM</div>
-        </div>
-        <div class="flow-cell">
-          <div class="flow-cell__step">02</div>
-          <div class="flow-cell__verb">Prove</div>
-          <div class="flow-cell__desc">Generate a Groth16 proof off-chain. The proof attests to knowledge of a valid commitment without revealing which one.</div>
-          <div class="flow-cell__chain">Off-chain / Browser</div>
-        </div>
-        <div class="flow-cell">
-          <div class="flow-cell__step">03</div>
-          <div class="flow-cell__verb">Verify</div>
-          <div class="flow-cell__desc">The garaga verifier on Starknet checks the Groth16 proof on-chain. Nullifier hash is checked against the spent set.</div>
-          <div class="flow-cell__chain">Starknet</div>
-        </div>
-        <div class="flow-cell">
-          <div class="flow-cell__step">04</div>
-          <div class="flow-cell__verb">Claim</div>
-          <div class="flow-cell__desc">Tokens are minted to the recipient. The nullifier is marked spent. No link to the original deposit is visible on-chain.</div>
-          <div class="flow-cell__chain">Starknet</div>
-        </div>
+    <!-- SPECS -->
+    <div class="specs" role="region" aria-label="System specifications">
+      <div class="spec">
+        <div class="spec__label">Circuit</div>
+        <div class="spec__value">6,634 constraints</div>
       </div>
-    </section>
-
-    <!-- 4. SECURITY MATRIX -->
-    <section class="section-gap" aria-label="Security properties">
-      <div class="section-title reveal">Security Matrix</div>
-      <div class="matrix-wrap reveal reveal-delay-1">
-        <table class="matrix">
-          <thead>
-            <tr>
-              <th>Property</th>
-              <th>Implementation</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="matrix__property">Fixed Denominations</td>
-              <td class="matrix__detail">0.0001, 0.001, 0.01, 0.1 FLOW</td>
-            </tr>
-            <tr>
-              <td class="matrix__property">On-chain Merkle Tree</td>
-              <td class="matrix__detail">Poseidon incremental, depth 24, 30-root buffer</td>
-            </tr>
-            <tr>
-              <td class="matrix__property">Commitment Hiding</td>
-              <td class="matrix__detail">Poseidon(Poseidon(secret, nullifier), amount)</td>
-            </tr>
-            <tr>
-              <td class="matrix__property">Clean Events</td>
-              <td class="matrix__detail">Mint emits nullifier_hash + amount only</td>
-            </tr>
-            <tr>
-              <td class="matrix__property">Relayer Pattern</td>
-              <td class="matrix__detail">Fee-protected (max_fee_bps bound)</td>
-            </tr>
-            <tr>
-              <td class="matrix__property">Withdrawal Timelock</td>
-              <td class="matrix__detail">Configurable delay, root_timestamps</td>
-            </tr>
-            <tr>
-              <td class="matrix__property">Emergency Withdraw</td>
-              <td class="matrix__detail">30-day timelock, owner-initiated</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="spec">
+        <div class="spec__label">Tree</div>
+        <div class="spec__value">Poseidon depth-24</div>
       </div>
-    </section>
-
-    <!-- 5. DEPLOYMENT PANEL -->
-    <section class="section-gap" aria-label="Deployment addresses">
-      <div class="section-title reveal">Deployment</div>
-      <div class="terminal reveal reveal-delay-1">
-        <div class="terminal__titlebar" aria-hidden="true">
-          <span class="terminal__dot"></span>
-          <span class="terminal__dot"></span>
-          <span class="terminal__dot"></span>
-        </div>
-        <div class="terminal__body">
-          <div><span class="terminal__prompt">&gt;</span> <span class="terminal__comment">flow-evm-testnet deployment</span><span class="terminal__cursor" aria-hidden="true"></span></div>
-          <div style="height: 12px"></div>
-          <div><span class="terminal__name">PoseidonT3</span> <span class="terminal__addr">0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a</span></div>
-          <div><span class="terminal__name">PoseidonT3Wrapper</span> <span class="terminal__addr">0x2eaEF8016D2a7Dc01677E57183a167649cB07402</span></div>
-          <div><span class="terminal__name">PrivacyBridge</span> <span class="terminal__addr">0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca</span></div>
-          <div class="terminal__meta">
-            <div>chain_id: 545</div>
-            <div>rpc: testnet.evm.nodes.onflow.org</div>
-          </div>
-        </div>
+      <div class="spec">
+        <div class="spec__label">Calldata</div>
+        <div class="spec__value">1,977 felts</div>
       </div>
-    </section>
-
-    <!-- 6. KNOWN LIMITATIONS -->
-    <section class="section-gap" aria-label="Known limitations">
-      <div class="section-title reveal">Known Limitations</div>
-      <div class="limits reveal reveal-delay-1 stagger-children">
-        <div class="limit-row">
-          <span class="limit-row__label">Root relay</span>
-          <span class="limit-row__desc">Centralized (owner relays Merkle root from Flow to Starknet)</span>
-        </div>
-        <div class="limit-row">
-          <span class="limit-row__label">Emergency withdraw</span>
-          <span class="limit-row__desc">Single-key with 30-day timelock (rug vector, mitigated not eliminated)</span>
-        </div>
-        <div class="limit-row">
-          <span class="limit-row__label">Trusted setup</span>
-          <span class="limit-row__desc">1-party ceremony (Hermez Phase 1 ptau)</span>
-        </div>
-        <div class="limit-row">
-          <span class="limit-row__label">known_roots</span>
-          <span class="limit-row__desc">Unbounded on Starknet (intentional: pruning would lock user funds)</span>
-        </div>
+      <div class="spec">
+        <div class="spec__label">Tests</div>
+        <div class="spec__value">93/93</div>
       </div>
-    </section>
-
-  </main>
-
-  <!-- 7. FOOTER -->
-  <footer class="footer">
-    <div class="footer__left">PL_Genesis Hackathon</div>
-    <div class="footer__right">
-      <a href="https://github.com/Yonkoo11/privacy-bridge" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <div class="spec">
+        <div class="spec__label">Pools</div>
+        <div class="spec__value">4 denominations</div>
+      </div>
+      <div class="spec">
+        <div class="spec__label">Root Buffer</div>
+        <div class="spec__value">30 entries</div>
+      </div>
     </div>
-  </footer>
 
-  <!-- Scroll reveal observer -->
-  <script>
-    (function() {
-      var els = document.querySelectorAll('.reveal');
-      if (!('IntersectionObserver' in window)) {
-        els.forEach(function(el) { el.classList.add('visible'); });
-        return;
-      }
-      var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
-      els.forEach(function(el) { observer.observe(el); });
-    })();
-  </script>
+    <!-- PROTOCOL FLOW -->
+    <section class="section" aria-label="Protocol flow">
+      <div class="stamp">&#9472;&#9472; Protocol Flow &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+      <div class="flow">
+        <div class="flow__step">
+          <div class="flow__number">1</div>
+          <div class="flow__title">Lock</div>
+          <div class="flow__desc">Deposit a fixed denomination into the PrivacyBridge contract. A Poseidon commitment is inserted into the on-chain Merkle tree.</div>
+          <div class="flow__chain">Flow EVM</div>
+        </div>
+        <div class="flow__step">
+          <div class="flow__number">2</div>
+          <div class="flow__title">Prove</div>
+          <div class="flow__desc">Generate a Groth16 proof off-chain. The proof attests to knowledge of a valid commitment in the tree without revealing which one.</div>
+          <div class="flow__chain">Off-chain / Browser</div>
+        </div>
+        <div class="flow__step">
+          <div class="flow__number">3</div>
+          <div class="flow__title">Verify</div>
+          <div class="flow__desc">The garaga verifier on Starknet checks the Groth16 proof on-chain. Nullifier hash is checked against the spent set.</div>
+          <div class="flow__chain">Starknet</div>
+        </div>
+        <div class="flow__step">
+          <div class="flow__number">4</div>
+          <div class="flow__title">Claim</div>
+          <div class="flow__desc">Tokens are minted to the recipient on Starknet. The nullifier is marked spent. No link to the original deposit is visible.</div>
+          <div class="flow__chain">Starknet</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECURITY PROPERTIES -->
+    <section class="section" aria-label="Security properties">
+      <div class="stamp">&#9472;&#9472; Security Properties &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+      <ul class="security-list">
+        <li class="security-item">
+          <span class="security-item__name">Fixed Denominations</span>
+          <span class="security-item__impl">0.0001, 0.001, 0.01, 0.1 FLOW</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">On-chain Merkle Tree</span>
+          <span class="security-item__impl">Poseidon incremental, depth 24, 30-root buffer</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Commitment Hiding</span>
+          <span class="security-item__impl">Poseidon(Poseidon(secret, nullifier), amount)</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Clean Events</span>
+          <span class="security-item__impl">Mint emits nullifier_hash + amount only</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Relayer Pattern</span>
+          <span class="security-item__impl">Fee-protected via max_fee_bps bound</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Withdrawal Timelock</span>
+          <span class="security-item__impl">Configurable delay, root_timestamps</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Emergency Withdraw</span>
+          <span class="security-item__impl">30-day timelock, owner-initiated</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- DEPLOYED CONTRACTS -->
+    <section class="section" aria-label="Deployed contracts">
+      <div class="stamp">&#9472;&#9472; Document Ref &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+      <div class="doc-panel">
+        <div class="doc-panel__header">Deployed Contracts // Flow EVM Testnet</div>
+        <div class="doc-panel__body">
+          <div class="contract-row">
+            <span class="contract-row__name">PoseidonT3</span>
+            <span class="contract-row__addr">0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a</span>
+          </div>
+          <div class="contract-row">
+            <span class="contract-row__name">PoseidonT3Wrapper</span>
+            <span class="contract-row__addr">0x2eaEF8016D2a7Dc01677E57183a167649cB07402</span>
+          </div>
+          <div class="contract-row">
+            <span class="contract-row__name">PrivacyBridge</span>
+            <span class="contract-row__addr">0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca</span>
+          </div>
+          <div class="doc-panel__meta">chain_id: 545</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KNOWN LIMITATIONS -->
+    <section class="section" aria-label="Known limitations">
+      <div class="stamp">&#9472;&#9472; Known Limitations &#9472;&#9472; Declassified &#9472;&#9472;</div>
+      <ol class="limitations">
+        <li>Root relay is centralized. The watcher service uses a single owner key to post Merkle roots cross-chain. A malicious operator can delay roots but cannot steal funds.</li>
+        <li>Garaga calldata proxy is a centralized service. It can cause transaction failures but cannot forge proofs or redirect withdrawals.</li>
+        <li>Emergency withdraw is a single-key rug vector, mitigated by a 30-day timelock. Users have 30 days to exit if the owner initiates emergency mode.</li>
+        <li>1-party trusted setup. The proving key was generated without a multi-party ceremony. A compromised setup allows forged proofs.</li>
+      </ol>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-wrap">
+      <a href="/privacy-bridge/bridge" class="cta-btn">Launch App</a>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>PL_Genesis Hackathon</span>
+      <span> &middot; </span>
+      <a href="https://github.com/Yonkoo11/privacy-bridge" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </footer>
+
+  </div>
 
 </body>
 </html>

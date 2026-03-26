@@ -3,26 +3,25 @@
 Started: 2026-03-26
 Style Config: ~/.claude/style.config.md
 Color Mode: dark-only
-Flags: --skip-state
 
-## Phase 1: State Design
-Status: skipped
-Output: skipped - static landing page
+## Round 1 (completed, replaced)
+Selected Signal (DNA-SIGNAL-DUAL-DENSE-TECH-PULSE). User flagged as distracting.
 
-## Phase 2: Creative (3 Proposals)
+## Round 2
+
+### Phase 2: Creative (3 Proposals)
 Status: completed
-Proposals: proposal-1.html (Cipher), proposal-2.html (Void), proposal-3.html (Signal)
-DNA Codes: DNA-CIPHER-MONO-GRID-SHARP-STILL, DNA-VOID-SANS-ASYM-SOFT-BREATH, DNA-SIGNAL-DUAL-DENSE-TECH-PULSE
+Proposals: proposal-4-vault.html, proposal-5-redact.html, proposal-6-wire.html
+DNA Codes: DNA-VAULT-MONO-CENTER-SHARP-STILL, DNA-REDACT-DUAL-LEFT-RAW-STILL, DNA-WIRE-GROTESK-SPLIT-EDGE-MOTION
 
-## Phase 3: Selection
+### Phase 3: Selection
 Status: completed
-Selected: Proposal 3 "Signal" (DNA-SIGNAL-DUAL-DENSE-TECH-PULSE) — best info density for hackathon judges
+Selected: Proposal 5 "Redact" (DNA-REDACT-DUAL-LEFT-RAW-STILL)
+Reason: Redaction metaphor directly maps to product function. Zero animations = stillness = safety. Memorable for judges.
 
-## Phase 4: Production Polish
+### Phase 4: Production Polish
 Status: completed
-Audit Result: pass
-Changes: OG meta tags, 55/45 hero grid split, real GitHub URL, title fix
+Ported to Next.js app, build passes 8/8 pages, deployed to GitHub Pages.
 
-## Phase 5: Final QA
-Status: completed
-QA Result: APPROVED
+### Phase 5: Final QA
+Status: pending
