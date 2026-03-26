@@ -14,5 +14,6 @@
 - RPC proxy needed for starknet.js compatibility.
 
 ## Hackathon Tracks (NO OVERLAP with Cipher Pol)
-- Crypto, AI & Robotics, Flow, Storacha
+- Crypto, Flow, Storacha (3 tracks)
+- Dropped: AI & Robotics (no AI code in project, dishonest to submit)
 - Do NOT select: Fresh Code, Infrastructure, Starknet, Lit Protocol, Community Vote

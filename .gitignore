@@ -2,11 +2,16 @@ node_modules/
 .env
 build/
 out/
+.next/
 *.ptau
 *.zkey
 *.wasm
 *.r1cs
 *.sym
+
+# Allow circuit artifacts needed by the web app (trusted setup outputs)
+!app/public/bridge.wasm
+!app/public/bridge_final.zkey
 target/
 .snfoundry_cache/
 

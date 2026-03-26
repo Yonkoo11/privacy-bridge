@@ -1,64 +1,85 @@
 # Privacy Bridge — Progress
 
-## Status: 7 Privacy Fixes + Self-Review Fixes (20/20 E2E tests passing on devnet)
+## Status: Phase 1-2 Complete, Phase 1A Verified on Devnet (27/27 tests)
 
-### DONE
-- [x] Circuit: bridge.circom (6634 constraints, 4 public inputs, depth 24)
-- [x] Trusted setup: Hermez Phase 1 ptau + Groth16 setup complete
-- [x] Circuit tests: 3/3 passing
-- [x] Solidity: PrivacyBridge.sol (lock + on-chain Merkle tree + denominations + emergency)
-- [x] PoseidonT3.sol wrapper (poseidon-solidity npm package)
-- [x] SDK: poseidon.mjs, merkle.mjs, prover.mjs, flow.mjs, storacha.mjs
-- [x] CLI: scripts/bridge.mjs (lock + prove + mint commands)
-- [x] garaga verifier generated (groth16_verifier.cairo + 79KB constants)
-- [x] Cairo bridge contract with all 7 fixes + self-review fixes
-- [x] E2E devnet test: 20/20 passing (11 phases)
-- [x] README.md and docs/index.html updated
+### Phase 1A: Shielded ERC20 Token (pFLOW) — VERIFIED
+- `contracts/starknet/src/shielded_token.cairo` — SNIP-2 ERC20, mint/burn restricted to bridge
+- `contracts/starknet/src/bridge.cairo` — uses ERC20 instead of internal balances
+  - `set_token_address()` one-time setter for deploy ordering
+- `scripts/deploy-devnet.mjs` — deploys ERC20 + bridge + sets token address
+- `tests/e2e-devnet.test.mjs` — 27/27 passing on devnet
+  - All original tests pass with ERC20 balances
+  - New: total_supply check, ERC20 transfer, metadata (name/symbol/decimals)
+  - Relayer fee via ERC20 mint (recipient 0.099, relayer 0.001 on 0.1 with 1%)
 
-### 7 PRIVACY FIXES + SELF-REVIEW
-1. **Fix 4**: Remove storacha_cid from mint() and ShieldedMint event
-2. **Fix 1**: Fixed denomination pools (0.0001, 0.001, 0.01, 0.1) on Solidity. Removed from Cairo (denomination disable after deposit would lock funds)
-3. **Fix 3**: On-chain Merkle tree (Poseidon, depth 24, root ring buffer of 30) + known_roots on Starknet
-4. **Fix 7**: Emergency withdraw with 30-day timelock (Solidity)
-5. **Fix 2**: Shielded balance tracking. Transfer event emits only amount (NOT from/to — that would destroy privacy)
-6. **Fix 5**: Relayer fee with max_fee_bps protection (user bounds the fee at submission time)
-7. **Fix 6**: Withdrawal time lock (root_timestamps + min_withdrawal_delay)
+### Phase 1B-D: Services — VERIFIED (relayer e2e passing)
+- `services/watcher/index.mjs` — syntax OK, needs Flow EVM events to test
+- `services/relayer/index.mjs` — POST /relay e2e test: 3/3 passing (proof→calldata→relay→on-chain verify)
+  - Fixed: Account constructor needed `'1', constants.TRANSACTION_VERSION.V3` for devnet V3 txs
+  - Fixed: u256 `max_fee_bps` low/high must be strings, not raw BigInts
+- `services/calldata/index.mjs` — starts, processes real proofs, returns 1977 felts
 
-### Self-review bugs found and fixed
-- Transfer event was emitting from/to/amount — now emits only amount (privacy fix)
-- Denomination check on Starknet removed — disable after deposit would lock funds
-- Added max_fee_bps parameter to mint() — protects users from fee changes between proof gen and submission
-- known_roots unbounded on Starknet is INTENTIONAL: pruning would lock funds for users with stale roots
+### Phase 2: Web App — VERIFIED (builds, serves, types clean)
+- `app/` — Next.js 14 + wagmi + tailwind, 20 source files
+- `next build` clean, all 6 routes static
+- Dev server serves landing page correctly
+- Circuit artifacts (bridge.wasm 1.7MB, bridge_final.zkey 5.9MB, verification_key.json 3.4K) copied to public/
+- NoteData type unified across hooks and encryption module
 
-### VERIFIED ON DEVNET (20/20)
-- [x] Mint without storacha_cid (Fix 4)
-- [x] Allowed denomination accepted, balance credited (Fix 1 + Fix 2)
-- [x] Root stored in known_roots, verified by mint (Fix 3)
-- [x] u256 → ContractAddress conversion works (Fix 2)
-- [x] Double-spend rejected
-- [x] Multi-deposit anonymity set (3 deposits, withdraw middle)
-- [x] Cumulative balance correct across multiple mints
-- [x] Relayer fee deduction: recipient got 0.099, relayer got 0.001 on 0.1 deposit with 1% fee (Fix 5)
-- [x] max_fee_bps rejection: fee=200bps, max=50bps → reverted (Fix 5)
-- [x] Poseidon zero values match between JS SDK and poseidon-solidity
+### What Has Been Verified
+- [x] Cairo compiles (scarb build clean)
+- [x] Devnet deploy: ECIP + verifier + bridge + token, set_token_address
+- [x] 27/27 e2e tests pass: mint via ERC20, balances, transfer, double-spend, relayer fee, max_fee_bps
+- [x] Calldata proxy: real proof in, 1977 felts out, via HTTP
+- [x] Relayer: health + fee endpoints respond correctly
+- [x] Relayer POST /relay: full e2e (proof → calldata proxy → relay → on-chain mint → balance verify), 3/3 pass
+- [x] Next.js: builds clean, serves landing page
 
-### DEPLOYED TO FLOW EVM TESTNET
-- PoseidonT3 library: 0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a
-- PoseidonT3Wrapper: 0x2eaEF8016D2a7Dc01677E57183a167649cB07402
-- PrivacyBridge: 0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca
-- Verified on-chain: denominations, owner, ZEROS[0] match JS, empty tree root correct
-- **On-chain Merkle root matches JS SDK after real deposit** (the critical cross-chain test)
-- 1 real deposit on testnet (0.001 FLOW, TX 0x782b831c...)
+### What Has Been Verified (This Session)
+- [x] Note encryption/decryption: 15/15 tests (AES-256-GCM round-trip, wrong password, tamper detection, large field elements)
+- [x] Full withdraw flow e2e: 17/17 tests (note gen → proof → calldata proxy HTTP → relayer HTTP → on-chain verify → double-spend reject)
+- [x] Watcher unit tests: 12/12 (state persistence, u256 split, relay simulation on devnet, entrypoint alignment)
+- [x] Browser merkle tree cross-check: 7/7 (matches SDK for 1, 3, and 10 commitments)
+- [x] Fixed: watcher had same Account V3 + u256 string bugs as relayer
+- [x] Fixed: useWithdraw.ts — calldata type (string→string[]), missing max_fee_bps, stale witness field
+- [x] Fixed: WithdrawForm.tsx — replaced placeholder merkle proof with real on-chain commitment fetching
+- [x] Created: app/src/lib/merkle.ts — browser-side Poseidon merkle tree (matches SDK exactly)
+- [x] App builds clean after all fixes (8/8 static pages)
 
-### NOT DONE
-- [ ] Demo video (3 min max)
+### Submission Readiness Fixes (This Session)
+- [x] Created LICENSE (MIT)
+- [x] Wired Storacha uploadReceipt() into relayer — best-effort IPFS receipt after mint, CID in response
+- [x] Dropped AI & Robotics track (no AI code, dishonest to submit) — 3 tracks: Crypto, Flow, Storacha
+- [x] Updated README: correct test counts (27/27 e2e + 5 more suites), team handle (@soligxbt), services + app in structure
+- [x] Added GitHub Pages workflow (.github/workflows/deploy.yml)
+- [x] Added output: 'export' to next.config.mjs for static deploy
+- [x] Relayer syntax check passes after Storacha integration
 
-### HONESTLY UNTESTED
-- Emergency withdraw flow (compile-verified, not exercised)
-- Withdrawal timelock with delay > 0 (needs devnet `increase_time` RPC)
+### What Has Been Verified (Submission Readiness)
+- [x] Next.js builds clean with `output: 'export'` — 6 HTML pages in `out/` (index, bridge, deposit, withdraw, notes, 404)
+- [x] Storacha import resolves from relayer path — createReceipt produces valid receipt JSON
+- [x] Relayer syntax check passes after Storacha integration
+- [x] GitHub Actions workflow YAML valid
+- [x] Circuit assets present in export: bridge.wasm (1.8MB), bridge_final.zkey (6.1MB), verification_key.json (3.5K)
 
-### KNOWN LIMITATIONS (documented, not fixable in scope)
-- Root relay is still centralized (owner relays from Flow to Starknet)
-- Emergency withdraw is a single-key rug vector (mitigated by 30-day timelock)
-- known_roots on Starknet grows unbounded (intentional: pruning locks funds)
+### What Has NOT Been Verified
+- [ ] Full deposit-to-withdraw flow through web app (needs MetaMask + Flow testnet)
+- [ ] Watcher against real Flow EVM events (tested relay logic, not event polling)
+- [ ] Browser snarkjs proof generation in actual browser (5.9MB zkey fetch)
+- [ ] Note encryption/decryption in actual browser (tested with Node.js crypto.subtle)
+- [ ] Storacha receipt upload end-to-end (needs W3UP_EMAIL + authorized w3up space)
+- [ ] GitHub Pages deployment (needs repo push + Pages enabled)
+
+### Architecture
+- Deploy ordering: bridge(token=0x0) -> token(bridge) -> set_token_address (one-time, current=0x0 guard)
+- SDK prover already had clean browser/server split, no changes needed
+- Services share project root node_modules
+- Storacha in relayer is best-effort: relay succeeds even if upload fails
+
+### Known Limitations
+- Root relay centralized (watcher uses owner key)
+- Garaga calldata proxy centralized (can only cause tx failure, not theft)
+- Emergency withdraw is single-key rug vector (mitigated by 30-day timelock)
+- known_roots unbounded on Starknet (intentional: pruning locks funds)
 - 1-party trusted setup
+- Anonymity set starts at 0 (dashboard warns users)

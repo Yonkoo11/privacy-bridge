@@ -50,15 +50,25 @@ sdk/src/
   prover.mjs        snarkjs proof + garaga calldata generation
   flow.mjs          Flow EVM client (with denomination validation)
   storacha.mjs      IPFS receipt upload
+services/
+  watcher/          Root relay watcher (Flow EVM -> Starknet)
+  relayer/          Gasless withdrawal relayer (HTTP API + Storacha receipts)
+  calldata/         Garaga calldata proxy (Python subprocess wrapper)
+app/                Next.js 14 web app (wagmi + tailwind)
 scripts/
   bridge.mjs        CLI: lock / prove / mint
-  deploy-devnet.mjs Starknet devnet deployment (ECIP + verifier + bridge)
+  deploy-devnet.mjs Starknet devnet deployment (ECIP + verifier + bridge + ERC20)
   deploy-flow.mjs   Flow EVM deployment (PoseidonT3 + PrivacyBridge)
   rpc-proxy.mjs     RPC compatibility proxy for devnet
 tests/
-  circuit.test.mjs  Circuit constraint tests (3/3)
-  e2e-devnet.test.mjs  Full pipeline test on devnet (16/16)
-  storacha.test.mjs Storacha integration test (9/9)
+  circuit.test.mjs         Circuit constraint tests (3/3)
+  e2e-devnet.test.mjs      Full pipeline on devnet (27/27)
+  storacha.test.mjs        Storacha integration test (9/9)
+  encryption.test.mjs      AES-256-GCM note encryption (15/15)
+  withdraw-flow.test.mjs   Full withdraw flow e2e (17/17)
+  watcher-unit.test.mjs    Watcher unit tests (12/12)
+  merkle-browser.test.mjs  Browser merkle cross-check (7/7)
+  relayer-e2e.mjs          Relayer POST /relay e2e (3/3)
 ```
 
 ## Quick Start
@@ -129,6 +139,10 @@ node scripts/bridge.mjs mint --proof proof-0.json
 | Hash Function | Poseidon (BN254 scalar field) |
 | On-chain Merkle | poseidon-solidity (BN254 constants) |
 | Storage | Storacha (w3up-client) |
+
+## Team
+
+- [@soligxbt](https://x.com/soligxbt)
 
 ## License
 
