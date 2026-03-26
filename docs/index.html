@@ -19,8 +19,12 @@
   :root {
     --bg: #08080c;
     --surface: #111118;
+    --surface-hover: #18181f;
     --grid-line: rgba(255, 255, 255, 0.06);
+    --border-default: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.16);
     --text-primary: #e4e4e8;
+    --text-secondary: #b0b0b8;
     --text-muted: #8a8a96;
     --amber: #f59e0b;
     --cyan: #06b6d4;
@@ -34,9 +38,12 @@
     --space-md: 16px;
     --space-lg: 24px;
     --space-xl: 48px;
-    --space-2xl: 64px;
+    --space-2xl: 80px;
+    --space-3xl: 120px;
 
     --radius: 2px;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* ===== BASE ===== */
@@ -79,15 +86,6 @@
   }
 
   /* ===== TYPOGRAPHY ===== */
-  .label {
-    font-family: var(--font-heading);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
   .mono {
     font-family: var(--font-mono);
   }
@@ -95,11 +93,31 @@
   .amber { color: var(--amber); }
   .cyan { color: var(--cyan); }
   .green { color: var(--green); }
-  .muted { color: var(--text-muted); }
 
-  /* ===== CTA BUTTON ===== */
+  /* ===== SCROLL REVEAL ===== */
+  .reveal {
+    opacity: 0.01;
+    transform: translateY(24px);
+    transition: opacity 500ms var(--ease-out-expo),
+                transform 500ms var(--ease-out-expo);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 80ms; }
+  .reveal-delay-2 { transition-delay: 160ms; }
+  .reveal-delay-3 { transition-delay: 240ms; }
+
+  /* ===== CTA BUTTONS ===== */
   .hero__cta {
     margin-top: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
   }
 
   .cta-btn {
@@ -124,9 +142,18 @@
     transform: scale(0.98);
   }
 
-  .cta-btn:focus-visible {
-    outline: 2px solid var(--cyan);
-    outline-offset: 2px;
+  .cta-link {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border-default);
+    transition: color 0.15s ease-out, border-color 0.15s ease-out;
+  }
+
+  .cta-link:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
   }
 
   /* ===== PULSE ANIMATION ===== */
@@ -153,6 +180,11 @@
   /* ===== REDUCED MOTION ===== */
   @media (prefers-reduced-motion: reduce) {
     .pulse-dot { animation: none; opacity: 1; }
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 
   /* ===== 1. HEADER BAR ===== */
@@ -161,7 +193,7 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--space-md) var(--space-lg);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-default);
     background: var(--surface);
     position: sticky;
     top: 0;
@@ -202,7 +234,7 @@
     display: grid;
     grid-template-columns: 55fr 45fr;
     gap: var(--space-lg);
-    padding: var(--space-2xl) 0 var(--space-xl);
+    padding: var(--space-3xl) 0 var(--space-2xl);
   }
 
   .hero__text {
@@ -214,9 +246,10 @@
 
   .hero__heading {
     font-family: var(--font-heading);
-    font-size: 44px;
+    font-size: 52px;
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
     color: var(--text-primary);
     margin-bottom: var(--space-lg);
   }
@@ -224,13 +257,23 @@
   .hero__sub {
     font-size: 16px;
     line-height: 1.6;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     max-width: 480px;
+  }
+
+  .hero__proof {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--green);
   }
 
   .hero__panel {
     background: var(--surface);
-    border: 1px solid var(--grid-line);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius);
     padding: var(--space-lg);
     display: flex;
@@ -240,9 +283,9 @@
 
   .hero__panel-title {
     font-family: var(--font-heading);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
     margin-bottom: var(--space-md);
@@ -270,7 +313,7 @@
 
   .data-row__dots {
     flex: 1;
-    border-bottom: 1px dotted var(--grid-line);
+    border-bottom: 1px dotted var(--border-default);
     margin-bottom: 3px;
     min-width: 20px;
   }
@@ -285,15 +328,15 @@
 
   /* ===== 3. PROTOCOL FLOW ===== */
   .section-gap {
-    padding-top: var(--space-xl);
-    padding-bottom: var(--space-xl);
+    padding-top: var(--space-2xl);
+    padding-bottom: var(--space-2xl);
   }
 
   .section-title {
     font-family: var(--font-heading);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
     margin-bottom: var(--space-lg);
@@ -303,6 +346,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     border: 1px solid var(--grid-line);
+    position: relative;
   }
 
   .flow-cell {
@@ -311,25 +355,55 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
+    position: relative;
+    transition: background 0.15s ease-out;
+  }
+
+  .flow-cell:hover {
+    background: var(--surface-hover);
   }
 
   .flow-cell:last-child {
     border-right: none;
   }
 
+  /* Connecting arrows between flow steps */
+  .flow-cell:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 6px solid var(--amber);
+    z-index: 1;
+    opacity: 0.5;
+  }
+
   .flow-cell__step {
-    font-family: var(--font-heading);
+    font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .flow-cell__verb {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
     color: var(--amber);
+    letter-spacing: -0.01em;
   }
 
   .flow-cell__desc {
     font-size: 14px;
     line-height: 1.5;
-    color: var(--text-primary);
+    color: var(--text-secondary);
     flex: 1;
   }
 
@@ -351,15 +425,15 @@
 
   .matrix th,
   .matrix td {
-    padding: 12px var(--space-md);
+    padding: 14px var(--space-lg);
     text-align: left;
     border: 1px solid var(--grid-line);
-    vertical-align: top;
+    vertical-align: middle;
   }
 
   .matrix th {
     font-family: var(--font-heading);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -372,10 +446,20 @@
     line-height: 1.5;
   }
 
+  .matrix tr {
+    transition: background 0.15s ease-out;
+  }
+
+  .matrix tbody tr:hover {
+    background: var(--surface-hover);
+  }
+
   .matrix__property {
     font-weight: 500;
     color: var(--text-primary);
     white-space: nowrap;
+    border-left: 2px solid var(--green) !important;
+    padding-left: 22px !important;
   }
 
   .matrix__detail {
@@ -385,27 +469,35 @@
     word-break: break-word;
   }
 
-  .tag {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    padding: 2px 8px;
-    border-radius: var(--radius);
-    white-space: nowrap;
-  }
-
-  .tag--tested {
-    color: var(--green);
-    border: 1px solid var(--green);
-  }
-
   /* ===== 5. DEPLOYMENT PANEL ===== */
   .terminal {
     background: var(--surface);
     border: 1px solid var(--grid-line);
     border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .terminal__titlebar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px var(--space-lg);
+    border-bottom: 1px solid var(--grid-line);
+  }
+
+  .terminal__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    opacity: 0.3;
+  }
+
+  .terminal__dot:first-child { background: #ff5f57; opacity: 0.7; }
+  .terminal__dot:nth-child(2) { background: #febc2e; opacity: 0.7; }
+  .terminal__dot:nth-child(3) { background: #28c840; opacity: 0.7; }
+
+  .terminal__body {
     padding: var(--space-lg);
     font-family: var(--font-mono);
     font-size: 13px;
@@ -447,14 +539,19 @@
   .limit-row {
     display: flex;
     gap: var(--space-lg);
-    padding: 12px var(--space-lg);
+    padding: 14px var(--space-lg);
     border-bottom: 1px solid var(--grid-line);
     font-size: 13px;
     line-height: 1.5;
+    transition: background 0.15s ease-out;
   }
 
   .limit-row:last-child {
     border-bottom: none;
+  }
+
+  .limit-row:hover {
+    background: var(--surface-hover);
   }
 
   .limit-row__label {
@@ -476,9 +573,9 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--space-md) var(--space-lg);
-    border-top: 1px solid var(--grid-line);
+    border-top: 1px solid var(--border-default);
     background: var(--surface);
-    margin-top: var(--space-xl);
+    margin-top: var(--space-2xl);
   }
 
   .footer__left {
@@ -490,13 +587,10 @@
     color: var(--text-muted);
   }
 
-  .footer__center {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-muted);
+  .footer__right {
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: var(--space-lg);
   }
 
   .footer__right a {
@@ -525,6 +619,11 @@
     outline-offset: 2px;
   }
 
+  .cta-btn:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+  }
+
   /* ===== RESPONSIVE ===== */
 
   /* Tablets and small desktops */
@@ -532,6 +631,7 @@
     .hero {
       grid-template-columns: 1fr;
       gap: var(--space-lg);
+      padding: var(--space-2xl) 0 var(--space-xl);
     }
 
     .hero__text {
@@ -539,7 +639,7 @@
     }
 
     .hero__heading {
-      font-size: 36px;
+      font-size: 40px;
     }
 
     .flow-grid {
@@ -559,8 +659,18 @@
       border-right: 1px solid var(--grid-line);
     }
 
+    /* Hide arrows on 2-col */
+    .flow-cell:nth-child(2)::after {
+      display: none;
+    }
+
     .terminal__name {
       min-width: 140px;
+    }
+
+    .section-gap {
+      padding-top: var(--space-xl);
+      padding-bottom: var(--space-xl);
     }
   }
 
@@ -586,6 +696,7 @@
 
     .hero__heading {
       font-size: 28px;
+      letter-spacing: -0.01em;
     }
 
     .hero__sub {
@@ -603,6 +714,11 @@
 
     .flow-cell:last-child {
       border-bottom: none;
+    }
+
+    /* Hide arrows on single-col */
+    .flow-cell::after {
+      display: none !important;
     }
 
     /* Convert matrix to card layout on mobile */
@@ -624,29 +740,23 @@
 
     .matrix tr {
       border: 1px solid var(--grid-line);
+      border-left: 2px solid var(--green);
       padding: var(--space-md);
       margin-bottom: var(--space-sm);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: var(--space-sm);
     }
 
     .matrix td {
       padding: 0;
     }
 
-    .matrix td.matrix__property {
-      flex: 1 0 auto;
+    .matrix__property {
+      border-left: none !important;
+      padding-left: 0 !important;
+      margin-bottom: var(--space-xs);
     }
 
-    .matrix td.matrix__detail {
-      flex: 1 0 100%;
-      order: 3;
-    }
-
-    .matrix td:last-child {
-      flex: 0 0 auto;
+    .matrix__detail {
+      margin-bottom: 0;
     }
 
     .limit-row {
@@ -672,6 +782,11 @@
     .terminal__addr {
       display: block;
       word-break: break-all;
+    }
+
+    .section-gap {
+      padding-top: var(--space-xl);
+      padding-bottom: var(--space-xl);
     }
   }
 
@@ -703,14 +818,19 @@
 
     <!-- 2. HERO GRID -->
     <section class="hero" aria-label="Overview">
-      <div class="hero__text">
+      <div class="hero__text reveal">
         <h1 class="hero__heading">Deposit on one chain.<br>Withdraw on another.<br>No link between them.</h1>
-        <p class="hero__sub">Groth16 proofs break the on-chain trail between Flow EVM deposits and Starknet withdrawals. Fixed denomination pools, on-chain Poseidon Merkle tree, relayer pattern. 20/20 E2E tests on devnet.</p>
+        <p class="hero__sub">Groth16 proofs break the on-chain trail between Flow EVM deposits and Starknet withdrawals. Fixed denomination pools, on-chain Poseidon Merkle tree, relayer pattern.</p>
+        <div class="hero__proof">
+          <span class="pulse-dot pulse-dot--green" aria-hidden="true" style="margin-right:0"></span>
+          20/20 E2E tests passing on devnet
+        </div>
         <div class="hero__cta">
-          <a href="https://github.com/Yonkoo11/privacy-bridge" class="cta-btn" target="_blank" rel="noopener noreferrer">View Source on GitHub</a>
+          <a href="https://github.com/Yonkoo11/privacy-bridge" class="cta-btn" target="_blank" rel="noopener noreferrer">View Source</a>
+          <a href="#flow" class="cta-link">How it works</a>
         </div>
       </div>
-      <div class="hero__panel" role="region" aria-label="System parameters">
+      <div class="hero__panel reveal reveal-delay-1" role="region" aria-label="System parameters">
         <div class="hero__panel-title">System Parameters</div>
         <div class="data-row">
           <span class="data-row__label">CIRCUIT</span>
@@ -746,27 +866,31 @@
     </section>
 
     <!-- 3. PROTOCOL FLOW -->
-    <section class="section-gap" aria-label="Protocol flow">
-      <div class="section-title">Protocol Flow</div>
-      <div class="flow-grid">
+    <section id="flow" class="section-gap" aria-label="Protocol flow">
+      <div class="section-title reveal">Protocol Flow</div>
+      <div class="flow-grid reveal reveal-delay-1">
         <div class="flow-cell">
-          <div class="flow-cell__step">01 // Lock</div>
+          <div class="flow-cell__step">01</div>
+          <div class="flow-cell__verb">Lock</div>
           <div class="flow-cell__desc">Deposit a fixed denomination into the PrivacyBridge contract. A Poseidon commitment is inserted into the on-chain Merkle tree.</div>
           <div class="flow-cell__chain">Flow EVM</div>
         </div>
         <div class="flow-cell">
-          <div class="flow-cell__step">02 // Prove</div>
-          <div class="flow-cell__desc">Generate a Groth16 proof off-chain. The proof attests to knowledge of a valid commitment in the tree without revealing which one.</div>
+          <div class="flow-cell__step">02</div>
+          <div class="flow-cell__verb">Prove</div>
+          <div class="flow-cell__desc">Generate a Groth16 proof off-chain. The proof attests to knowledge of a valid commitment without revealing which one.</div>
           <div class="flow-cell__chain">Off-chain / Browser</div>
         </div>
         <div class="flow-cell">
-          <div class="flow-cell__step">03 // Verify</div>
+          <div class="flow-cell__step">03</div>
+          <div class="flow-cell__verb">Verify</div>
           <div class="flow-cell__desc">The garaga verifier on Starknet checks the Groth16 proof on-chain. Nullifier hash is checked against the spent set.</div>
           <div class="flow-cell__chain">Starknet</div>
         </div>
         <div class="flow-cell">
-          <div class="flow-cell__step">04 // Claim</div>
-          <div class="flow-cell__desc">Tokens are minted to the recipient on Starknet. The nullifier is marked spent. No link to the original deposit is visible.</div>
+          <div class="flow-cell__step">04</div>
+          <div class="flow-cell__verb">Claim</div>
+          <div class="flow-cell__desc">Tokens are minted to the recipient. The nullifier is marked spent. No link to the original deposit is visible on-chain.</div>
           <div class="flow-cell__chain">Starknet</div>
         </div>
       </div>
@@ -774,51 +898,43 @@
 
     <!-- 4. SECURITY MATRIX -->
     <section class="section-gap" aria-label="Security properties">
-      <div class="section-title">Security Matrix</div>
-      <div class="matrix-wrap">
+      <div class="section-title reveal">Security Matrix</div>
+      <div class="matrix-wrap reveal reveal-delay-1">
         <table class="matrix">
           <thead>
             <tr>
               <th>Property</th>
               <th>Implementation</th>
-              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td class="matrix__property">Fixed Denominations</td>
               <td class="matrix__detail">0.0001, 0.001, 0.01, 0.1 FLOW</td>
-              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">On-chain Merkle Tree</td>
               <td class="matrix__detail">Poseidon incremental, depth 24, 30-root buffer</td>
-              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Commitment Hiding</td>
               <td class="matrix__detail">Poseidon(Poseidon(secret, nullifier), amount)</td>
-              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Clean Events</td>
               <td class="matrix__detail">Mint emits nullifier_hash + amount only</td>
-              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Relayer Pattern</td>
               <td class="matrix__detail">Fee-protected (max_fee_bps bound)</td>
-              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Withdrawal Timelock</td>
               <td class="matrix__detail">Configurable delay, root_timestamps</td>
-              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Emergency Withdraw</td>
               <td class="matrix__detail">30-day timelock, owner-initiated</td>
-              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
           </tbody>
         </table>
@@ -827,24 +943,31 @@
 
     <!-- 5. DEPLOYMENT PANEL -->
     <section class="section-gap" aria-label="Deployment addresses">
-      <div class="section-title">Deployment</div>
-      <div class="terminal">
-        <div><span class="terminal__prompt">&gt;</span> <span class="terminal__comment">flow-evm-testnet deployment</span></div>
-        <br>
-        <div><span class="terminal__name">PoseidonT3</span> <span class="terminal__addr">0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a</span></div>
-        <div><span class="terminal__name">PoseidonT3Wrapper</span> <span class="terminal__addr">0x2eaEF8016D2a7Dc01677E57183a167649cB07402</span></div>
-        <div><span class="terminal__name">PrivacyBridge</span> <span class="terminal__addr">0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca</span></div>
-        <div class="terminal__meta">
-          <div>chain_id: 545</div>
-          <div>rpc: testnet.evm.nodes.onflow.org</div>
+      <div class="section-title reveal">Deployment</div>
+      <div class="terminal reveal reveal-delay-1">
+        <div class="terminal__titlebar" aria-hidden="true">
+          <span class="terminal__dot"></span>
+          <span class="terminal__dot"></span>
+          <span class="terminal__dot"></span>
+        </div>
+        <div class="terminal__body">
+          <div><span class="terminal__prompt">&gt;</span> <span class="terminal__comment">flow-evm-testnet deployment</span></div>
+          <div style="height: 12px"></div>
+          <div><span class="terminal__name">PoseidonT3</span> <span class="terminal__addr">0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a</span></div>
+          <div><span class="terminal__name">PoseidonT3Wrapper</span> <span class="terminal__addr">0x2eaEF8016D2a7Dc01677E57183a167649cB07402</span></div>
+          <div><span class="terminal__name">PrivacyBridge</span> <span class="terminal__addr">0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca</span></div>
+          <div class="terminal__meta">
+            <div>chain_id: 545</div>
+            <div>rpc: testnet.evm.nodes.onflow.org</div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- 6. KNOWN LIMITATIONS -->
     <section class="section-gap" aria-label="Known limitations">
-      <div class="section-title">Known Limitations</div>
-      <div class="limits">
+      <div class="section-title reveal">Known Limitations</div>
+      <div class="limits reveal reveal-delay-1">
         <div class="limit-row">
           <span class="limit-row__label">Root relay</span>
           <span class="limit-row__desc">Centralized (owner relays Merkle root from Flow to Starknet)</span>
@@ -869,14 +992,30 @@
   <!-- 7. FOOTER -->
   <footer class="footer">
     <div class="footer__left">PL_Genesis Hackathon</div>
-    <div class="footer__center">
-      <span class="pulse-dot pulse-dot--green" aria-hidden="true"></span>
-      20 tests passing
-    </div>
     <div class="footer__right">
       <a href="https://github.com/Yonkoo11/privacy-bridge" target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
   </footer>
+
+  <!-- Scroll reveal observer -->
+  <script>
+    (function() {
+      var els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window)) {
+        els.forEach(function(el) { el.classList.add('visible'); });
+        return;
+      }
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      els.forEach(function(el) { observer.observe(el); });
+    })();
+  </script>
 
 </body>
 </html>
