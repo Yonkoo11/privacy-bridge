@@ -18,10 +18,10 @@
   /* ===== TOKENS ===== */
   :root {
     --bg: #08080c;
-    --surface: #0f0f14;
+    --surface: #111118;
     --grid-line: rgba(255, 255, 255, 0.06);
     --text-primary: #e4e4e8;
-    --text-muted: #5a5a66;
+    --text-muted: #8a8a96;
     --amber: #f59e0b;
     --cyan: #06b6d4;
     --green: #22c55e;
@@ -97,6 +97,38 @@
   .green { color: var(--green); }
   .muted { color: var(--text-muted); }
 
+  /* ===== CTA BUTTON ===== */
+  .hero__cta {
+    margin-top: var(--space-lg);
+  }
+
+  .cta-btn {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--bg);
+    background: var(--amber);
+    padding: 10px 24px;
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: background 0.15s ease-out, transform 0.1s ease-out;
+  }
+
+  .cta-btn:hover {
+    background: #d97706;
+  }
+
+  .cta-btn:active {
+    transform: scale(0.98);
+  }
+
+  .cta-btn:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+  }
+
   /* ===== PULSE ANIMATION ===== */
   @keyframes pulse {
     0%, 100% { opacity: 1; }
@@ -129,7 +161,7 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--space-md) var(--space-lg);
-    border-bottom: 1px solid var(--grid-line);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     background: var(--surface);
     position: sticky;
     top: 0;
@@ -364,14 +396,9 @@
     white-space: nowrap;
   }
 
-  .tag--amber {
-    color: var(--amber);
-    border: 1px solid var(--amber);
-  }
-
-  .tag--cyan {
-    color: var(--cyan);
-    border: 1px solid var(--cyan);
+  .tag--tested {
+    color: var(--green);
+    border: 1px solid var(--green);
   }
 
   /* ===== 5. DEPLOYMENT PANEL ===== */
@@ -412,42 +439,35 @@
     border-top: 1px solid var(--grid-line);
   }
 
-  /* ===== 6. STACK GRID ===== */
-  .stack-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+  /* ===== 6. KNOWN LIMITATIONS ===== */
+  .limits {
     border: 1px solid var(--grid-line);
   }
 
-  .stack-cell {
-    padding: var(--space-md) var(--space-lg);
-    border-right: 1px solid var(--grid-line);
+  .limit-row {
+    display: flex;
+    gap: var(--space-lg);
+    padding: 12px var(--space-lg);
     border-bottom: 1px solid var(--grid-line);
+    font-size: 13px;
+    line-height: 1.5;
   }
 
-  .stack-cell:nth-child(3n) {
-    border-right: none;
-  }
-
-  .stack-cell:nth-child(n+4) {
+  .limit-row:last-child {
     border-bottom: none;
   }
 
-  .stack-cell__label {
-    font-family: var(--font-heading);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: var(--space-xs);
-  }
-
-  .stack-cell__value {
+  .limit-row__label {
     font-family: var(--font-mono);
-    font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 160px;
+  }
+
+  .limit-row__desc {
+    color: var(--text-muted);
   }
 
   /* ===== 7. FOOTER ===== */
@@ -585,40 +605,57 @@
       border-bottom: none;
     }
 
-    /* Make the matrix scroll horizontally on mobile */
+    /* Convert matrix to card layout on mobile */
     .matrix-wrap {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+      overflow-x: visible;
     }
 
-    .matrix {
-      min-width: 580px;
+    .matrix { min-width: 0; }
+
+    .matrix thead { display: none; }
+
+    .matrix,
+    .matrix tbody,
+    .matrix tr,
+    .matrix td {
+      display: block;
+      border: none;
     }
 
-    .stack-grid {
-      grid-template-columns: repeat(2, 1fr);
+    .matrix tr {
+      border: 1px solid var(--grid-line);
+      padding: var(--space-md);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: var(--space-sm);
     }
 
-    .stack-cell:nth-child(3n) {
-      border-right: 1px solid var(--grid-line);
+    .matrix td {
+      padding: 0;
     }
 
-    .stack-cell:nth-child(2n) {
-      border-right: none;
+    .matrix td.matrix__property {
+      flex: 1 0 auto;
     }
 
-    .stack-cell {
-      border-bottom: 1px solid var(--grid-line);
+    .matrix td.matrix__detail {
+      flex: 1 0 100%;
+      order: 3;
     }
 
-    .stack-cell:nth-child(n+5) {
-      border-bottom: none;
+    .matrix td:last-child {
+      flex: 0 0 auto;
     }
 
-    /* On 2-col with 6 items, last row is items 5-6 */
-    .stack-cell:nth-child(5),
-    .stack-cell:nth-child(6) {
-      border-bottom: none;
+    .limit-row {
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .limit-row__label {
+      min-width: auto;
     }
 
     .footer {
@@ -667,8 +704,11 @@
     <!-- 2. HERO GRID -->
     <section class="hero" aria-label="Overview">
       <div class="hero__text">
-        <h1 class="hero__heading">Zero-knowledge<br>cross-chain bridge</h1>
-        <p class="hero__sub">Lock tokens on Flow EVM. Prove with Groth16. Claim on Starknet. No visible link between source and destination.</p>
+        <h1 class="hero__heading">Deposit on one chain.<br>Withdraw on another.<br>No link between them.</h1>
+        <p class="hero__sub">Groth16 proofs break the on-chain trail between Flow EVM deposits and Starknet withdrawals. Fixed denomination pools, on-chain Poseidon Merkle tree, relayer pattern. 20/20 E2E tests on devnet.</p>
+        <div class="hero__cta">
+          <a href="https://github.com/Yonkoo11/privacy-bridge" class="cta-btn" target="_blank" rel="noopener noreferrer">View Source on GitHub</a>
+        </div>
       </div>
       <div class="hero__panel" role="region" aria-label="System parameters">
         <div class="hero__panel-title">System Parameters</div>
@@ -748,37 +788,37 @@
             <tr>
               <td class="matrix__property">Fixed Denominations</td>
               <td class="matrix__detail">0.0001, 0.001, 0.01, 0.1 FLOW</td>
-              <td><span class="tag tag--amber">ACTIVE</span></td>
+              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">On-chain Merkle Tree</td>
               <td class="matrix__detail">Poseidon incremental, depth 24, 30-root buffer</td>
-              <td><span class="tag tag--cyan">VERIFIED</span></td>
+              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Commitment Hiding</td>
               <td class="matrix__detail">Poseidon(Poseidon(secret, nullifier), amount)</td>
-              <td><span class="tag tag--cyan">VERIFIED</span></td>
+              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Clean Events</td>
               <td class="matrix__detail">Mint emits nullifier_hash + amount only</td>
-              <td><span class="tag tag--amber">ACTIVE</span></td>
+              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Relayer Pattern</td>
               <td class="matrix__detail">Fee-protected (max_fee_bps bound)</td>
-              <td><span class="tag tag--amber">ACTIVE</span></td>
+              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Withdrawal Timelock</td>
               <td class="matrix__detail">Configurable delay, root_timestamps</td>
-              <td><span class="tag tag--amber">ACTIVE</span></td>
+              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
             <tr>
               <td class="matrix__property">Emergency Withdraw</td>
               <td class="matrix__detail">30-day timelock, owner-initiated</td>
-              <td><span class="tag tag--amber">ACTIVE</span></td>
+              <td><span class="tag tag--tested">TESTED</span></td>
             </tr>
           </tbody>
         </table>
@@ -801,33 +841,25 @@
       </div>
     </section>
 
-    <!-- 6. STACK GRID -->
-    <section class="section-gap" aria-label="Technology stack">
-      <div class="section-title">Stack</div>
-      <div class="stack-grid">
-        <div class="stack-cell">
-          <div class="stack-cell__label">Circuit</div>
-          <div class="stack-cell__value">Circom 2.1.9 + snarkjs</div>
+    <!-- 6. KNOWN LIMITATIONS -->
+    <section class="section-gap" aria-label="Known limitations">
+      <div class="section-title">Known Limitations</div>
+      <div class="limits">
+        <div class="limit-row">
+          <span class="limit-row__label">Root relay</span>
+          <span class="limit-row__desc">Centralized (owner relays Merkle root from Flow to Starknet)</span>
         </div>
-        <div class="stack-cell">
-          <div class="stack-cell__label">Proof</div>
-          <div class="stack-cell__value">Groth16 / BN254</div>
+        <div class="limit-row">
+          <span class="limit-row__label">Emergency withdraw</span>
+          <span class="limit-row__desc">Single-key with 30-day timelock (rug vector, mitigated not eliminated)</span>
         </div>
-        <div class="stack-cell">
-          <div class="stack-cell__label">Source</div>
-          <div class="stack-cell__value">Solidity 0.8.20</div>
+        <div class="limit-row">
+          <span class="limit-row__label">Trusted setup</span>
+          <span class="limit-row__desc">1-party ceremony (Hermez Phase 1 ptau)</span>
         </div>
-        <div class="stack-cell">
-          <div class="stack-cell__label">Dest</div>
-          <div class="stack-cell__value">Cairo 2.14.0</div>
-        </div>
-        <div class="stack-cell">
-          <div class="stack-cell__label">Verifier</div>
-          <div class="stack-cell__value">garaga 1.0.1</div>
-        </div>
-        <div class="stack-cell">
-          <div class="stack-cell__label">Hash</div>
-          <div class="stack-cell__value">Poseidon</div>
+        <div class="limit-row">
+          <span class="limit-row__label">known_roots</span>
+          <span class="limit-row__desc">Unbounded on Starknet (intentional: pruning would lock user funds)</span>
         </div>
       </div>
     </section>
