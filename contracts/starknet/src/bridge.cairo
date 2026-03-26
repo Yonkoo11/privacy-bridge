@@ -3,12 +3,19 @@ pub trait IPrivacyBridge<TContractState> {
     fn mint(
         ref self: TContractState,
         full_proof_with_hints: Span<felt252>,
-        storacha_cid: felt252,
+        max_fee_bps: u256,
     );
 
     fn is_nullifier_spent(self: @TContractState, nullifier_hash: u256) -> bool;
     fn get_merkle_root(self: @TContractState) -> u256;
     fn set_merkle_root(ref self: TContractState, root: u256);
+    fn add_known_root(ref self: TContractState, root: u256);
+    fn balance_of(self: @TContractState, account: starknet::ContractAddress) -> u256;
+    fn transfer(ref self: TContractState, to: starknet::ContractAddress, amount: u256);
+    fn get_relayer_fee(self: @TContractState) -> u256;
+    fn set_relayer_fee(ref self: TContractState, fee_bps: u256);
+    fn set_denomination(ref self: TContractState, denom: u256, allowed: bool);
+    fn set_min_delay(ref self: TContractState, delay: u64);
 }
 
 #[starknet::contract]
@@ -29,6 +36,17 @@ mod PrivacyBridge {
         merkle_root: u256,
         nullifiers: starknet::storage::Map<u256, bool>,
         owner: starknet::ContractAddress,
+        // Fix 1: Fixed denomination pools
+        allowed_denominations: starknet::storage::Map<u256, bool>,
+        // Fix 3: Root history
+        known_roots: starknet::storage::Map<u256, bool>,
+        // Fix 2: Shielded balances
+        balances: starknet::storage::Map<starknet::ContractAddress, u256>,
+        // Fix 5: Relayer fee (basis points, max 500 = 5%)
+        relayer_fee_bps: u256,
+        // Fix 6: Withdrawal time lock
+        root_timestamps: starknet::storage::Map<u256, u64>,
+        min_withdrawal_delay: u64,
     }
 
     #[event]
@@ -36,20 +54,34 @@ mod PrivacyBridge {
     enum Event {
         ShieldedMint: ShieldedMint,
         RootUpdated: RootUpdated,
+        Transfer: Transfer,
     }
 
+    // Fix 4: Removed storacha_cid from event
     #[derive(Drop, starknet::Event)]
     struct ShieldedMint {
         nullifier_hash: u256,
-        recipient: u256,
         amount: u256,
-        storacha_cid: felt252,
     }
 
     #[derive(Drop, starknet::Event)]
     struct RootUpdated {
         new_root: u256,
     }
+
+    // Fix 2: Transfer event — only emits amount, NOT from/to addresses.
+    // Emitting addresses would let observers reconstruct fund flows,
+    // destroying cross-chain unlinkability.
+    #[derive(Drop, starknet::Event)]
+    struct Transfer {
+        amount: u256,
+    }
+
+    // Fixed denomination values (wei) for testnet
+    const DENOM_0001: u256 = 100000000000000;       // 0.0001
+    const DENOM_001: u256 = 1000000000000000;        // 0.001
+    const DENOM_01: u256 = 10000000000000000;        // 0.01
+    const DENOM_1: u256 = 100000000000000000;        // 0.1
 
     #[constructor]
     fn constructor(
@@ -59,6 +91,15 @@ mod PrivacyBridge {
     ) {
         self.verifier_class_hash.write(verifier_class_hash);
         self.owner.write(owner);
+
+        // Fix 1: Set allowed denominations
+        self.allowed_denominations.write(DENOM_0001, true);
+        self.allowed_denominations.write(DENOM_001, true);
+        self.allowed_denominations.write(DENOM_01, true);
+        self.allowed_denominations.write(DENOM_1, true);
+
+        // Fix 6: Default delay 0 (for devnet testing)
+        self.min_withdrawal_delay.write(0);
     }
 
     #[abi(embed_v0)]
@@ -66,7 +107,7 @@ mod PrivacyBridge {
         fn mint(
             ref self: ContractState,
             full_proof_with_hints: Span<felt252>,
-            storacha_cid: felt252,
+            max_fee_bps: u256,
         ) {
             // 1. Verify the Groth16 proof via garaga library call
             let class_hash = self.verifier_class_hash.read();
@@ -82,9 +123,17 @@ mod PrivacyBridge {
             let recipient: u256 = *pi.at(2);
             let amount: u256 = *pi.at(3);
 
-            // 3. Check merkle root matches
-            let stored_root = self.merkle_root.read();
-            assert(proof_root == stored_root, 'Merkle root mismatch');
+            // Denomination is enforced at deposit time on Flow EVM.
+            // NOT checked here — disabling a denomination after deposit would lock funds.
+
+            // Fix 3: Check root is in known_roots history
+            assert(self.known_roots.read(proof_root), 'Unknown merkle root');
+
+            // Fix 6: Check withdrawal time lock
+            let root_time = self.root_timestamps.read(proof_root);
+            let now = starknet::get_block_timestamp();
+            let delay = self.min_withdrawal_delay.read();
+            assert(now >= root_time + delay, 'Withdrawal too early');
 
             // 4. Check nullifier not already spent (double-spend protection)
             let spent = self.nullifiers.read(nullifier_hash);
@@ -93,12 +142,30 @@ mod PrivacyBridge {
             // 5. Mark nullifier as spent
             self.nullifiers.write(nullifier_hash, true);
 
-            // 6. Emit mint event
+            // Fix 5: Relayer fee — credit fee to caller, remainder to recipient
+            // max_fee_bps protects users from fee changes between proof gen and submission
+            let fee_bps = self.relayer_fee_bps.read();
+            assert(fee_bps <= max_fee_bps, 'Fee exceeds max agreed');
+            let fee = amount * fee_bps / 10000;
+            let net_amount = amount - fee;
+
+            // Fix 2: Convert recipient u256 to ContractAddress and credit balance
+            let felt_recip: felt252 = recipient.try_into().expect('recipient overflow');
+            let addr: starknet::ContractAddress = felt_recip.try_into().unwrap();
+            let bal = self.balances.read(addr);
+            self.balances.write(addr, bal + net_amount);
+
+            // Fix 5: Credit relayer fee to caller (if any)
+            if fee > 0 {
+                let caller = starknet::get_caller_address();
+                let caller_bal = self.balances.read(caller);
+                self.balances.write(caller, caller_bal + fee);
+            }
+
+            // Fix 4: Emit event without storacha_cid or recipient
             self.emit(ShieldedMint {
                 nullifier_hash,
-                recipient,
                 amount,
-                storacha_cid,
             });
         }
 
@@ -110,12 +177,72 @@ mod PrivacyBridge {
             self.merkle_root.read()
         }
 
+        // Legacy: sets single root (kept for backward compat with tests)
         fn set_merkle_root(ref self: ContractState, root: u256) {
             let caller = starknet::get_caller_address();
             let owner = self.owner.read();
             assert(caller == owner, 'Only owner can set root');
             self.merkle_root.write(root);
+            // Also add to known_roots and timestamp
+            self.known_roots.write(root, true);
+            self.root_timestamps.write(root, starknet::get_block_timestamp());
             self.emit(RootUpdated { new_root: root });
+        }
+
+        // Fix 3: Add root to history (owner only)
+        fn add_known_root(ref self: ContractState, root: u256) {
+            let caller = starknet::get_caller_address();
+            let owner = self.owner.read();
+            assert(caller == owner, 'Only owner can add root');
+            self.merkle_root.write(root);
+            self.known_roots.write(root, true);
+            self.root_timestamps.write(root, starknet::get_block_timestamp());
+            self.emit(RootUpdated { new_root: root });
+        }
+
+        // Fix 2: Balance query
+        fn balance_of(self: @ContractState, account: starknet::ContractAddress) -> u256 {
+            self.balances.read(account)
+        }
+
+        // Fix 2: Transfer shielded balance
+        fn transfer(ref self: ContractState, to: starknet::ContractAddress, amount: u256) {
+            let caller = starknet::get_caller_address();
+            let from_bal = self.balances.read(caller);
+            assert(from_bal >= amount, 'Insufficient balance');
+            self.balances.write(caller, from_bal - amount);
+            let to_bal = self.balances.read(to);
+            self.balances.write(to, to_bal + amount);
+            self.emit(Transfer { amount });
+        }
+
+        // Fix 5: Relayer fee management
+        fn get_relayer_fee(self: @ContractState) -> u256 {
+            self.relayer_fee_bps.read()
+        }
+
+        fn set_relayer_fee(ref self: ContractState, fee_bps: u256) {
+            let caller = starknet::get_caller_address();
+            let owner = self.owner.read();
+            assert(caller == owner, 'Only owner can set fee');
+            assert(fee_bps <= 500, 'Fee exceeds 5%');
+            self.relayer_fee_bps.write(fee_bps);
+        }
+
+        // Fix 1: Denomination management
+        fn set_denomination(ref self: ContractState, denom: u256, allowed: bool) {
+            let caller = starknet::get_caller_address();
+            let owner = self.owner.read();
+            assert(caller == owner, 'Only owner can set denom');
+            self.allowed_denominations.write(denom, allowed);
+        }
+
+        // Fix 6: Withdrawal delay management
+        fn set_min_delay(ref self: ContractState, delay: u64) {
+            let caller = starknet::get_caller_address();
+            let owner = self.owner.read();
+            assert(caller == owner, 'Only owner can set delay');
+            self.min_withdrawal_delay.write(delay);
         }
     }
 }

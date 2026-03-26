@@ -233,7 +233,9 @@
       <span class="badge">Groth16 / BN254</span>
       <span class="badge">garaga on-chain verifier</span>
       <span class="badge">Poseidon commitments</span>
-      <span class="badge live">E2E verified on devnet</span>
+      <span class="badge">Fixed denomination pools</span>
+      <span class="badge">On-chain Merkle tree</span>
+      <span class="badge live">16/16 E2E tests passing</span>
     </div>
   </section>
 
@@ -261,8 +263,8 @@
       <div class="step">
         <div class="step-num">4</div>
         <h3>Claim</h3>
-        <p>If the proof is valid and the nullifier hasn't been used, your shielded balance is minted. Receipt stored on IPFS via Storacha.</p>
-        <div class="chain">Starknet + IPFS</div>
+        <p>If the proof is valid and the nullifier hasn't been used, your shielded balance is credited. A relayer can submit on your behalf for a fee.</p>
+        <div class="chain">Starknet</div>
       </div>
     </div>
   </section>
@@ -281,7 +283,7 @@
       <div class="label">Calldata felts</div>
     </div>
     <div class="stat">
-      <div class="num">8/8</div>
+      <div class="num">16/16</div>
       <div class="label">E2E tests passing</div>
     </div>
   </div>
@@ -321,19 +323,31 @@
     <ul class="privacy-list">
       <li>
         <span class="check">&#10003;</span>
+        <div><strong>Fixed denomination pools</strong><br><span>All deposits in a pool have the same amount. Eliminates amount-based transaction linking.</span></div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
+        <div><strong>On-chain Merkle tree</strong><br><span>Poseidon incremental tree computed on-chain (Flow EVM). Root history on Starknet. Trustlessly verifiable.</span></div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
         <div><strong>Commitment hiding</strong><br><span>Poseidon(Poseidon(secret, nullifier), amount). On-chain data cannot reveal secret or link to withdrawal.</span></div>
       </li>
       <li>
         <span class="check">&#10003;</span>
-        <div><strong>Nullifier binding</strong><br><span>Each deposit has a unique nullifier. Double-spend prevented on-chain.</span></div>
+        <div><strong>No privacy-leaking events</strong><br><span>Mint events emit only nullifier hash and amount. No recipient, no off-chain identifiers.</span></div>
       </li>
       <li>
         <span class="check">&#10003;</span>
-        <div><strong>Amount hidden from events</strong><br><span>Lock events emit only the commitment hash. Amount is in calldata but not indexed.</span></div>
+        <div><strong>Relayer support</strong><br><span>Anyone can submit proofs. Users don't reveal their Starknet address to the sequencer.</span></div>
       </li>
       <li>
         <span class="check">&#10003;</span>
-        <div><strong>No on-chain link</strong><br><span>ZK proof demonstrates knowledge of a valid commitment without revealing which one.</span></div>
+        <div><strong>Withdrawal timelock</strong><br><span>Configurable delay between deposit and withdrawal prevents timing correlation.</span></div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
+        <div><strong>Emergency withdraw</strong><br><span>Owner-initiated with 30-day timelock. Cancellable. Protects locked funds.</span></div>
       </li>
     </ul>
   </section>

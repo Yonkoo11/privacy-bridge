@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { computeCommitment, computeNullifierHash, poseidonHash } from '../sdk/src/poseidon.mjs';
 import { buildTreeFromCommitments } from '../sdk/src/merkle.mjs';
 import { generateBridgeProof, generateGaragaCalldata } from '../sdk/src/prover.mjs';
-import { getFlowProvider, lockTokens, fetchAllCommitments } from '../sdk/src/flow.mjs';
+import { getFlowProvider, lockTokens, fetchAllCommitments, ALLOWED_DENOMINATIONS } from '../sdk/src/flow.mjs';
 import { createReceipt } from '../sdk/src/storacha.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -47,6 +47,12 @@ async function cmdLock(args) {
   const provider = getFlowProvider();
   const wallet = new ethers.Wallet(privateKey, provider);
   const amountWei = ethers.parseEther(amount);
+
+  // Fix 1: Validate denomination
+  if (!ALLOWED_DENOMINATIONS.includes(amountWei)) {
+    console.error(`Invalid denomination. Allowed: ${ALLOWED_DENOMINATIONS.map(d => ethers.formatEther(d)).join(', ')} FLOW`);
+    process.exit(1);
+  }
 
   // Generate secret and nullifier
   const secret = randomFieldElement();
@@ -195,15 +201,13 @@ async function cmdMint(args) {
   console.log(`  Bridge: ${deploy.bridge_address}`);
   console.log(`  Calldata felts: ${proofData.garagaCalldata.length}`);
 
-  // Encode a short felt for storacha_cid (placeholder — real CID comes from Storacha upload)
-  const storachaCid = '0x0';
-
+  // max_fee_bps: accept up to 5% relayer fee (u256 as low/high)
   const tx = await account.execute({
     contractAddress: deploy.bridge_address,
     entrypoint: 'mint',
     calldata: CallData.compile({
       full_proof_with_hints: proofData.garagaCalldata,
-      storacha_cid: storachaCid,
+      max_fee_bps: { low: '500', high: '0' },
     }),
   });
 
