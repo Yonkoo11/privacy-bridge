@@ -1,37 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef } from 'react';
-
-function useScrollReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }),
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-    );
-    el.querySelectorAll('.reveal').forEach((r) => obs.observe(r));
-    return () => obs.disconnect();
-  }, []);
-  return ref;
-}
 
 const SPECS = [
   ['Circuit', '6,634 constraints'],
   ['Tree', 'Poseidon depth-24'],
   ['Calldata', '1,977 felts'],
-  ['Tests', '93 / 93'],
+  ['Tests', '93/93'],
   ['Pools', '4 denominations'],
-  ['Root buffer', '30 entries'],
+  ['Root Buffer', '30 entries'],
 ];
 
 const FLOW_STEPS = [
-  { step: '01', verb: 'Lock', desc: 'Deposit a fixed denomination into the PrivacyBridge contract. A Poseidon commitment enters the on-chain Merkle tree.', chain: 'Flow EVM' },
-  { step: '02', verb: 'Prove', desc: 'Generate a Groth16 proof off-chain. The proof attests knowledge of a valid commitment without revealing which one.', chain: 'Browser' },
-  { step: '03', verb: 'Verify', desc: 'The garaga verifier on Starknet checks the Groth16 proof on-chain. Nullifier hash is checked against the spent set.', chain: 'Starknet' },
-  { step: '04', verb: 'Claim', desc: 'pFLOW tokens are minted to the recipient. The nullifier is marked spent. No link to the original deposit exists on-chain.', chain: 'Starknet' },
+  { n: '1', verb: 'Lock', desc: 'Deposit a fixed denomination into the PrivacyBridge contract. A Poseidon commitment is inserted into the on-chain Merkle tree.', chain: 'Flow EVM' },
+  { n: '2', verb: 'Prove', desc: 'Generate a Groth16 proof off-chain. The proof attests to knowledge of a valid commitment in the tree without revealing which one.', chain: 'Off-chain / Browser' },
+  { n: '3', verb: 'Verify', desc: 'The garaga verifier on Starknet checks the Groth16 proof on-chain. Nullifier hash is checked against the spent set.', chain: 'Starknet' },
+  { n: '4', verb: 'Claim', desc: 'Tokens are minted to the recipient on Starknet. The nullifier is marked spent. No link to the original deposit is visible.', chain: 'Starknet' },
 ];
 
 const SECURITY = [
@@ -39,7 +23,7 @@ const SECURITY = [
   ['On-chain Merkle Tree', 'Poseidon incremental, depth 24, 30-root buffer'],
   ['Commitment Hiding', 'Poseidon(Poseidon(secret, nullifier), amount)'],
   ['Clean Events', 'Mint emits nullifier_hash + amount only'],
-  ['Relayer Pattern', 'Fee-protected (max_fee_bps bound)'],
+  ['Relayer Pattern', 'Fee-protected via max_fee_bps bound'],
   ['Withdrawal Timelock', 'Configurable delay, root_timestamps'],
   ['Emergency Withdraw', '30-day timelock, owner-initiated'],
 ];
@@ -51,121 +35,116 @@ const CONTRACTS = [
 ];
 
 const LIMITATIONS = [
-  ['Root relay', 'Centralized (owner relays Merkle root from Flow to Starknet)'],
-  ['Emergency withdraw', 'Single-key with 30-day timelock (rug vector, mitigated not eliminated)'],
-  ['Trusted setup', '1-party ceremony (Hermez Phase 1 ptau)'],
-  ['known_roots', 'Unbounded on Starknet (intentional: pruning would lock user funds)'],
+  'Root relay is centralized. The watcher service uses a single owner key to post Merkle roots cross-chain. A malicious operator can delay roots but cannot steal funds.',
+  'Garaga calldata proxy is a centralized service. It can cause transaction failures but cannot forge proofs or redirect withdrawals.',
+  'Emergency withdraw is a single-key rug vector, mitigated by a 30-day timelock. Users have 30 days to exit if the owner initiates emergency mode.',
+  '1-party trusted setup. The proving key was generated without a multi-party ceremony. A compromised setup allows forged proofs.',
 ];
 
 export default function Home() {
-  const containerRef = useScrollReveal();
-
   return (
-    <div className="min-h-screen" ref={containerRef}>
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10 backdrop-blur-xl" style={{ borderColor: 'var(--border)', background: 'rgba(10,10,15,0.88)' }}>
-        <span className="text-sm font-bold tracking-widest uppercase" style={{ fontFamily: 'var(--font-heading)' }}>Privacy Bridge</span>
-        <span className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>Flow EVM &rarr; Starknet</span>
-      </header>
+    <div className="min-h-screen">
+      <div className="max-w-[800px] mx-auto px-6">
 
-      <main className="max-w-[1080px] mx-auto px-6">
+        {/* Header */}
+        <header className="flex items-baseline justify-between py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+          <span className="text-[13px] font-bold tracking-[0.18em] uppercase" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>Privacy Bridge</span>
+          <span className="text-xs tracking-wider" style={{ color: 'var(--text-label)' }}>Flow EVM &rarr; Starknet</span>
+        </header>
+
         {/* Hero */}
-        <section className="py-24 md:py-32">
-          <div className="reveal max-w-[640px]">
-            <h1 className="text-3xl md:text-[44px] font-bold leading-[1.15] mb-6" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '-0.025em' }}>
-              <span className="hero-line">Deposit on one chain.</span>
-              <span className="hero-line">Withdraw on another.</span>
-              <span className="hero-line" style={{ color: 'var(--accent)' }}>No link between them.</span>
-            </h1>
-            <p className="text-base leading-relaxed mb-8 max-w-[520px]" style={{ color: 'var(--text-secondary)' }}>
-              Groth16 proofs sever the on-chain trail between Flow&nbsp;EVM deposits and Starknet withdrawals. Fixed denomination pools, Poseidon Merkle tree, relayer pattern.
-            </p>
-            <div className="flex items-center gap-5">
-              <Link href="/bridge" className="cta-btn">Launch App</Link>
-              <a href="#how" className="text-sm transition-colors hover:text-white" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textDecoration: 'none' }}>
-                How it works &darr;
-              </a>
-            </div>
+        <section className="pt-12 pb-8 sm:pt-16">
+          <div className="text-[28px] sm:text-[38px] font-bold leading-[1.15]" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)', letterSpacing: '-0.01em' }}>
+            <div className="mb-1">Deposit on one chain.</div>
+            <div className="mb-1">Withdraw on another.</div>
+            <div className="redact-bar mb-1">No link between them.</div>
           </div>
+          <p className="mt-6 text-sm leading-[1.7] max-w-[640px]" style={{ color: 'var(--text-body)' }}>
+            Groth16 proofs sever the on-chain trail between Flow&nbsp;EVM deposits and Starknet withdrawals. Fixed denomination pools, Poseidon Merkle tree, relayer pattern.
+          </p>
         </section>
 
-        {/* Specs strip */}
-        <section className="reveal py-8 border-t border-b" style={{ borderColor: 'var(--border)' }}>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-y-4">
-            {SPECS.map(([label, value]) => (
-              <div key={label} className="flex flex-col gap-0.5">
-                <span className="text-[11px] uppercase tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{label}</span>
-                <span className="text-sm font-medium" style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>{value}</span>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Specs */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-px mb-16 mt-12" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
+          {SPECS.map(([label, value]) => (
+            <div key={label} className="px-6 py-4" style={{ background: 'var(--surface)' }}>
+              <div className="text-[10px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>{label}</div>
+              <div className="text-[15px] font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{value}</div>
+            </div>
+          ))}
+        </div>
 
         {/* Protocol Flow */}
-        <section id="how" className="py-20">
-          <div className="reveal text-xs font-medium tracking-wider uppercase mb-8" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>Protocol Flow</div>
-          <div className="reveal reveal-delay-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: 'var(--border)' }}>
+        <section className="mb-16">
+          <div className="stamp">&mdash;&mdash; Protocol Flow &mdash;&mdash; Unclassified &mdash;&mdash;</div>
+          <div className="flow-track">
             {FLOW_STEPS.map((s) => (
-              <div key={s.step} className="flow-cell relative p-6 flex flex-col gap-2 transition-colors hover:bg-[var(--surface-hover)]" style={{ background: 'var(--surface)' }}>
-                <div className="text-[11px] tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{s.step}</div>
-                <div className="text-lg font-bold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--accent)' }}>{s.verb}</div>
-                <div className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-secondary)' }}>{s.desc}</div>
-                <div className="text-[11px] tracking-wider uppercase mt-2" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{s.chain}</div>
+              <div key={s.n} className="relative mb-8 last:mb-0">
+                <div className="absolute -left-8 -top-0.5 w-6 text-center text-2xl font-bold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{s.n}</div>
+                <div className="text-base font-semibold mb-1 tracking-wide" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{s.verb}</div>
+                <div className="text-[13px] leading-[1.65] mb-2 max-w-[600px]" style={{ color: 'var(--text-body)' }}>{s.desc}</div>
+                <div className="text-[11px] tracking-[0.08em] uppercase" style={{ color: 'var(--text-label)' }}>{s.chain}</div>
               </div>
             ))}
           </div>
         </section>
 
         {/* Security */}
-        <section className="py-20">
-          <div className="reveal text-xs font-medium tracking-wider uppercase mb-8" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>Security</div>
-          <div className="reveal reveal-delay-1">
-            {SECURITY.map(([prop, detail], i) => (
-              <div key={prop} className="matrix-property relative flex flex-col sm:flex-row gap-1 sm:gap-8 pl-4 py-4 transition-colors hover:bg-[var(--surface-hover)]" style={{ borderBottom: i < SECURITY.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                <span className="font-medium whitespace-nowrap shrink-0 sm:min-w-[190px] text-sm">{prop}</span>
-                <span className="text-sm" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{detail}</span>
+        <section className="mb-16">
+          <div className="stamp">&mdash;&mdash; Security Properties &mdash;&mdash; Unclassified &mdash;&mdash;</div>
+          <div>
+            {SECURITY.map(([prop, detail]) => (
+              <div key={prop} className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-0 mb-px">
+                <span className="text-[13px] font-medium px-4 py-3" style={{ color: 'var(--text-heading)', background: 'var(--surface)', borderRight: '1px solid var(--border)' }}>{prop}</span>
+                <span className="text-[13px] px-4 py-3" style={{ color: 'var(--text-body)' }}>{detail}</span>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Deployment */}
-        <section className="py-20">
-          <div className="reveal text-xs font-medium tracking-wider uppercase mb-8" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>Deployed Contracts</div>
-          <div className="reveal reveal-delay-1 p-6 overflow-x-auto" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', lineHeight: 2 }}>
+        {/* Contracts */}
+        <section className="mb-16">
+          <div className="stamp">&mdash;&mdash; Document Ref &mdash;&mdash; Unclassified &mdash;&mdash;</div>
+          <div className="doc-panel">
+            <div className="doc-panel-header">Deployed Contracts // Flow EVM Testnet</div>
+            <div className="p-4">
               {CONTRACTS.map(([name, addr]) => (
-                <div key={name}>
-                  <span className="inline-block min-w-[180px]" style={{ color: 'var(--text-secondary)' }}>{name}</span>{' '}
-                  <span className="tabular-nums" style={{ color: 'var(--accent)' }}>{addr}</span>
+                <div key={name} className="flex items-baseline justify-between gap-4 py-2 flex-wrap">
+                  <span className="text-[13px] font-medium shrink-0" style={{ color: 'var(--text-heading)' }}>{name}</span>
+                  <span className="text-[13px] tabular-nums break-all" style={{ color: 'var(--text-stamp)' }}>{addr}</span>
                 </div>
               ))}
-              <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-                <div>chain_id: 545 &middot; rpc: testnet.evm.nodes.onflow.org</div>
-              </div>
+              <div className="text-xs pt-3 mt-3" style={{ borderTop: '1px solid var(--border-strong)', color: 'var(--text-label)' }}>chain_id: 545</div>
             </div>
           </div>
         </section>
 
         {/* Limitations */}
-        <section className="py-20">
-          <div className="reveal text-xs font-medium tracking-wider uppercase mb-8" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>Known Limitations</div>
-          <div className="reveal reveal-delay-1">
-            {LIMITATIONS.map(([label, desc], i) => (
-              <div key={label} className="flex flex-col sm:flex-row gap-1 sm:gap-8 py-4 text-sm leading-relaxed" style={{ borderBottom: i < LIMITATIONS.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                <span className="font-medium whitespace-nowrap shrink-0 sm:min-w-[170px]" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>{label}</span>
-                <span style={{ color: 'var(--text-muted)' }}>{desc}</span>
-              </div>
+        <section className="mb-16">
+          <div className="stamp">&mdash;&mdash; Known Limitations &mdash;&mdash; Declassified &mdash;&mdash;</div>
+          <ol className="list-none" style={{ counterReset: 'lim' }}>
+            {LIMITATIONS.map((text, i) => (
+              <li key={i} className="relative pl-6 py-3 text-[13px] leading-[1.6]" style={{ borderBottom: i < LIMITATIONS.length - 1 ? '1px solid var(--surface-raised)' : 'none', counterIncrement: 'lim' }}>
+                <span className="absolute left-0 text-xs font-semibold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-label)' }}>{String(i + 1).padStart(2, '0')}</span>
+                {text}
+              </li>
             ))}
-          </div>
+          </ol>
         </section>
-      </main>
 
-      {/* Footer */}
-      <footer className="flex flex-col sm:flex-row items-center justify-between px-6 py-5 mt-8" style={{ borderTop: '1px solid var(--border)' }}>
-        <span className="text-xs tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>PL_Genesis Hackathon</span>
-        <a href="https://github.com/Yonkoo11/privacy-bridge" target="_blank" rel="noopener noreferrer" className="text-xs transition-colors hover:text-white mt-2 sm:mt-0" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textDecoration: 'none' }}>GitHub &nearr;</a>
-      </footer>
+        {/* CTA */}
+        <div className="mt-16 mb-12">
+          <Link href="/bridge" className="cta-btn">Launch App</Link>
+        </div>
+
+        {/* Footer */}
+        <footer className="py-6 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-label)' }}>
+          <span>PL_Genesis Hackathon</span>
+          <span> &middot; </span>
+          <a href="https://github.com/Yonkoo11/privacy-bridge" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--text-body)] transition-colors" style={{ color: 'var(--text-label)', textDecoration: 'none', borderBottom: '1px solid var(--border-strong)' }}>GitHub</a>
+        </footer>
+
+      </div>
     </div>
   );
 }
