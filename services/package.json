@@ -1,0 +1,11 @@
+{
+  "name": "privacy-bridge-services",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "watcher": "node watcher/index.mjs",
+    "relayer": "node relayer/index.mjs",
+    "calldata": "node calldata/index.mjs"
+  },
+  "dependencies": {}
+}
