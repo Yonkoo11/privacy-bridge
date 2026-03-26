@@ -12,6 +12,11 @@ const nextConfig = {
     };
     // snarkjs needs these
     config.experiments = { ...config.experiments, asyncWebAssembly: true };
+    // Exclude large circuit files from webpack processing
+    config.module.rules.push({
+      test: /\.(wasm|zkey)$/,
+      type: 'asset/resource',
+    });
     return config;
   },
 };
