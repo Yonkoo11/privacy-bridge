@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Bridge — Cipher Proposal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================
+       DESIGN TOKENS
+       DNA: CIPHER-MONO-GRID-SHARP-STILL
+       ========================================= */
+    :root {
+      --bg: #0a0a0e;
+      --surface: #111116;
+      --border: rgba(255, 255, 255, 0.08);
+      --text-primary: #e8e8ec;
+      --text-muted: #5a5a66;
+      --accent: #00e87b;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      --space-3xl: 64px;
+      --space-4xl: 80px;
+      --space-5xl: 120px;
+      --radius: 2px;
+      --max-width: 960px;
+      --duration-fast: 150ms;
+      --duration-normal: 200ms;
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      :root {
+        --duration-fast: 0ms;
+        --duration-normal: 0ms;
+      }
+    }
+
+    /* =========================================
+       RESET & BASE
+       ========================================= */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-mono);
+      font-weight: 400;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background-color: var(--bg);
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    /* =========================================
+       LAYOUT
+       ========================================= */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding-left: var(--space-lg);
+      padding-right: var(--space-lg);
+    }
+
+    section {
+      padding-top: var(--space-4xl);
+      padding-bottom: var(--space-4xl);
+    }
+
+    /* =========================================
+       SECTION LABELS
+       ========================================= */
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: var(--space-xl);
+    }
+
+    /* =========================================
+       HERO
+       ========================================= */
+    .hero {
+      padding-top: var(--space-5xl);
+      padding-bottom: var(--space-4xl);
+    }
+
+    .hero-title {
+      font-family: var(--font-mono);
+      font-size: clamp(48px, 7vw, 80px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+    }
+
+    .hero-descriptor {
+      margin-top: var(--space-lg);
+      font-size: clamp(14px, 1.6vw, 16px);
+      font-weight: 400;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 640px;
+    }
+
+    .hero-rule {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin-top: var(--space-xl);
+      margin-bottom: var(--space-xl);
+    }
+
+    .hero-status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md) var(--space-xl);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .hero-status span {
+      white-space: nowrap;
+    }
+
+    .hero-status .status-tag {
+      color: var(--text-primary);
+      opacity: 0.5;
+    }
+
+    .hero-status .status-value {
+      color: var(--text-primary);
+      opacity: 0.8;
+    }
+
+    /* =========================================
+       HOW IT WORKS — VERTICAL TIMELINE
+       ========================================= */
+    .timeline {
+      position: relative;
+      padding-left: var(--space-3xl);
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 8px;
+      bottom: 8px;
+      width: 1px;
+      background: var(--border);
+    }
+
+    .timeline-step {
+      position: relative;
+      padding-bottom: var(--space-2xl);
+    }
+
+    .timeline-step:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-number {
+      position: absolute;
+      left: calc(-1 * var(--space-3xl));
+      top: 0;
+      width: 40px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: center;
+      line-height: 1;
+    }
+
+    .timeline-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--space-sm);
+    }
+
+    .timeline-desc {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 600px;
+    }
+
+    .timeline-chain {
+      display: inline-block;
+      margin-top: var(--space-sm);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    /* On wider screens, float chain label to the right */
+    @media (min-width: 640px) {
+      .timeline-step {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: var(--space-lg);
+        align-items: start;
+      }
+
+      .timeline-chain {
+        margin-top: 0;
+        text-align: right;
+        padding-top: 2px;
+      }
+    }
+
+    /* =========================================
+       PRIVACY PROPERTIES — CHECKLIST
+       ========================================= */
+    .checklist {
+      list-style: none;
+    }
+
+    .checklist-item {
+      padding: var(--space-md) 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .checklist-item:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .checklist-tag {
+      font-weight: 700;
+      color: var(--accent);
+      margin-right: var(--space-sm);
+      font-size: 12px;
+    }
+
+    .checklist-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .checklist-desc {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* =========================================
+       TECH STACK — TERMINAL BLOCK
+       ========================================= */
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--space-lg);
+      overflow-x: auto;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      opacity: 0.4;
+    }
+
+    .terminal pre {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.9;
+      color: var(--text-muted);
+      white-space: pre;
+      tab-size: 2;
+    }
+
+    .terminal .prompt {
+      color: var(--accent);
+      user-select: none;
+    }
+
+    .terminal .cmd {
+      color: var(--text-primary);
+    }
+
+    .terminal .key {
+      color: var(--text-primary);
+      opacity: 0.7;
+    }
+
+    .terminal .val {
+      color: var(--text-muted);
+    }
+
+    /* =========================================
+       CONTRACT ADDRESSES — TABLE
+       ========================================= */
+    .address-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .address-table tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .address-table tr:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .address-table td {
+      padding: var(--space-md) 0;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .address-label {
+      color: var(--text-muted);
+      font-weight: 500;
+      padding-right: var(--space-lg);
+      white-space: nowrap;
+      width: 1%;
+    }
+
+    .address-value {
+      color: var(--text-primary);
+      font-weight: 400;
+      word-break: break-all;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .address-copy {
+      display: inline-block;
+      margin-left: var(--space-sm);
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: 0.4;
+      vertical-align: middle;
+      user-select: none;
+    }
+
+    .address-network {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0.5;
+      margin-bottom: var(--space-lg);
+    }
+
+    /* =========================================
+       FOOTER
+       ========================================= */
+    .footer {
+      padding-top: var(--space-3xl);
+      padding-bottom: var(--space-2xl);
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer a {
+      color: var(--text-primary);
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity var(--duration-fast) var(--ease-out);
+    }
+
+    .footer a:hover {
+      opacity: 1;
+    }
+
+    .footer a:focus-visible {
+      outline: 1px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @media (max-width: 480px) {
+      section {
+        padding-top: var(--space-3xl);
+        padding-bottom: var(--space-3xl);
+      }
+
+      .hero {
+        padding-top: var(--space-4xl);
+      }
+
+      .hero-status {
+        flex-direction: column;
+        gap: var(--space-sm);
+      }
+
+      .timeline {
+        padding-left: var(--space-2xl);
+      }
+
+      .timeline::before {
+        left: 15px;
+      }
+
+      .timeline-number {
+        left: calc(-1 * var(--space-2xl));
+        width: 32px;
+        font-size: 16px;
+      }
+
+      .terminal pre {
+        font-size: 11px;
+      }
+
+      .address-table td {
+        display: block;
+        padding: var(--space-xs) 0;
+      }
+
+      .address-label {
+        padding-right: 0;
+        font-size: 12px;
+      }
+
+      .address-value {
+        font-size: 11px;
+      }
+
+      .address-table tr {
+        padding: var(--space-sm) 0;
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="container">
+      <h1 class="hero-title">PRIVACY<br>BRIDGE</h1>
+      <p class="hero-descriptor">Lock on Flow. Prove in zero knowledge. Claim on Starknet.</p>
+      <hr class="hero-rule">
+      <div class="hero-status">
+        <span><span class="status-tag">[CIRCUIT]</span> <span class="status-value">6,634 constraints</span></span>
+        <span><span class="status-tag">[TREE]</span> <span class="status-value">depth-24 Poseidon</span></span>
+        <span><span class="status-tag">[TESTS]</span> <span class="status-value">20/20 passing</span></span>
+        <span><span class="status-tag">[CHAIN]</span> <span class="status-value">Flow EVM &rarr; Starknet</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section>
+    <div class="container">
+      <p class="section-label">How It Works</p>
+      <div class="timeline">
+        <div class="timeline-step">
+          <div class="timeline-number">01</div>
+          <div>
+            <div class="timeline-title">Lock funds</div>
+            <p class="timeline-desc">Deposit a fixed denomination into the Privacy Bridge contract. A Poseidon commitment is inserted into the on-chain Merkle tree. No link between your address and the commitment is exposed.</p>
+          </div>
+          <span class="timeline-chain">Flow EVM</span>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-number">02</div>
+          <div>
+            <div class="timeline-title">Generate proof</div>
+            <p class="timeline-desc">Off-chain, produce a Groth16 proof that you know a secret and nullifier corresponding to a leaf in the Merkle tree, without revealing which leaf. The circuit has 6,634 constraints.</p>
+          </div>
+          <span class="timeline-chain">Client-side</span>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-number">03</div>
+          <div>
+            <div class="timeline-title">Relay root</div>
+            <p class="timeline-desc">The current Merkle root is relayed from Flow to Starknet. A ring buffer of 30 roots ensures users have time to submit proofs against recent state.</p>
+          </div>
+          <span class="timeline-chain">Cross-chain</span>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-number">04</div>
+          <div>
+            <div class="timeline-title">Claim on Starknet</div>
+            <p class="timeline-desc">Submit the proof to the Starknet bridge contract. The garaga verifier checks the BN254 pairing on-chain. Funds are minted to the recipient. The nullifier is marked spent to prevent double claims.</p>
+          </div>
+          <span class="timeline-chain">Starknet</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRIVACY PROPERTIES ===================== -->
+  <section>
+    <div class="container">
+      <p class="section-label">Privacy Properties</p>
+      <ul class="checklist">
+        <li class="checklist-item">
+          <span class="checklist-tag">[PASS]</span>
+          <span class="checklist-name">Fixed denomination pools</span>
+          <span class="checklist-desc"> &mdash; Deposits are restricted to 0.0001, 0.001, 0.01, or 0.1 FLOW. Equal amounts prevent value-based correlation between deposits and withdrawals.</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-tag">[PASS]</span>
+          <span class="checklist-name">On-chain Merkle tree</span>
+          <span class="checklist-desc"> &mdash; Poseidon hash, depth 24, supporting ~16 million leaves. Root ring buffer of 30 entries prevents front-running invalidation.</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-tag">[PASS]</span>
+          <span class="checklist-name">Commitment hiding</span>
+          <span class="checklist-desc"> &mdash; commitment = Poseidon(Poseidon(secret, nullifier), amount). The preimage is never published. Only the prover knows the link.</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-tag">[PASS]</span>
+          <span class="checklist-name">No privacy-leaking events</span>
+          <span class="checklist-desc"> &mdash; Transfer events emit only the amount. No from/to addresses. No CID references. Observers see deposits but cannot link them to withdrawals.</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-tag">[PASS]</span>
+          <span class="checklist-name">Relayer support with fee protection</span>
+          <span class="checklist-desc"> &mdash; Users can submit through a relayer to avoid revealing their Starknet address. max_fee_bps parameter prevents relayers from extracting more than the user agreed to.</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-tag">[PASS]</span>
+          <span class="checklist-name">Withdrawal timelock</span>
+          <span class="checklist-desc"> &mdash; Roots carry timestamps. Withdrawals must wait a minimum delay, increasing the anonymity set before funds can be claimed.</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-tag">[PASS]</span>
+          <span class="checklist-name">Emergency withdraw</span>
+          <span class="checklist-desc"> &mdash; 30-day timelock on emergency withdrawal. Owner cannot rug instantly. Users have time to exit via normal proof path.</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== TECH STACK ===================== -->
+  <section>
+    <div class="container">
+      <p class="section-label">Tech Stack</p>
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dot"></div>
+          <div class="terminal-dot"></div>
+          <div class="terminal-dot"></div>
+        </div>
+        <pre><span class="prompt">$</span> <span class="cmd">cat /etc/privacy-bridge/stack.conf</span>
+
+<span class="key">circuit   </span> <span class="val">= circom 2.1.9 + snarkjs (Groth16/BN254)</span>
+<span class="key">source    </span> <span class="val">= Flow EVM (Solidity 0.8.20)</span>
+<span class="key">dest      </span> <span class="val">= Starknet (Cairo 2.14.0)</span>
+<span class="key">verifier  </span> <span class="val">= garaga 1.0.1 (ECIP MSM + BN254 pairing)</span>
+<span class="key">hash      </span> <span class="val">= Poseidon (BN254 scalar field)</span>
+<span class="key">tree      </span> <span class="val">= incremental, depth 24, 30-root ring buffer</span>
+<span class="key">calldata  </span> <span class="val">= ~1,977 felts per proof</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTRACT ADDRESSES ===================== -->
+  <section>
+    <div class="container">
+      <p class="section-label">Contract Addresses</p>
+      <p class="address-network">Flow EVM Testnet</p>
+      <table class="address-table">
+        <tr>
+          <td class="address-label">PoseidonT3</td>
+          <td class="address-value">0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a<span class="address-copy">[copy]</span></td>
+        </tr>
+        <tr>
+          <td class="address-label">PoseidonT3Wrapper</td>
+          <td class="address-value">0x2eaEF8016D2a7Dc01677E57183a167649cB07402<span class="address-copy">[copy]</span></td>
+        </tr>
+        <tr>
+          <td class="address-label">PrivacyBridge</td>
+          <td class="address-value">0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca<span class="address-copy">[copy]</span></td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <span>Built for PL_Genesis Hackathon</span>
+        <a href="https://github.com/yonkoo11/privacy-bridge" target="_blank" rel="noopener noreferrer">GitHub &rarr;</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

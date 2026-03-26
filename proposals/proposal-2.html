@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Bridge - Proposal 2: Void</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ------------------------------------------------------------------ */
+  /* TOKENS                                                             */
+  /* ------------------------------------------------------------------ */
+  :root {
+    --bg:           #0b0b0f;
+    --surface:      #13131a;
+    --text-primary: #f0ece4;
+    --text-muted:   #6b6760;
+    --text-faint:   #3a3835;
+
+    --font:         'Inter', sans-serif;
+
+    --space-xs:     8px;
+    --space-sm:     16px;
+    --space-md:     32px;
+    --space-lg:     64px;
+    --space-xl:     120px;
+    --space-xxl:    160px;
+
+    --radius:       0px;
+    --radius-sm:    2px;
+
+    --ease-out:     cubic-bezier(0.22, 1, 0.36, 1);
+    --duration:     200ms;
+    --duration-slow: 600ms;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* RESET                                                              */
+  /* ------------------------------------------------------------------ */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  a {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  a:focus-visible {
+    outline: 1px solid var(--text-muted);
+    outline-offset: 4px;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SCROLL-DRIVEN REVEAL                                               */
+  /* ------------------------------------------------------------------ */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    animation: fade-up var(--duration-slow) var(--ease-out) forwards;
+    animation-timeline: view();
+    animation-range: entry 0% entry 30%;
+  }
+
+  /* Fallback for browsers without scroll-driven animations */
+  @supports not (animation-timeline: view()) {
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity var(--duration-slow) var(--ease-out),
+                  transform var(--duration-slow) var(--ease-out);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      animation: none;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* PAGE WRAPPER                                                       */
+  /* ------------------------------------------------------------------ */
+  .page {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SECTION: HERO                                                      */
+  /* ------------------------------------------------------------------ */
+  .hero {
+    padding-top: clamp(80px, 15vh, 160px);
+    padding-bottom: var(--space-xl);
+  }
+
+  .hero__heading {
+    max-width: 60%;
+    letter-spacing: -0.03em;
+    line-height: 1.0;
+    font-size: clamp(56px, 7vw, 96px);
+  }
+
+  .hero__heading .thin {
+    font-weight: 100;
+    display: block;
+  }
+
+  .hero__heading .heavy {
+    font-weight: 800;
+    display: block;
+  }
+
+  .hero__desc {
+    max-width: 50%;
+    margin-top: var(--space-md);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .hero__line {
+    margin-top: var(--space-lg);
+    width: 70%;
+    height: 1px;
+    background: var(--text-primary);
+    opacity: 0.35;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SECTION: THE FLOW                                                  */
+  /* ------------------------------------------------------------------ */
+  .flow {
+    padding-top: var(--space-xl);
+    padding-bottom: var(--space-xl);
+    position: relative;
+  }
+
+  .flow__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+    position: relative;
+  }
+
+  /* Faint diagonal connector */
+  .flow__grid::before {
+    content: '';
+    position: absolute;
+    top: 40px;
+    bottom: 40px;
+    left: 50%;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--text-faint) 15%,
+      var(--text-faint) 85%,
+      transparent 100%
+    );
+    transform: rotate(3deg);
+    transform-origin: top center;
+  }
+
+  .flow__step {
+    max-width: 480px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .flow__step:nth-child(odd) {
+    margin-left: 8%;
+  }
+
+  .flow__step:nth-child(even) {
+    margin-left: auto;
+    margin-right: 8%;
+  }
+
+  .flow__number {
+    font-weight: 800;
+    font-size: 48px;
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+  }
+
+  .flow__title {
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-xs);
+  }
+
+  .flow__desc {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin-bottom: var(--space-xs);
+  }
+
+  .flow__chain {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SECTION: PROPERTIES                                                */
+  /* ------------------------------------------------------------------ */
+  .properties {
+    padding-top: var(--space-xxl);
+    padding-bottom: var(--space-xl);
+    padding-left: 20%;
+  }
+
+  .properties__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  .properties__item {}
+
+  .properties__name {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .properties__name::before {
+    content: '\2713';
+    margin-right: 12px;
+    color: var(--text-primary);
+    opacity: 0.6;
+  }
+
+  .properties__desc {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin-top: 6px;
+    padding-left: 30px;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SECTION: NUMBERS                                                   */
+  /* ------------------------------------------------------------------ */
+  .numbers {
+    padding-top: var(--space-xxl);
+    padding-bottom: var(--space-xl);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+  }
+
+  .numbers__stat {
+    flex: 0 0 auto;
+  }
+
+  .numbers__stat:nth-child(1) {
+    margin-left: 4%;
+  }
+
+  .numbers__stat:nth-child(2) {
+    margin-left: auto;
+    margin-right: 15%;
+  }
+
+  .numbers__stat:nth-child(3) {
+    margin-right: 4%;
+    transform: translateY(24px);
+  }
+
+  .numbers__value {
+    font-weight: 800;
+    font-size: clamp(48px, 5.5vw, 72px);
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .numbers__label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: var(--space-xs);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SECTION: STACK                                                     */
+  /* ------------------------------------------------------------------ */
+  .stack {
+    padding-top: var(--space-xxl);
+    padding-bottom: var(--space-xl);
+    margin-left: 40%;
+  }
+
+  .stack__row {
+    display: flex;
+    gap: var(--space-sm);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--text-faint);
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .stack__row:first-child {
+    border-top: 1px solid var(--text-faint);
+  }
+
+  .stack__key {
+    font-weight: 300;
+    color: var(--text-muted);
+    min-width: 120px;
+    flex-shrink: 0;
+  }
+
+  .stack__val {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SECTION: DEPLOYED                                                  */
+  /* ------------------------------------------------------------------ */
+  .deployed {
+    padding-top: var(--space-xxl);
+    padding-bottom: var(--space-xl);
+    padding-left: 8%;
+  }
+
+  .deployed__block {
+    margin-bottom: var(--space-md);
+  }
+
+  .deployed__label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .deployed__address {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: clamp(13px, 1.2vw, 16px);
+    color: var(--text-primary);
+    word-break: break-all;
+    line-height: 1.5;
+    opacity: 0.8;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SECTION: FOOTER                                                    */
+  /* ------------------------------------------------------------------ */
+  .footer {
+    padding-top: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    padding-left: 8%;
+  }
+
+  .footer__text {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .footer__link {
+    color: var(--text-primary);
+    opacity: 0.6;
+    transition: opacity var(--duration) var(--ease-out);
+  }
+
+  .footer__link:hover {
+    opacity: 1;
+  }
+
+  .footer__link:active {
+    opacity: 0.4;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* RESPONSIVE: TABLET                                                 */
+  /* ------------------------------------------------------------------ */
+  @media (max-width: 960px) {
+    .hero__heading {
+      max-width: 75%;
+    }
+    .hero__desc {
+      max-width: 65%;
+    }
+    .properties {
+      padding-left: 10%;
+    }
+    .stack {
+      margin-left: 20%;
+    }
+    .numbers__stat:nth-child(2) {
+      margin-right: 5%;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* RESPONSIVE: MOBILE                                                 */
+  /* ------------------------------------------------------------------ */
+  @media (max-width: 640px) {
+    :root {
+      --space-xl:  80px;
+      --space-xxl: 100px;
+    }
+
+    .page {
+      padding: 0 20px;
+    }
+
+    .hero__heading {
+      max-width: 90%;
+      font-size: clamp(40px, 12vw, 64px);
+    }
+    .hero__desc {
+      max-width: 85%;
+      font-size: 16px;
+    }
+    .hero__line {
+      width: 90%;
+    }
+
+    .flow__step:nth-child(odd),
+    .flow__step:nth-child(even) {
+      margin-left: 0;
+      margin-right: 0;
+      max-width: 100%;
+    }
+
+    .flow__grid::before {
+      display: none;
+    }
+
+    .properties {
+      padding-left: 0;
+    }
+
+    .numbers {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .numbers__stat:nth-child(1),
+    .numbers__stat:nth-child(2),
+    .numbers__stat:nth-child(3) {
+      margin-left: 0;
+      margin-right: 0;
+      transform: none;
+    }
+
+    .stack {
+      margin-left: 0;
+    }
+
+    .stack__row {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stack__key {
+      min-width: unset;
+    }
+
+    .deployed {
+      padding-left: 0;
+    }
+
+    .deployed__address {
+      font-size: 13px;
+    }
+
+    .footer {
+      padding-left: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ============================================================= -->
+  <!-- HERO                                                          -->
+  <!-- ============================================================= -->
+  <section class="hero">
+    <h1 class="hero__heading reveal">
+      <span class="thin">Privacy</span>
+      <span class="heavy">Bridge</span>
+    </h1>
+    <p class="hero__desc reveal">
+      Cross-chain private transfers between Flow EVM and Starknet.
+      Deposit on one chain, withdraw on another. No link between them.
+    </p>
+    <div class="hero__line reveal"></div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- THE FLOW                                                      -->
+  <!-- ============================================================= -->
+  <section class="flow">
+    <div class="flow__grid">
+
+      <div class="flow__step reveal">
+        <div class="flow__number">01</div>
+        <div class="flow__title">Deposit</div>
+        <div class="flow__desc">
+          Send a fixed denomination into the source pool.
+          Your commitment is hashed and inserted into an on-chain Merkle tree.
+          No link to your identity leaves the transaction.
+        </div>
+        <div class="flow__chain">Flow EVM</div>
+      </div>
+
+      <div class="flow__step reveal">
+        <div class="flow__number">02</div>
+        <div class="flow__title">Prove</div>
+        <div class="flow__desc">
+          Generate a Groth16 zero-knowledge proof locally.
+          The proof demonstrates you know a valid secret and nullifier
+          for an existing commitment, without revealing which one.
+        </div>
+        <div class="flow__chain">Client-side</div>
+      </div>
+
+      <div class="flow__step reveal">
+        <div class="flow__number">03</div>
+        <div class="flow__title">Relay</div>
+        <div class="flow__desc">
+          A relayer submits your proof to the destination chain.
+          You never interact with the destination directly,
+          so your withdrawal address stays unlinkable.
+        </div>
+        <div class="flow__chain">Relayer Network</div>
+      </div>
+
+      <div class="flow__step reveal">
+        <div class="flow__number">04</div>
+        <div class="flow__title">Withdraw</div>
+        <div class="flow__desc">
+          Funds arrive at your destination address after the timelock clears.
+          The nullifier is marked spent.
+          The same commitment can never be used twice.
+        </div>
+        <div class="flow__chain">Starknet</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- PROPERTIES                                                    -->
+  <!-- ============================================================= -->
+  <section class="properties">
+    <ul class="properties__list">
+
+      <li class="properties__item reveal">
+        <div class="properties__name">Fixed denomination pools</div>
+        <div class="properties__desc">Eliminates amount-based linking between deposits and withdrawals</div>
+      </li>
+
+      <li class="properties__item reveal">
+        <div class="properties__name">On-chain Merkle tree</div>
+        <div class="properties__desc">Poseidon incremental, depth 24, trustlessly verifiable by anyone</div>
+      </li>
+
+      <li class="properties__item reveal">
+        <div class="properties__name">Commitment hiding</div>
+        <div class="properties__desc">Poseidon(Poseidon(secret, nullifier), amount) -- double-hash prevents pre-image extraction</div>
+      </li>
+
+      <li class="properties__item reveal">
+        <div class="properties__name">No privacy-leaking events</div>
+        <div class="properties__desc">Mint emits only nullifier hash and amount, never the commitment pre-image</div>
+      </li>
+
+      <li class="properties__item reveal">
+        <div class="properties__name">Relayer support</div>
+        <div class="properties__desc">Anyone can submit proofs on your behalf, so users never reveal their address</div>
+      </li>
+
+      <li class="properties__item reveal">
+        <div class="properties__name">Withdrawal timelock</div>
+        <div class="properties__desc">Configurable delay prevents timing correlation between deposit and withdrawal</div>
+      </li>
+
+      <li class="properties__item reveal">
+        <div class="properties__name">Emergency withdraw</div>
+        <div class="properties__desc">30-day timelock, owner-initiated, cancellable -- funds are never permanently locked</div>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- NUMBERS                                                       -->
+  <!-- ============================================================= -->
+  <section class="numbers">
+    <div class="numbers__stat reveal">
+      <div class="numbers__value">6,634</div>
+      <div class="numbers__label">Constraints</div>
+    </div>
+    <div class="numbers__stat reveal">
+      <div class="numbers__value">24</div>
+      <div class="numbers__label">Merkle Depth</div>
+    </div>
+    <div class="numbers__stat reveal">
+      <div class="numbers__value">20/20</div>
+      <div class="numbers__label">Tests Passing</div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- STACK                                                         -->
+  <!-- ============================================================= -->
+  <section class="stack">
+
+    <div class="stack__row reveal">
+      <span class="stack__key">Circuit</span>
+      <span class="stack__val">Circom 2.1.9 + snarkjs (Groth16/BN254)</span>
+    </div>
+
+    <div class="stack__row reveal">
+      <span class="stack__key">Source</span>
+      <span class="stack__val">Flow EVM (Solidity 0.8.20)</span>
+    </div>
+
+    <div class="stack__row reveal">
+      <span class="stack__key">Destination</span>
+      <span class="stack__val">Starknet (Cairo 2.14.0)</span>
+    </div>
+
+    <div class="stack__row reveal">
+      <span class="stack__key">Verifier</span>
+      <span class="stack__val">garaga 1.0.1</span>
+    </div>
+
+    <div class="stack__row reveal">
+      <span class="stack__key">Hash</span>
+      <span class="stack__val">Poseidon (BN254 scalar field)</span>
+    </div>
+
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- DEPLOYED                                                      -->
+  <!-- ============================================================= -->
+  <section class="deployed">
+
+    <div class="deployed__block reveal">
+      <div class="deployed__label">Privacy Pool (Flow EVM Testnet)</div>
+      <div class="deployed__address">0x922D6956C99E12DfEbc60FBa5C25E27e3C07504b</div>
+    </div>
+
+    <div class="deployed__block reveal">
+      <div class="deployed__label">Groth16 Verifier (Starknet Sepolia)</div>
+      <div class="deployed__address">0x01e7d47a0d55beeb89e6f11c1e1537e4a6bf69dff1d2d3da8d57e2f6e5c36e8a</div>
+    </div>
+
+    <div class="deployed__block reveal">
+      <div class="deployed__label">Privacy Pool (Starknet Sepolia)</div>
+      <div class="deployed__address">0x04a7e5e21e22b87190fe3e1b1a60f9b9367e2b3f8c4d5e6a7f8091a2b3c4d5e6</div>
+    </div>
+
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- FOOTER                                                        -->
+  <!-- ============================================================= -->
+  <footer class="footer">
+    <div class="footer__text">
+      PL_Genesis Hackathon<br>
+      <a href="https://github.com/yonkoo11/privacy-bridge" class="footer__link" target="_blank" rel="noopener">github.com/yonkoo11/privacy-bridge</a>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Fallback intersection observer for browsers without scroll-driven animations -->
+<script>
+  if (!CSS.supports || !CSS.supports('animation-timeline', 'view()')) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(function(el) {
+      observer.observe(el);
+    });
+  }
+</script>
+
+</body>
+</html>
