@@ -27,6 +27,7 @@
     --text-secondary: #b0b0b8;
     --text-muted: #8a8a96;
     --amber: #f59e0b;
+    --amber-glow: rgba(245, 158, 11, 0.15);
     --cyan: #06b6d4;
     --green: #22c55e;
 
@@ -57,8 +58,8 @@
     background-color: var(--bg);
     color: var(--text-primary);
     font-family: var(--font-heading);
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.6;
     min-height: 100vh;
     background-image:
       repeating-linear-gradient(
@@ -85,21 +86,12 @@
     padding: 0 var(--space-md);
   }
 
-  /* ===== TYPOGRAPHY ===== */
-  .mono {
-    font-family: var(--font-mono);
-  }
-
-  .amber { color: var(--amber); }
-  .cyan { color: var(--cyan); }
-  .green { color: var(--green); }
-
   /* ===== SCROLL REVEAL ===== */
   .reveal {
     opacity: 0.01;
     transform: translateY(24px);
-    transition: opacity 500ms var(--ease-out-expo),
-                transform 500ms var(--ease-out-expo);
+    transition: opacity 600ms var(--ease-out-expo),
+                transform 600ms var(--ease-out-expo);
   }
 
   .reveal.visible {
@@ -107,59 +99,68 @@
     transform: translateY(0);
   }
 
-  .reveal-delay-1 { transition-delay: 80ms; }
-  .reveal-delay-2 { transition-delay: 160ms; }
-  .reveal-delay-3 { transition-delay: 240ms; }
+  .reveal-delay-1 { transition-delay: 100ms; }
+  .reveal-delay-2 { transition-delay: 200ms; }
+  .reveal-delay-3 { transition-delay: 300ms; }
 
-  /* ===== CTA BUTTONS ===== */
-  .hero__cta {
-    margin-top: var(--space-lg);
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    flex-wrap: wrap;
+  /* Staggered children inside visible parents */
+  .stagger-children > * {
+    opacity: 0.01;
+    transform: translateY(12px);
+    transition: opacity 400ms var(--ease-out-expo),
+                transform 400ms var(--ease-out-expo);
   }
 
-  .cta-btn {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    color: var(--bg);
-    background: var(--amber);
-    padding: 10px 24px;
-    border-radius: var(--radius);
-    text-decoration: none;
-    transition: background 0.15s ease-out, transform 0.1s ease-out;
+  .stagger-children.visible > * {
+    opacity: 1;
+    transform: translateY(0);
   }
 
-  .cta-btn:hover {
-    background: #d97706;
-  }
+  .stagger-children.visible > *:nth-child(1) { transition-delay: 50ms; }
+  .stagger-children.visible > *:nth-child(2) { transition-delay: 100ms; }
+  .stagger-children.visible > *:nth-child(3) { transition-delay: 150ms; }
+  .stagger-children.visible > *:nth-child(4) { transition-delay: 200ms; }
+  .stagger-children.visible > *:nth-child(5) { transition-delay: 250ms; }
+  .stagger-children.visible > *:nth-child(6) { transition-delay: 300ms; }
+  .stagger-children.visible > *:nth-child(7) { transition-delay: 350ms; }
 
-  .cta-btn:active {
-    transform: scale(0.98);
-  }
-
-  .cta-link {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--text-muted);
-    text-decoration: none;
-    border-bottom: 1px solid var(--border-default);
-    transition: color 0.15s ease-out, border-color 0.15s ease-out;
-  }
-
-  .cta-link:hover {
-    color: var(--text-primary);
-    border-color: var(--text-primary);
-  }
-
-  /* ===== PULSE ANIMATION ===== */
+  /* ===== ANIMATIONS ===== */
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--amber-glow); }
+    50% { box-shadow: 0 0 20px 4px var(--amber-glow); }
+  }
+
+  @keyframes arrow-breathe {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes cursor-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  @keyframes border-draw {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+
+  @keyframes hero-word-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
   }
 
   .pulse-dot {
@@ -177,14 +178,69 @@
     background: var(--green);
   }
 
+  /* ===== CTA BUTTONS ===== */
+  .hero__cta {
+    margin-top: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--bg);
+    background: var(--amber);
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: background 0.15s ease-out, transform 0.15s ease-out, box-shadow 0.3s ease-out;
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  .cta-btn:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+    animation: none;
+    box-shadow: 0 4px 20px var(--amber-glow);
+  }
+
+  .cta-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .cta-link {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border-default);
+    padding-bottom: 1px;
+    transition: color 0.15s ease-out, border-color 0.15s ease-out;
+  }
+
+  .cta-link:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+  }
+
   /* ===== REDUCED MOTION ===== */
   @media (prefers-reduced-motion: reduce) {
     .pulse-dot { animation: none; opacity: 1; }
-    .reveal {
+    .cta-btn { animation: none; }
+    .reveal, .stagger-children > * {
       opacity: 1;
       transform: none;
       transition: none;
     }
+    .flow-cell:not(:last-child)::after { animation: none; }
+    .hero__line { animation: none; opacity: 1; filter: none; }
+    .terminal__cursor { animation: none; }
+    .matrix__property::before { animation: none; }
   }
 
   /* ===== 1. HEADER BAR ===== */
@@ -198,6 +254,8 @@
     position: sticky;
     top: 0;
     z-index: 10;
+    backdrop-filter: blur(12px);
+    background: rgba(17, 17, 24, 0.85);
   }
 
   .header__brand {
@@ -212,7 +270,7 @@
 
   .header__status {
     font-family: var(--font-heading);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -254,6 +312,19 @@
     margin-bottom: var(--space-lg);
   }
 
+  /* Per-line stagger on hero heading */
+  .hero__line {
+    display: block;
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(4px);
+    animation: hero-word-reveal 700ms var(--ease-out-expo) forwards;
+  }
+
+  .hero__line:nth-child(1) { animation-delay: 100ms; }
+  .hero__line:nth-child(2) { animation-delay: 250ms; }
+  .hero__line:nth-child(3) { animation-delay: 400ms; }
+
   .hero__sub {
     font-size: 16px;
     line-height: 1.6;
@@ -265,7 +336,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-top: var(--space-sm);
+    margin-top: 12px;
     font-family: var(--font-mono);
     font-size: 13px;
     color: var(--green);
@@ -298,11 +369,20 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 6px 0;
+    padding: 7px 0;
     font-family: var(--font-mono);
     font-size: 13px;
     line-height: 1.4;
     gap: var(--space-sm);
+    transition: background 0.15s ease-out;
+    margin: 0 calc(-1 * var(--space-sm));
+    padding-left: var(--space-sm);
+    padding-right: var(--space-sm);
+    border-radius: var(--radius);
+  }
+
+  .data-row:hover {
+    background: var(--surface-hover);
   }
 
   .data-row__label {
@@ -334,7 +414,7 @@
 
   .section-title {
     font-family: var(--font-heading);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -356,18 +436,20 @@
     flex-direction: column;
     gap: var(--space-sm);
     position: relative;
-    transition: background 0.15s ease-out;
+    transition: background 0.2s ease-out, transform 0.2s ease-out;
   }
 
   .flow-cell:hover {
     background: var(--surface-hover);
+    transform: translateY(-2px);
+    z-index: 1;
   }
 
   .flow-cell:last-child {
     border-right: none;
   }
 
-  /* Connecting arrows between flow steps */
+  /* Animated connecting arrows between flow steps */
   .flow-cell:not(:last-child)::after {
     content: '';
     position: absolute;
@@ -379,22 +461,24 @@
     border-top: 6px solid transparent;
     border-bottom: 6px solid transparent;
     border-left: 6px solid var(--amber);
-    z-index: 1;
-    opacity: 0.5;
+    z-index: 2;
+    animation: arrow-breathe 2.5s ease-in-out infinite;
   }
+
+  .flow-cell:nth-child(2):not(:last-child)::after { animation-delay: 0.4s; }
+  .flow-cell:nth-child(3):not(:last-child)::after { animation-delay: 0.8s; }
 
   .flow-cell__step {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: var(--text-muted);
   }
 
   .flow-cell__verb {
     font-family: var(--font-heading);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: var(--amber);
     letter-spacing: -0.01em;
@@ -402,14 +486,14 @@
 
   .flow-cell__desc {
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
     color: var(--text-secondary);
     flex: 1;
   }
 
   .flow-cell__chain {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -425,7 +509,7 @@
 
   .matrix th,
   .matrix td {
-    padding: 14px var(--space-lg);
+    padding: 16px var(--space-lg);
     text-align: left;
     border: 1px solid var(--grid-line);
     vertical-align: middle;
@@ -442,7 +526,7 @@
   }
 
   .matrix td {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.5;
   }
 
@@ -458,13 +542,37 @@
     font-weight: 500;
     color: var(--text-primary);
     white-space: nowrap;
-    border-left: 2px solid var(--green) !important;
+    position: relative;
     padding-left: 22px !important;
   }
 
+  /* Animated green border indicator */
+  .matrix__property::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--green);
+    transform-origin: top;
+  }
+
+  .reveal.visible .matrix__property::before {
+    animation: border-draw 400ms var(--ease-out-expo) forwards;
+  }
+
+  .matrix tbody tr:nth-child(1) .matrix__property::before { animation-delay: 100ms; }
+  .matrix tbody tr:nth-child(2) .matrix__property::before { animation-delay: 150ms; }
+  .matrix tbody tr:nth-child(3) .matrix__property::before { animation-delay: 200ms; }
+  .matrix tbody tr:nth-child(4) .matrix__property::before { animation-delay: 250ms; }
+  .matrix tbody tr:nth-child(5) .matrix__property::before { animation-delay: 300ms; }
+  .matrix tbody tr:nth-child(6) .matrix__property::before { animation-delay: 350ms; }
+  .matrix tbody tr:nth-child(7) .matrix__property::before { animation-delay: 400ms; }
+
   .matrix__detail {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
     word-break: break-word;
   }
@@ -513,6 +621,16 @@
     color: var(--text-muted);
   }
 
+  .terminal__cursor {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background: var(--amber);
+    vertical-align: text-bottom;
+    margin-left: 4px;
+    animation: cursor-blink 1s step-end infinite;
+  }
+
   .terminal__addr {
     color: var(--cyan);
     font-variant-numeric: tabular-nums;
@@ -539,9 +657,9 @@
   .limit-row {
     display: flex;
     gap: var(--space-lg);
-    padding: 14px var(--space-lg);
+    padding: 16px var(--space-lg);
     border-bottom: 1px solid var(--grid-line);
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.5;
     transition: background 0.15s ease-out;
   }
@@ -556,11 +674,12 @@
 
   .limit-row__label {
     font-family: var(--font-mono);
+    font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
     white-space: nowrap;
     flex-shrink: 0;
-    min-width: 160px;
+    min-width: 170px;
   }
 
   .limit-row__desc {
@@ -595,10 +714,11 @@
 
   .footer__right a {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
     text-decoration: none;
     border-bottom: 1px solid var(--grid-line);
+    padding-bottom: 1px;
     transition: color 0.15s ease-out, border-color 0.15s ease-out;
   }
 
@@ -615,11 +735,6 @@
   /* ===== FOCUS STATES ===== */
   a:focus-visible,
   button:focus-visible {
-    outline: 2px solid var(--cyan);
-    outline-offset: 2px;
-  }
-
-  .cta-btn:focus-visible {
     outline: 2px solid var(--cyan);
     outline-offset: 2px;
   }
@@ -659,9 +774,12 @@
       border-right: 1px solid var(--grid-line);
     }
 
-    /* Hide arrows on 2-col */
     .flow-cell:nth-child(2)::after {
       display: none;
+    }
+
+    .flow-cell:hover {
+      transform: none;
     }
 
     .terminal__name {
@@ -691,7 +809,7 @@
     }
 
     .hero {
-      padding: var(--space-lg) 0;
+      padding: var(--space-xl) 0 var(--space-lg);
     }
 
     .hero__heading {
@@ -700,7 +818,7 @@
     }
 
     .hero__sub {
-      font-size: 14px;
+      font-size: 15px;
     }
 
     .flow-grid {
@@ -716,9 +834,12 @@
       border-bottom: none;
     }
 
-    /* Hide arrows on single-col */
     .flow-cell::after {
       display: none !important;
+    }
+
+    .flow-cell:hover {
+      transform: none;
     }
 
     /* Convert matrix to card layout on mobile */
@@ -750,9 +871,12 @@
     }
 
     .matrix__property {
-      border-left: none !important;
       padding-left: 0 !important;
       margin-bottom: var(--space-xs);
+    }
+
+    .matrix__property::before {
+      display: none;
     }
 
     .matrix__detail {
@@ -819,7 +943,11 @@
     <!-- 2. HERO GRID -->
     <section class="hero" aria-label="Overview">
       <div class="hero__text reveal">
-        <h1 class="hero__heading">Deposit on one chain.<br>Withdraw on another.<br>No link between them.</h1>
+        <h1 class="hero__heading">
+          <span class="hero__line">Deposit on one chain.</span>
+          <span class="hero__line">Withdraw on another.</span>
+          <span class="hero__line">No link between them.</span>
+        </h1>
         <p class="hero__sub">Groth16 proofs break the on-chain trail between Flow EVM deposits and Starknet withdrawals. Fixed denomination pools, on-chain Poseidon Merkle tree, relayer pattern.</p>
         <div class="hero__proof">
           <span class="pulse-dot pulse-dot--green" aria-hidden="true" style="margin-right:0"></span>
@@ -827,10 +955,10 @@
         </div>
         <div class="hero__cta">
           <a href="https://github.com/Yonkoo11/privacy-bridge" class="cta-btn" target="_blank" rel="noopener noreferrer">View Source</a>
-          <a href="#flow" class="cta-link">How it works</a>
+          <a href="#flow" class="cta-link">How it works &darr;</a>
         </div>
       </div>
-      <div class="hero__panel reveal reveal-delay-1" role="region" aria-label="System parameters">
+      <div class="hero__panel reveal reveal-delay-1 stagger-children" role="region" aria-label="System parameters">
         <div class="hero__panel-title">System Parameters</div>
         <div class="data-row">
           <span class="data-row__label">CIRCUIT</span>
@@ -868,7 +996,7 @@
     <!-- 3. PROTOCOL FLOW -->
     <section id="flow" class="section-gap" aria-label="Protocol flow">
       <div class="section-title reveal">Protocol Flow</div>
-      <div class="flow-grid reveal reveal-delay-1">
+      <div class="flow-grid reveal reveal-delay-1 stagger-children">
         <div class="flow-cell">
           <div class="flow-cell__step">01</div>
           <div class="flow-cell__verb">Lock</div>
@@ -951,7 +1079,7 @@
           <span class="terminal__dot"></span>
         </div>
         <div class="terminal__body">
-          <div><span class="terminal__prompt">&gt;</span> <span class="terminal__comment">flow-evm-testnet deployment</span></div>
+          <div><span class="terminal__prompt">&gt;</span> <span class="terminal__comment">flow-evm-testnet deployment</span><span class="terminal__cursor" aria-hidden="true"></span></div>
           <div style="height: 12px"></div>
           <div><span class="terminal__name">PoseidonT3</span> <span class="terminal__addr">0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a</span></div>
           <div><span class="terminal__name">PoseidonT3Wrapper</span> <span class="terminal__addr">0x2eaEF8016D2a7Dc01677E57183a167649cB07402</span></div>
@@ -967,7 +1095,7 @@
     <!-- 6. KNOWN LIMITATIONS -->
     <section class="section-gap" aria-label="Known limitations">
       <div class="section-title reveal">Known Limitations</div>
-      <div class="limits reveal reveal-delay-1">
+      <div class="limits reveal reveal-delay-1 stagger-children">
         <div class="limit-row">
           <span class="limit-row__label">Root relay</span>
           <span class="limit-row__desc">Centralized (owner relays Merkle root from Flow to Starknet)</span>
@@ -1012,7 +1140,7 @@
             observer.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
       els.forEach(function(el) { observer.observe(el); });
     })();
   </script>
