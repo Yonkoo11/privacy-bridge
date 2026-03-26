@@ -18,7 +18,8 @@
  */
 
 import http from 'node:http';
-import { RpcProvider, Account, Contract, CallData } from 'starknet';
+import { RpcProvider, Account, Contract, CallData, constants } from 'starknet';
+import { createReceipt, uploadReceipt } from '../../sdk/src/storacha.mjs';
 
 // ---------------------------------------------------------------------------
 // Config
@@ -220,8 +221,9 @@ async function handleRelay(req, res, account, bridgeContract) {
     // can be unreliable, so we catch execution errors instead.
 
     // Build the mint() call
-    const maxFeeLow = BigInt(max_fee_bps) & ((1n << 128n) - 1n);
-    const maxFeeHigh = BigInt(max_fee_bps) >> 128n;
+    const maxFeeBig = BigInt(max_fee_bps);
+    const maxFeeLow = (maxFeeBig & ((1n << 128n) - 1n)).toString();
+    const maxFeeHigh = (maxFeeBig >> 128n).toString();
 
     const tx = await account.execute([
       {
@@ -243,10 +245,31 @@ async function handleRelay(req, res, account, bridgeContract) {
       status: receipt.execution_status || 'ACCEPTED',
     });
 
+    // Best-effort Storacha receipt upload (non-blocking for relay response)
+    let receiptCid = null;
+    try {
+      if (storachaClient) {
+        const bridgeReceipt = createReceipt({
+          commitment: BigInt(calldata[0] || '0'),
+          nullifierHash: BigInt(calldata[1] || '0'),
+          amount: BigInt(calldata[2] || '0'),
+          sourceChain: 'flow-evm-testnet',
+          destChain: 'starknet',
+        });
+        receiptCid = await uploadReceipt(storachaClient, bridgeReceipt);
+        log('INFO', 'Receipt uploaded to Storacha', { cid: receiptCid });
+      }
+    } catch (storachaErr) {
+      log('WARN', 'Storacha receipt upload failed (non-critical)', {
+        error: storachaErr.message,
+      });
+    }
+
     sendJson(res, 200, {
       success: true,
       txHash: tx.transaction_hash,
       feeBps: feeNum,
+      receiptCid,
     });
   } catch (err) {
     log('ERROR', 'Relay failed', { error: err.message });
@@ -283,6 +306,9 @@ function handleHealth(res) {
 // Server
 // ---------------------------------------------------------------------------
 
+// Storacha client (initialized lazily in main, null if not configured)
+let storachaClient = null;
+
 async function main() {
   validateConfig();
 
@@ -291,12 +317,30 @@ async function main() {
     provider,
     STARKNET_ACCOUNT_ADDRESS,
     RELAYER_PRIVATE_KEY,
+    '1',
+    constants.TRANSACTION_VERSION.V3,
   );
   const bridgeContract = new Contract(
     BRIDGE_ABI,
     STARKNET_BRIDGE_ADDRESS,
     provider,
   );
+
+  // Initialize Storacha client if configured
+  const W3UP_EMAIL = process.env.W3UP_EMAIL;
+  if (W3UP_EMAIL) {
+    try {
+      const { create } = await import('@web3-storage/w3up-client');
+      storachaClient = await create();
+      log('INFO', 'Storacha client initialized', { email: W3UP_EMAIL });
+    } catch (err) {
+      log('WARN', 'Storacha init failed, receipts will not be uploaded', {
+        error: err.message,
+      });
+    }
+  } else {
+    log('INFO', 'W3UP_EMAIL not set, Storacha receipt upload disabled');
+  }
 
   const server = http.createServer(async (req, res) => {
     const { method, url } = req;

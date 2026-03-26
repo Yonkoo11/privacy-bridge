@@ -18,7 +18,7 @@
  */
 
 import { ethers } from 'ethers';
-import { RpcProvider, Account, Contract, CallData } from 'starknet';
+import { RpcProvider, Account, Contract, CallData, constants } from 'starknet';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -161,8 +161,8 @@ async function relayNewRoots(flowContract, starknetContract, starknetAccount) {
     try {
       // Split u256 into low/high felt252 for Starknet
       const rootBigInt = BigInt(root);
-      const low = rootBigInt & ((1n << 128n) - 1n);
-      const high = rootBigInt >> 128n;
+      const low = (rootBigInt & ((1n << 128n) - 1n)).toString();
+      const high = (rootBigInt >> 128n).toString();
 
       const tx = await starknetAccount.execute([
         {
@@ -245,6 +245,8 @@ async function main() {
     starknetProvider,
     STARKNET_ACCOUNT_ADDRESS,
     STARKNET_PRIVATE_KEY,
+    '1',
+    constants.TRANSACTION_VERSION.V3,
   );
   const starknetContract = new Contract(
     STARKNET_BRIDGE_ABI,

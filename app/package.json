@@ -1,0 +1,31 @@
+{
+  "name": "privacy-bridge-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.56.0",
+    "get-starknet-core": "^4.0.0",
+    "next": "14.2.33",
+    "poseidon-lite": "^0.3.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "snarkjs": "^0.7.5",
+    "starknet": "^6.23.1",
+    "viem": "^2.21.0",
+    "wagmi": "^2.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.5.0"
+  }
+}

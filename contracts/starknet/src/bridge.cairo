@@ -10,8 +10,8 @@ pub trait IPrivacyBridge<TContractState> {
     fn get_merkle_root(self: @TContractState) -> u256;
     fn set_merkle_root(ref self: TContractState, root: u256);
     fn add_known_root(ref self: TContractState, root: u256);
-    fn balance_of(self: @TContractState, account: starknet::ContractAddress) -> u256;
-    fn transfer(ref self: TContractState, to: starknet::ContractAddress, amount: u256);
+    fn get_token_address(self: @TContractState) -> starknet::ContractAddress;
+    fn set_token_address(ref self: TContractState, token_address: starknet::ContractAddress);
     fn get_relayer_fee(self: @TContractState) -> u256;
     fn set_relayer_fee(ref self: TContractState, fee_bps: u256);
     fn set_denomination(ref self: TContractState, denom: u256, allowed: bool);
@@ -29,6 +29,10 @@ mod PrivacyBridge {
         IGroth16VerifierBN254LibraryDispatcher,
         IGroth16VerifierBN254DispatcherTrait,
     };
+    use privacy_bridge::shielded_token::{
+        IShieldedTokenDispatcher,
+        IShieldedTokenDispatcherTrait,
+    };
 
     #[storage]
     struct Storage {
@@ -40,8 +44,8 @@ mod PrivacyBridge {
         allowed_denominations: starknet::storage::Map<u256, bool>,
         // Fix 3: Root history
         known_roots: starknet::storage::Map<u256, bool>,
-        // Fix 2: Shielded balances
-        balances: starknet::storage::Map<starknet::ContractAddress, u256>,
+        // ERC20 token address (replaces internal balances)
+        token_address: starknet::ContractAddress,
         // Fix 5: Relayer fee (basis points, max 500 = 5%)
         relayer_fee_bps: u256,
         // Fix 6: Withdrawal time lock
@@ -54,7 +58,6 @@ mod PrivacyBridge {
     enum Event {
         ShieldedMint: ShieldedMint,
         RootUpdated: RootUpdated,
-        Transfer: Transfer,
     }
 
     // Fix 4: Removed storacha_cid from event
@@ -69,14 +72,6 @@ mod PrivacyBridge {
         new_root: u256,
     }
 
-    // Fix 2: Transfer event — only emits amount, NOT from/to addresses.
-    // Emitting addresses would let observers reconstruct fund flows,
-    // destroying cross-chain unlinkability.
-    #[derive(Drop, starknet::Event)]
-    struct Transfer {
-        amount: u256,
-    }
-
     // Fixed denomination values (wei) for testnet
     const DENOM_0001: u256 = 100000000000000;       // 0.0001
     const DENOM_001: u256 = 1000000000000000;        // 0.001
@@ -88,9 +83,11 @@ mod PrivacyBridge {
         ref self: ContractState,
         verifier_class_hash: ClassHash,
         owner: starknet::ContractAddress,
+        token_address: starknet::ContractAddress,
     ) {
         self.verifier_class_hash.write(verifier_class_hash);
         self.owner.write(owner);
+        self.token_address.write(token_address);
 
         // Fix 1: Set allowed denominations
         self.allowed_denominations.write(DENOM_0001, true);
@@ -142,24 +139,25 @@ mod PrivacyBridge {
             // 5. Mark nullifier as spent
             self.nullifiers.write(nullifier_hash, true);
 
-            // Fix 5: Relayer fee — credit fee to caller, remainder to recipient
+            // Fix 5: Relayer fee — mint fee to caller, remainder to recipient
             // max_fee_bps protects users from fee changes between proof gen and submission
             let fee_bps = self.relayer_fee_bps.read();
             assert(fee_bps <= max_fee_bps, 'Fee exceeds max agreed');
             let fee = amount * fee_bps / 10000;
             let net_amount = amount - fee;
 
-            // Fix 2: Convert recipient u256 to ContractAddress and credit balance
+            // Convert recipient u256 to ContractAddress
             let felt_recip: felt252 = recipient.try_into().expect('recipient overflow');
             let addr: starknet::ContractAddress = felt_recip.try_into().unwrap();
-            let bal = self.balances.read(addr);
-            self.balances.write(addr, bal + net_amount);
 
-            // Fix 5: Credit relayer fee to caller (if any)
+            // Mint pFLOW tokens via ERC20 contract
+            let token = IShieldedTokenDispatcher { contract_address: self.token_address.read() };
+            token.mint(addr, net_amount);
+
+            // Fix 5: Mint relayer fee to caller (if any)
             if fee > 0 {
                 let caller = starknet::get_caller_address();
-                let caller_bal = self.balances.read(caller);
-                self.balances.write(caller, caller_bal + fee);
+                token.mint(caller, fee);
             }
 
             // Fix 4: Emit event without storacha_cid or recipient
@@ -200,20 +198,19 @@ mod PrivacyBridge {
             self.emit(RootUpdated { new_root: root });
         }
 
-        // Fix 2: Balance query
-        fn balance_of(self: @ContractState, account: starknet::ContractAddress) -> u256 {
-            self.balances.read(account)
+        fn get_token_address(self: @ContractState) -> starknet::ContractAddress {
+            self.token_address.read()
         }
 
-        // Fix 2: Transfer shielded balance
-        fn transfer(ref self: ContractState, to: starknet::ContractAddress, amount: u256) {
+        // One-time token address setter (for deploy-time chicken-and-egg)
+        fn set_token_address(ref self: ContractState, token_address: starknet::ContractAddress) {
             let caller = starknet::get_caller_address();
-            let from_bal = self.balances.read(caller);
-            assert(from_bal >= amount, 'Insufficient balance');
-            self.balances.write(caller, from_bal - amount);
-            let to_bal = self.balances.read(to);
-            self.balances.write(to, to_bal + amount);
-            self.emit(Transfer { amount });
+            let owner = self.owner.read();
+            assert(caller == owner, 'Only owner can set token');
+            let zero: starknet::ContractAddress = 0.try_into().unwrap();
+            let current = self.token_address.read();
+            assert(current == zero, 'Token already set');
+            self.token_address.write(token_address);
         }
 
         // Fix 5: Relayer fee management

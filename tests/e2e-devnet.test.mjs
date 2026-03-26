@@ -2,14 +2,15 @@
 /**
  * End-to-end test: generate proof -> garaga calldata -> mint on starknet-devnet
  *
- * Tests all 7 privacy fixes:
+ * Tests all 7 privacy fixes + ERC20 token integration:
  *   Fix 4: No storacha_cid in mint() signature
  *   Fix 1: Fixed denomination validation
  *   Fix 3: Root history (known_roots)
  *   Fix 7: Emergency withdraw (Solidity only, not tested here)
- *   Fix 2: Balance tracking + balance_of
+ *   Fix 2: ERC20 pFLOW token (replaces internal balances)
  *   Fix 5: Relayer fee
  *   Fix 6: Withdrawal time lock (delay=0 for devnet)
+ *   ERC20: transfer, approve, transferFrom
  *
  * Prerequisites:
  *   starknet-devnet --seed 42 on :5050
@@ -60,10 +61,23 @@ function splitU256(val) {
   return { low: low.toString(), high: high.toString() };
 }
 
+// Helper: read u256 balance from ERC20 token
+async function getTokenBalance(provider, tokenAddress, account) {
+  const result = await provider.callContract({
+    contractAddress: tokenAddress,
+    entrypoint: 'balance_of',
+    calldata: CallData.compile({ account }),
+  });
+  return (BigInt(result[1]) << 128n) | BigInt(result[0]);
+}
+
 async function main() {
   const deploy = JSON.parse(fs.readFileSync(path.join(projectRoot, 'deploy.json'), 'utf8'));
   const provider = new RpcProvider({ nodeUrl: deploy.rpc });
   const account = new Account(provider, deploy.owner, '0xb137668388dbe9acdfa3bc734cc2c469', '1', constants.TRANSACTION_VERSION.V3);
+
+  const tokenAddress = deploy.token_address;
+  assert(!!tokenAddress, 'deploy.json has token_address');
 
   console.log('\n=== Phase 1: Generate deposit (Fix 1: allowed denomination) ===');
   const secret = randomField();
@@ -150,14 +164,18 @@ async function main() {
     assert(false, `mint transaction failed: ${msg}`);
   }
 
-  console.log('\n=== Phase 6b: Verify balance (Fix 2) ===');
-  const balResult = await provider.callContract({
-    contractAddress: deploy.bridge_address,
-    entrypoint: 'balance_of',
-    calldata: CallData.compile({ account: deploy.owner }),
+  console.log('\n=== Phase 6b: Verify ERC20 balance (was internal balance) ===');
+  const balance = await getTokenBalance(provider, tokenAddress, deploy.owner);
+  assert(balance === amount, `pFLOW balance_of equals deposited amount (${balance})`);
+
+  // Check total supply
+  const supplyResult = await provider.callContract({
+    contractAddress: tokenAddress,
+    entrypoint: 'total_supply',
+    calldata: [],
   });
-  const balance = (BigInt(balResult[1]) << 128n) | BigInt(balResult[0]);
-  assert(balance === amount, `balance_of equals deposited amount (${balance})`);
+  const totalSupply = (BigInt(supplyResult[1]) << 128n) | BigInt(supplyResult[0]);
+  assert(totalSupply === amount, `pFLOW total_supply equals minted amount (${totalSupply})`);
 
   console.log('\n=== Phase 7: Verify nullifier is spent ===');
   const nullifierBig = BigInt(proofResult.publicSignals[1]);
@@ -261,15 +279,10 @@ async function main() {
   });
   assert(BigInt(multiSpent[0]) === 1n, 'multi-deposit: correct nullifier spent');
 
-  // Verify cumulative balance (Fix 2): first mint (0.001) + second mint (0.01)
-  const bal2Result = await provider.callContract({
-    contractAddress: deploy.bridge_address,
-    entrypoint: 'balance_of',
-    calldata: CallData.compile({ account: deploy.owner }),
-  });
-  const balance2 = (BigInt(bal2Result[1]) << 128n) | BigInt(bal2Result[0]);
+  // Verify cumulative ERC20 balance: first mint (0.001) + second mint (0.01)
+  const balance2 = await getTokenBalance(provider, tokenAddress, deploy.owner);
   const expectedBal = 1000000000000000n + 10000000000000000n;
-  assert(balance2 === expectedBal, `cumulative balance correct (${balance2})`);
+  assert(balance2 === expectedBal, `cumulative pFLOW balance correct (${balance2})`);
 
   console.log('\n=== Phase 10: Relayer fee deduction during mint (Fix 5) ===');
   // Set relayer fee to 100 bps (1%)
@@ -288,11 +301,9 @@ async function main() {
   assert(BigInt(feeResult[0]) === 100n, 'relayer fee set to 100 bps');
 
   // Generate a new deposit+proof with a DIFFERENT recipient than the account submitting
-  // The submitter (account/owner) acts as relayer, recipient is a different address
   const feeSecret = randomField();
   const feeNullifier = randomField();
   const feeAmount = 100000000000000000n; // 0.1 — allowed denomination
-  // Use a dummy recipient address (not the owner/relayer)
   const feeRecipient = '0x0000000000000000000000000000000000000000000000000000000000abcdef';
   const feeCommitment = computeCommitment(feeSecret, feeNullifier, feeAmount);
 
@@ -321,12 +332,7 @@ async function main() {
   await provider.waitForTransaction(setFeeRootTx.transaction_hash);
 
   // Record owner balance before mint (owner = relayer = caller)
-  const ownerBalBefore = await provider.callContract({
-    contractAddress: deploy.bridge_address,
-    entrypoint: 'balance_of',
-    calldata: CallData.compile({ account: deploy.owner }),
-  });
-  const ownerBefore = (BigInt(ownerBalBefore[1]) << 128n) | BigInt(ownerBalBefore[0]);
+  const ownerBefore = await getTokenBalance(provider, tokenAddress, deploy.owner);
 
   // Mint — owner submits proof as relayer, recipient is different address
   try {
@@ -345,23 +351,13 @@ async function main() {
   }
 
   // Check recipient got amount minus fee: 0.1 * (1 - 0.01) = 0.099
-  const recipBalResult = await provider.callContract({
-    contractAddress: deploy.bridge_address,
-    entrypoint: 'balance_of',
-    calldata: CallData.compile({ account: feeRecipient }),
-  });
-  const recipBal = (BigInt(recipBalResult[1]) << 128n) | BigInt(recipBalResult[0]);
-  const expectedRecip = feeAmount - (feeAmount * 100n / 10000n); // 0.1 - 1% = 0.099
+  const recipBal = await getTokenBalance(provider, tokenAddress, feeRecipient);
+  const expectedRecip = feeAmount - (feeAmount * 100n / 10000n);
   assert(recipBal === expectedRecip, `recipient got ${recipBal} (expected ${expectedRecip}, fee deducted)`);
 
   // Check relayer (owner) got the fee: 0.1 * 0.01 = 0.001
-  const ownerBalAfter = await provider.callContract({
-    contractAddress: deploy.bridge_address,
-    entrypoint: 'balance_of',
-    calldata: CallData.compile({ account: deploy.owner }),
-  });
-  const ownerAfter = (BigInt(ownerBalAfter[1]) << 128n) | BigInt(ownerBalAfter[0]);
-  const expectedFee = feeAmount * 100n / 10000n; // 1% of 0.1
+  const ownerAfter = await getTokenBalance(provider, tokenAddress, deploy.owner);
+  const expectedFee = feeAmount * 100n / 10000n;
   assert(ownerAfter === ownerBefore + expectedFee, `relayer got fee: ${ownerAfter - ownerBefore} (expected ${expectedFee})`);
 
   // Reset fee to 0
@@ -373,7 +369,6 @@ async function main() {
   await provider.waitForTransaction(resetFeeTx.transaction_hash);
 
   console.log('\n=== Phase 11: max_fee_bps protection (Fix 5) ===');
-  // Set fee to 200 bps, but try to mint with max_fee_bps=50 — should reject
   const setHighFeeTx = await account.execute({
     contractAddress: deploy.bridge_address,
     entrypoint: 'set_relayer_fee',
@@ -381,7 +376,6 @@ async function main() {
   });
   await provider.waitForTransaction(setHighFeeTx.transaction_hash);
 
-  // New deposit for this test
   const capSecret = randomField();
   const capNullifier = randomField();
   const capAmount = 1000000000000000n; // 0.001
@@ -405,7 +399,6 @@ async function main() {
   await provider.waitForTransaction(setCapRootTx.transaction_hash);
 
   try {
-    // max_fee_bps=50 but actual fee is 200 — should revert
     const capMintTx = await account.execute({
       contractAddress: deploy.bridge_address,
       entrypoint: 'mint',
@@ -427,6 +420,49 @@ async function main() {
     calldata: CallData.compile({ fee_bps: splitU256(0n) }),
   });
   await provider.waitForTransaction(resetFee2Tx.transaction_hash);
+
+  console.log('\n=== Phase 12: ERC20 token features ===');
+  // Test pFLOW ERC20 metadata
+  const nameResult = await provider.callContract({
+    contractAddress: tokenAddress,
+    entrypoint: 'name',
+    calldata: [],
+  });
+  assert(nameResult[0] !== '0x0', 'pFLOW has name');
+
+  const symbolResult = await provider.callContract({
+    contractAddress: tokenAddress,
+    entrypoint: 'symbol',
+    calldata: [],
+  });
+  assert(symbolResult[0] !== '0x0', 'pFLOW has symbol');
+
+  const decimalsResult = await provider.callContract({
+    contractAddress: tokenAddress,
+    entrypoint: 'decimals',
+    calldata: [],
+  });
+  assert(BigInt(decimalsResult[0]) === 18n, 'pFLOW has 18 decimals');
+
+  // Test ERC20 transfer: owner transfers 0.001 pFLOW to dummy address
+  const transferTo = '0x0000000000000000000000000000000000000000000000000000000000001234';
+  const transferAmt = 1000000000000000n; // 0.001
+  const ownerBalPre = await getTokenBalance(provider, tokenAddress, deploy.owner);
+
+  const transferTx = await account.execute({
+    contractAddress: tokenAddress,
+    entrypoint: 'transfer',
+    calldata: CallData.compile({
+      recipient: transferTo,
+      amount: splitU256(transferAmt),
+    }),
+  });
+  await provider.waitForTransaction(transferTx.transaction_hash);
+
+  const ownerBalPost = await getTokenBalance(provider, tokenAddress, deploy.owner);
+  const recipBalPost = await getTokenBalance(provider, tokenAddress, transferTo);
+  assert(ownerBalPost === ownerBalPre - transferAmt, 'ERC20 transfer: sender balance decreased');
+  assert(recipBalPost === transferAmt, 'ERC20 transfer: recipient balance increased');
 
   console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
   if (failed > 0) process.exit(1);
