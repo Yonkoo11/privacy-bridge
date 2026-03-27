@@ -114,6 +114,23 @@ input[type='number'] {
 .cta-btn:hover { background: #d4d4d8; }
 .cta-btn:active { background: #a1a1aa; }
 
+/* Focus indicator for inputs/textareas (replaces focus:outline-none) */
+input:focus,
+textarea:focus {
+  border-color: var(--text-heading) !important;
+  outline: none;
+}
+
+/* Nav tab hover (inactive tabs brighten on hover) */
+nav a:hover {
+  color: var(--text-body) !important;
+}
+
+/* Secondary button hover (non-cta buttons in gap-px groups) */
+button:not(.cta-btn):not(:disabled):hover {
+  background: #24242f !important;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .redact-bar { padding: 1px 8px; }
