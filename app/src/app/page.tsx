@@ -62,13 +62,16 @@ export default function Home() {
           <p className="mt-6 text-sm leading-[1.7] max-w-[640px]" style={{ color: 'var(--text-body)' }}>
             Groth16 proofs sever the on-chain trail between Flow&nbsp;EVM deposits and Starknet withdrawals. Fixed denomination pools, Poseidon Merkle tree, relayer pattern.
           </p>
+          <div className="mt-8">
+            <Link href="/bridge" className="cta-btn">Launch App</Link>
+          </div>
         </section>
 
         {/* Specs */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-px mb-16 mt-12" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
           {SPECS.map(([label, value]) => (
             <div key={label} className="px-6 py-4" style={{ background: 'var(--surface)' }}>
-              <div className="text-[10px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>{label}</div>
+              <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>{label}</div>
               <div className="text-[15px] font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{value}</div>
             </div>
           ))}
@@ -82,7 +85,7 @@ export default function Home() {
               <div key={s.n} className="relative mb-8 last:mb-0">
                 <div className="absolute -left-8 -top-0.5 w-6 text-center text-2xl font-bold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{s.n}</div>
                 <div className="text-base font-semibold mb-1 tracking-wide" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{s.verb}</div>
-                <div className="text-[13px] leading-[1.65] mb-2 max-w-[600px]" style={{ color: 'var(--text-body)' }}>{s.desc}</div>
+                <div className="text-[14px] leading-[1.65] mb-2 max-w-[600px]" style={{ color: 'var(--text-body)' }}>{s.desc}</div>
                 <div className="text-[11px] tracking-[0.08em] uppercase" style={{ color: 'var(--text-label)' }}>{s.chain}</div>
               </div>
             ))}
@@ -96,7 +99,7 @@ export default function Home() {
             {SECURITY.map(([prop, detail]) => (
               <div key={prop} className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-0 mb-px">
                 <span className="text-[13px] font-medium px-4 py-3" style={{ color: 'var(--text-heading)', background: 'var(--surface)', borderRight: '1px solid var(--border)' }}>{prop}</span>
-                <span className="text-[13px] px-4 py-3" style={{ color: 'var(--text-body)' }}>{detail}</span>
+                <span className="text-[14px] px-4 py-3" style={{ color: 'var(--text-body)' }}>{detail}</span>
               </div>
             ))}
           </div>
@@ -124,18 +127,13 @@ export default function Home() {
           <div className="stamp">&mdash;&mdash; Known Limitations &mdash;&mdash; Declassified &mdash;&mdash;</div>
           <ol className="list-none" style={{ counterReset: 'lim' }}>
             {LIMITATIONS.map((text, i) => (
-              <li key={i} className="relative pl-6 py-3 text-[13px] leading-[1.6]" style={{ borderBottom: i < LIMITATIONS.length - 1 ? '1px solid var(--surface-raised)' : 'none', counterIncrement: 'lim' }}>
+              <li key={i} className="relative pl-6 py-3 text-[14px] leading-[1.6]" style={{ borderBottom: i < LIMITATIONS.length - 1 ? '1px solid var(--surface-raised)' : 'none', counterIncrement: 'lim' }}>
                 <span className="absolute left-0 text-xs font-semibold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-label)' }}>{String(i + 1).padStart(2, '0')}</span>
                 {text}
               </li>
             ))}
           </ol>
         </section>
-
-        {/* CTA */}
-        <div className="mt-16 mb-12">
-          <Link href="/bridge" className="cta-btn">Launch App</Link>
-        </div>
 
         {/* Footer */}
         <footer className="py-6 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-label)' }}>

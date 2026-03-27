@@ -30,7 +30,7 @@ export default function Dashboard() {
       {/* Overview stats */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
             Total Value Locked
           </div>
           <div className="text-2xl font-semibold text-gray-100 tabular-nums">
@@ -38,7 +38,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
             Total Deposits
           </div>
           <div className="text-2xl font-semibold text-gray-100 tabular-nums">
@@ -46,13 +46,13 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
             Relayer Status
           </div>
           <div className="text-lg text-gray-400">{stats.relayerStatus}</div>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
             Relayer Fee
           </div>
           <div className="text-lg text-gray-400">{stats.relayerFee}</div>
@@ -76,7 +76,7 @@ export default function Dashboard() {
               <span
                 className={`text-sm font-medium tabular-nums ${
                   d.size === 0
-                    ? 'text-gray-600'
+                    ? 'text-gray-400'
                     : d.size < 5
                       ? 'text-amber-400'
                       : 'text-emerald-400'
@@ -94,7 +94,7 @@ export default function Dashboard() {
         <h3 className="text-sm font-medium text-gray-300 mb-2">
           Latest Merkle Root
         </h3>
-        <p className="text-xs font-mono text-gray-500 break-all">
+        <p className="text-xs font-mono text-gray-400 break-all">
           {stats.latestRoot}
         </p>
       </div>

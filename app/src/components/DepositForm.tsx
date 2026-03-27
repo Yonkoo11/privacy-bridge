@@ -85,7 +85,7 @@ export default function DepositForm() {
           <button
             onClick={handleGenerate}
             disabled={!isConnected || status === 'generating'}
-            className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-medium rounded-lg"
+            className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg"
           >
             {!isConnected ? 'Connect wallet first' : 'Generate Note'}
           </button>
@@ -106,11 +106,11 @@ export default function DepositForm() {
             <div className="bg-gray-800 rounded-lg p-4">
               <div className="space-y-2 text-xs font-mono text-gray-400 break-all">
                 <div>
-                  <span className="text-gray-500">commitment: </span>
+                  <span className="text-gray-400">commitment: </span>
                   {noteData.commitment}
                 </div>
                 <div>
-                  <span className="text-gray-500">amount: </span>
+                  <span className="text-gray-400">amount: </span>
                   {DENOMINATIONS[selectedDenom].label}
                 </div>
               </div>
@@ -134,7 +134,7 @@ export default function DepositForm() {
             <button
               onClick={handleLock}
               disabled={!noteSaved}
-              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-medium rounded-lg"
+              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg"
             >
               {noteSaved
                 ? 'Lock on Flow EVM'

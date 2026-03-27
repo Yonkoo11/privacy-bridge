@@ -42,7 +42,7 @@ export default function BridgeLayout({
                 className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px ${
                   isActive
                     ? 'border-emerald-500 text-emerald-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                    : 'border-transparent text-gray-400 hover:text-gray-300'
                 }`}
               >
                 {item.label}

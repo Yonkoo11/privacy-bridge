@@ -72,14 +72,14 @@ export default function NoteManager() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password to decrypt notes"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-300 placeholder:text-gray-600 focus:outline-none focus:border-gray-600"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-300 placeholder:text-gray-400 focus:outline-none focus:border-gray-600"
                 onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
               />
             </div>
             <button
               onClick={handleUnlock}
               disabled={!password}
-              className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 text-white text-sm font-medium rounded-lg"
+              className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white text-sm font-medium rounded-lg"
             >
               Unlock Notes
             </button>
@@ -91,8 +91,8 @@ export default function NoteManager() {
           <div className="space-y-4">
             {notes.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-500 text-sm">No notes found</p>
-                <p className="text-gray-600 text-xs mt-1">
+                <p className="text-gray-400 text-sm">No notes found</p>
+                <p className="text-gray-400 text-xs mt-1">
                   Notes will appear here after you make a deposit
                 </p>
               </div>
@@ -106,14 +106,14 @@ export default function NoteManager() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1 text-xs font-mono text-gray-400 flex-1 min-w-0">
                         <div>
-                          <span className="text-gray-500">Amount: </span>
+                          <span className="text-gray-400">Amount: </span>
                           {(Number(note.amount) / 1e18).toFixed(4)} FLOW
                         </div>
                         <div className="break-all">
-                          <span className="text-gray-500">Commitment: </span>
+                          <span className="text-gray-400">Commitment: </span>
                           {note.commitment.slice(0, 20)}...
                         </div>
-                        <div className="text-gray-600">
+                        <div className="text-gray-400">
                           {new Date(note.createdAt).toLocaleDateString()}
                         </div>
                       </div>
@@ -121,7 +121,7 @@ export default function NoteManager() {
                         <span
                           className={`text-xs px-2 py-0.5 rounded ${
                             note.spent
-                              ? 'bg-gray-700 text-gray-500'
+                              ? 'bg-gray-700 text-gray-400'
                               : 'bg-emerald-900/30 text-emerald-400'
                           }`}
                         >
@@ -129,7 +129,7 @@ export default function NoteManager() {
                         </span>
                         <button
                           onClick={() => deleteNote(note.id)}
-                          className="text-gray-600 hover:text-red-400 text-xs"
+                          className="text-gray-400 hover:text-red-400 text-xs"
                         >
                           Delete
                         </button>

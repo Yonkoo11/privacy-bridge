@@ -153,7 +153,7 @@ export default function WithdrawForm() {
                     ? 'bg-emerald-600 text-white'
                     : i === currentStep
                       ? 'bg-emerald-600/30 border border-emerald-500 text-emerald-400'
-                      : 'bg-gray-800 text-gray-500'
+                      : 'bg-gray-800 text-gray-400'
                 }`}
               >
                 {i < currentStep ? '\u2713' : i + 1}
@@ -177,13 +177,13 @@ export default function WithdrawForm() {
               onChange={(e) => setNoteInput(e.target.value)}
               placeholder="Paste your note JSON here..."
               rows={6}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm font-mono text-gray-300 placeholder:text-gray-600 resize-none focus:outline-none focus:border-gray-600"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm font-mono text-gray-300 placeholder:text-gray-400 resize-none focus:outline-none focus:border-gray-600"
             />
             <div className="flex gap-2">
               <button
                 onClick={handlePasteNote}
                 disabled={!noteInput.trim()}
-                className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 text-white text-sm font-medium rounded-lg"
+                className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white text-sm font-medium rounded-lg"
               >
                 Load Note
               </button>
@@ -209,11 +209,11 @@ export default function WithdrawForm() {
           <div className="space-y-4">
             <div className="bg-gray-800 rounded-lg p-4 text-xs font-mono text-gray-400 space-y-1">
               <div>
-                <span className="text-gray-500">Amount: </span>
+                <span className="text-gray-400">Amount: </span>
                 {(Number(note.amount) / 1e18).toFixed(4)} FLOW
               </div>
               <div className="break-all">
-                <span className="text-gray-500">Commitment: </span>
+                <span className="text-gray-400">Commitment: </span>
                 {note.commitment}
               </div>
             </div>
@@ -227,14 +227,14 @@ export default function WithdrawForm() {
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder="0x..."
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm font-mono text-gray-300 placeholder:text-gray-600 focus:outline-none focus:border-gray-600"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm font-mono text-gray-300 placeholder:text-gray-400 focus:outline-none focus:border-gray-600"
               />
             </div>
 
             <button
               onClick={handleGenerateProof}
               disabled={!recipient || status === 'proving'}
-              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-medium rounded-lg"
+              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg"
             >
               {status === 'proving' ? 'Generating proof...' : 'Generate Proof'}
             </button>
@@ -250,7 +250,7 @@ export default function WithdrawForm() {
             <button
               onClick={getCalldata}
               disabled={status === 'fetching_calldata'}
-              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-medium rounded-lg"
+              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg"
             >
               {status === 'fetching_calldata'
                 ? 'Fetching calldata...'
@@ -266,7 +266,7 @@ export default function WithdrawForm() {
             <button
               onClick={submitRelay}
               disabled={status === 'relaying'}
-              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-medium rounded-lg"
+              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg"
             >
               {status === 'relaying'
                 ? 'Submitting to relayer...'

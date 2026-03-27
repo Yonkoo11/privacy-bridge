@@ -117,5 +117,5 @@ input[type='number'] {
 /* Responsive */
 @media (max-width: 640px) {
   .redact-bar { padding: 1px 8px; }
-  .stamp { margin-bottom: 24px; }
+  .stamp { margin-bottom: 24px; font-size: 9px; padding: 6px 10px; }
 }

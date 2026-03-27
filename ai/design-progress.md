@@ -24,4 +24,5 @@ Status: completed
 Ported to Next.js app, build passes 8/8 pages, deployed to GitHub Pages.
 
 ### Phase 5: Final QA
-Status: pending
+Status: completed
+Fixes applied: 9 (hero CTA, font size bumps, mobile stamp, WCAG contrast across 6 files)
