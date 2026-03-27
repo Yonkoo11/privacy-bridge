@@ -62,13 +62,30 @@
 - [x] GitHub Actions workflow YAML valid
 - [x] Circuit assets present in export: bridge.wasm (1.8MB), bridge_final.zkey (6.1MB), verification_key.json (3.5K)
 
+### UI/UX Polish (Design Critique Session)
+- [x] 20/20 critique issues fixed across 7 files (globals.css, page.tsx, bridge/layout.tsx, Dashboard, DepositForm, WithdrawForm, NoteManager)
+- [x] Interactive states: focus indicators, nav hover, button hover, disabled pointer-events
+- [x] Landing: hero line height, spec grid responsive, section left-border anchors, footer fix, bottom CTA separator
+- [x] Dashboard: meaningful empty states, deposit CTA, panel header hierarchy
+- [x] Deposit: denomination descriptions, connect-wallet button triggers wallet
+- [x] Withdraw: step labels visible, helper text, recipient address validation with inline error
+- [x] Notes: show/hide password toggle, 3-level password strength indicator, export as primary CTA
+- [x] Global: status-pulse animation for loading states, mobile nav horizontal scroll
+- [x] All visually verified via Puppeteer screenshots (desktop + mobile)
+- [x] Production build passes (8/8 static pages, zero errors)
+- Commits: be20bcd, 1225cd0, 88439f5, 370cb76, 475b660
+
+### What Has Been Verified (Live Deploy)
+- [x] GitHub Pages deployment live at yonkoo11.github.io/privacy-bridge
+- [x] All 8 static pages rendering correctly on live site
+- [x] Repo description, homepage, and topic tags set on GitHub
+
 ### What Has NOT Been Verified
 - [ ] Full deposit-to-withdraw flow through web app (needs MetaMask + Flow testnet)
 - [ ] Watcher against real Flow EVM events (tested relay logic, not event polling)
 - [ ] Browser snarkjs proof generation in actual browser (5.9MB zkey fetch)
 - [ ] Note encryption/decryption in actual browser (tested with Node.js crypto.subtle)
 - [ ] Storacha receipt upload end-to-end (needs W3UP_EMAIL + authorized w3up space)
-- [ ] GitHub Pages deployment (needs repo push + Pages enabled)
 
 ### Architecture
 - Deploy ordering: bridge(token=0x0) -> token(bridge) -> set_token_address (one-time, current=0x0 guard)
