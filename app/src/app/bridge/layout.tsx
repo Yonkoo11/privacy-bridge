@@ -22,10 +22,10 @@ export default function BridgeLayout({
     <div className="min-h-screen">
       {/* Header */}
       <header style={{ borderBottom: '1px solid var(--border)' }}>
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
           <Link
             href="/"
-            className="text-[13px] font-bold tracking-[0.18em] uppercase"
+            className="text-[13px] font-bold tracking-[0.18em] uppercase shrink-0"
             style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)', textDecoration: 'none' }}
           >
             Privacy Bridge
@@ -36,14 +36,14 @@ export default function BridgeLayout({
 
       {/* Nav tabs */}
       <nav style={{ borderBottom: '1px solid var(--border)' }}>
-        <div className="max-w-4xl mx-auto px-4 flex gap-1">
+        <div className="max-w-4xl mx-auto px-4 nav-scroll flex gap-1">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-4 py-2.5 text-[13px] font-medium -mb-px"
+                className="px-3 sm:px-4 py-2.5 text-[13px] font-medium -mb-px whitespace-nowrap shrink-0"
                 style={{
                   fontFamily: 'var(--font-mono)',
                   color: isActive ? 'var(--text-heading)' : 'var(--text-label)',

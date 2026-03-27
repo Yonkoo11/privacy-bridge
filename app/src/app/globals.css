@@ -131,6 +131,38 @@ button:not(.cta-btn):not(:disabled):hover {
   background: #24242f !important;
 }
 
+/* Disabled buttons: prevent clicks, not just cursor */
+button:disabled {
+  pointer-events: none;
+}
+
+/* Mobile nav: horizontal scroll when tabs overflow */
+.nav-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.nav-scroll::-webkit-scrollbar { display: none; }
+
+/* Status indicator pulse */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+.status-pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-pulse::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-body);
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .redact-bar { padding: 1px 8px; }

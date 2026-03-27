@@ -30,6 +30,7 @@ export default function WithdrawForm() {
 
   const [noteInput, setNoteInput] = useState('');
   const [recipient, setRecipient] = useState('');
+  const isValidRecipient = recipient.startsWith('0x') && recipient.length >= 42;
   const [treeError, setTreeError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const publicClient = usePublicClient();
@@ -142,30 +143,35 @@ export default function WithdrawForm() {
         <div className="flex items-center gap-0 mb-6">
           {STEPS.map((step, i) => (
             <div key={i} className="flex items-center gap-0 flex-1">
-              <div
-                className="w-6 h-6 flex items-center justify-center text-xs font-medium shrink-0"
-                style={{
-                  fontFamily: 'var(--font-heading)',
-                  background: i < currentStep
-                    ? 'var(--text-heading)'
-                    : i === currentStep
-                      ? 'var(--surface-raised)'
-                      : 'var(--bg)',
-                  color: i < currentStep
-                    ? 'var(--bg)'
-                    : i === currentStep
+              <div className="flex flex-col items-center gap-1 shrink-0">
+                <div
+                  className="w-6 h-6 flex items-center justify-center text-xs font-medium"
+                  style={{
+                    fontFamily: 'var(--font-heading)',
+                    background: i < currentStep
                       ? 'var(--text-heading)'
-                      : 'var(--text-label)',
-                  border: i === currentStep
-                    ? '1px solid var(--text-heading)'
-                    : '1px solid var(--border-strong)',
-                }}
-              >
-                {i < currentStep ? '\u2713' : i + 1}
+                      : i === currentStep
+                        ? 'var(--surface-raised)'
+                        : 'var(--bg)',
+                    color: i < currentStep
+                      ? 'var(--bg)'
+                      : i === currentStep
+                        ? 'var(--text-heading)'
+                        : 'var(--text-label)',
+                    border: i === currentStep
+                      ? '1px solid var(--text-heading)'
+                      : '1px solid var(--border-strong)',
+                  }}
+                >
+                  {i < currentStep ? '\u2713' : i + 1}
+                </div>
+                <span className="text-[9px] hidden sm:block" style={{ color: i <= currentStep ? 'var(--text-body)' : 'var(--text-label)', fontFamily: 'var(--font-mono)' }}>
+                  {step}
+                </span>
               </div>
               {i < STEPS.length - 1 && (
                 <div
-                  className="flex-1 h-px"
+                  className="flex-1 h-px mt-[-14px] sm:mt-[-14px]"
                   style={{ background: i < currentStep ? 'var(--text-heading)' : 'var(--border-strong)' }}
                 />
               )}
@@ -176,10 +182,13 @@ export default function WithdrawForm() {
         {/* Step 1: Load note */}
         {!note && (
           <div className="space-y-3">
+            <p className="text-[12px]" style={{ color: 'var(--text-label)' }}>
+              Paste the JSON from your deposit note, or upload the backup file.
+            </p>
             <textarea
               value={noteInput}
               onChange={(e) => setNoteInput(e.target.value)}
-              placeholder="Paste your note JSON here..."
+              placeholder='{"secret":"...","nullifier":"...","commitment":"...","amount":"..."}'
               rows={6}
               className="w-full p-3 text-[13px] font-mono resize-none focus:outline-none"
               style={{
@@ -245,17 +254,22 @@ export default function WithdrawForm() {
                 className="w-full px-3 py-2.5 text-[13px] font-mono focus:outline-none"
                 style={{
                   background: 'var(--bg)',
-                  border: '1px solid var(--border-strong)',
+                  border: `1px solid ${recipient && !isValidRecipient ? 'rgba(239,68,68,0.5)' : 'var(--border-strong)'}`,
                   color: 'var(--text-body)',
                 }}
               />
+              {recipient && !isValidRecipient && (
+                <p className="text-[11px] mt-1" style={{ color: '#f87171' }}>
+                  Address must start with 0x and be at least 42 characters
+                </p>
+              )}
             </div>
 
             <button
               onClick={handleGenerateProof}
-              disabled={!recipient || status === 'proving'}
+              disabled={!isValidRecipient || status === 'proving'}
               className="cta-btn w-full text-center"
-              style={!recipient || status === 'proving' ? {
+              style={!isValidRecipient || status === 'proving' ? {
                 background: 'var(--surface-raised)',
                 color: 'var(--text-label)',
                 cursor: 'not-allowed',

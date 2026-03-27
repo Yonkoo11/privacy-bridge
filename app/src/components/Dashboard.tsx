@@ -1,15 +1,18 @@
 'use client';
 
+import Link from 'next/link';
 import { DENOMINATIONS } from '@/lib/constants';
 
 export default function Dashboard() {
   const stats = {
     tvl: '0.0000',
     totalDeposits: 0,
-    latestRoot: 'N/A',
-    relayerStatus: 'Unknown',
+    latestRoot: null as string | null,
+    relayerStatus: 'offline' as 'online' | 'offline',
     relayerFee: '1%',
   };
+
+  const isEmpty = stats.totalDeposits === 0;
 
   const denomSets = DENOMINATIONS.map((d) => ({
     label: d.label,
@@ -46,7 +49,10 @@ export default function Dashboard() {
           <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
             Relayer Status
           </div>
-          <div className="text-base" style={{ color: 'var(--text-body)' }}>{stats.relayerStatus}</div>
+          <div className="text-base flex items-center gap-2" style={{ color: 'var(--text-body)' }}>
+            <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: stats.relayerStatus === 'online' ? '#34d399' : 'var(--text-label)' }} />
+            {stats.relayerStatus === 'online' ? 'Online' : 'Not connected'}
+          </div>
         </div>
         <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
           <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
@@ -56,9 +62,19 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Empty state CTA */}
+      {isEmpty && (
+        <div className="p-5 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)' }}>
+          <p className="text-[13px] mb-3" style={{ color: 'var(--text-label)' }}>No deposits yet. Start building your anonymity set.</p>
+          <Link href="/bridge/deposit" className="cta-btn text-[13px]" style={{ padding: '10px 28px' }}>
+            Make First Deposit
+          </Link>
+        </div>
+      )}
+
       {/* Anonymity sets */}
       <div className="doc-panel">
-        <div className="doc-panel-header">Anonymity Sets by Denomination</div>
+        <div className="doc-panel-header" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>Anonymity Sets by Denomination</div>
         <div className="p-4 space-y-0">
           {denomSets.map((d, i) => (
             <div
@@ -82,10 +98,10 @@ export default function Dashboard() {
 
       {/* Latest root */}
       <div className="doc-panel">
-        <div className="doc-panel-header">Latest Merkle Root</div>
+        <div className="doc-panel-header" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>Latest Merkle Root</div>
         <div className="p-4">
           <p className="text-xs font-mono break-all" style={{ color: 'var(--text-label)' }}>
-            {stats.latestRoot}
+            {stats.latestRoot ?? 'No roots relayed yet'}
           </p>
         </div>
       </div>

@@ -1,12 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useConnect } from 'wagmi';
+import { injected } from 'wagmi/connectors';
 import { useDeposit } from '@/hooks/useDeposit';
 import { DENOMINATIONS } from '@/lib/constants';
 
+const DENOM_HINTS: Record<string, string> = {
+  '0.0001 FLOW': 'Micro - test transactions',
+  '0.001 FLOW': 'Small - low-value transfers',
+  '0.01 FLOW': 'Medium - standard privacy',
+  '0.1 FLOW': 'Large - high-value privacy',
+};
+
 export default function DepositForm() {
   const { isConnected } = useAccount();
+  const { connect } = useConnect();
   const {
     generateNote,
     lockDeposit,
@@ -68,7 +77,7 @@ export default function DepositForm() {
               <button
                 key={i}
                 onClick={() => setSelectedDenom(i)}
-                className="px-4 py-3 text-[13px] font-medium"
+                className="px-4 py-3 text-left"
                 style={{
                   fontFamily: 'var(--font-mono)',
                   background: selectedDenom === i ? 'var(--surface-raised)' : 'var(--surface)',
@@ -76,7 +85,8 @@ export default function DepositForm() {
                   border: selectedDenom === i ? '1px solid var(--text-heading)' : '1px solid transparent',
                 }}
               >
-                {d.label}
+                <div className="text-[13px] font-medium">{d.label}</div>
+                <div className="text-[10px] mt-0.5" style={{ color: 'var(--text-label)' }}>{DENOM_HINTS[d.label] ?? ''}</div>
               </button>
             ))}
           </div>
@@ -84,18 +94,27 @@ export default function DepositForm() {
 
         {/* Step 2: Generate note */}
         {!noteData && (
-          <button
-            onClick={handleGenerate}
-            disabled={!isConnected || status === 'generating'}
-            className="cta-btn w-full text-center"
-            style={!isConnected || status === 'generating' ? {
-              background: 'var(--surface-raised)',
-              color: 'var(--text-label)',
-              cursor: 'not-allowed',
-            } : {}}
-          >
-            {!isConnected ? 'Connect wallet first' : 'Generate Note'}
-          </button>
+          isConnected ? (
+            <button
+              onClick={handleGenerate}
+              disabled={status === 'generating'}
+              className="cta-btn w-full text-center"
+              style={status === 'generating' ? {
+                background: 'var(--surface-raised)',
+                color: 'var(--text-label)',
+                cursor: 'not-allowed',
+              } : {}}
+            >
+              Generate Note
+            </button>
+          ) : (
+            <button
+              onClick={() => connect({ connector: injected() })}
+              className="cta-btn w-full text-center"
+            >
+              Connect Wallet to Deposit
+            </button>
+          )
         )}
 
         {/* Step 3: Show note + backup */}
@@ -154,14 +173,14 @@ export default function DepositForm() {
 
         {/* Status display */}
         {status === 'locking' && (
-          <div className="mt-4 text-[13px]" style={{ color: 'var(--text-body)' }}>
-            Confirm transaction in your wallet...
+          <div className="mt-4 text-[13px] status-pulse" style={{ color: 'var(--text-body)' }}>
+            Confirm transaction in your wallet
           </div>
         )}
 
         {status === 'confirming' && (
-          <div className="mt-4 text-[13px]" style={{ color: 'var(--text-body)' }}>
-            Waiting for confirmation...
+          <div className="mt-4 text-[13px] status-pulse" style={{ color: 'var(--text-body)' }}>
+            Waiting for confirmation
           </div>
         )}
 

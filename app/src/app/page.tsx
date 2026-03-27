@@ -54,7 +54,7 @@ export default function Home() {
 
         {/* Hero */}
         <section className="pt-12 pb-8 sm:pt-16">
-          <div className="text-[28px] sm:text-[38px] font-bold leading-[1.15]" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)', letterSpacing: '-0.01em' }}>
+          <div className="text-[28px] sm:text-[38px] font-bold leading-[1.25] sm:leading-[1.15]" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)', letterSpacing: '-0.01em' }}>
             <div className="mb-1">Deposit on one chain.</div>
             <div className="mb-1">Withdraw on another.</div>
             <div className="redact-bar mb-1">No link between them.</div>
@@ -70,15 +70,15 @@ export default function Home() {
         {/* Specs */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-px mb-16 mt-12" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
           {SPECS.map(([label, value]) => (
-            <div key={label} className="px-6 py-4" style={{ background: 'var(--surface)' }}>
-              <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>{label}</div>
-              <div className="text-[15px] font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{value}</div>
+            <div key={label} className="px-4 sm:px-6 py-4" style={{ background: 'var(--surface)' }}>
+              <div className="text-[10px] sm:text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>{label}</div>
+              <div className="text-[14px] sm:text-[15px] font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{value}</div>
             </div>
           ))}
         </div>
 
         {/* Protocol Flow */}
-        <section className="mb-16">
+        <section className="mb-16 pl-4" style={{ borderLeft: '2px solid var(--border-strong)' }}>
           <div className="stamp">&mdash;&mdash; Protocol Flow &mdash;&mdash; Unclassified &mdash;&mdash;</div>
           <div className="flow-track">
             {FLOW_STEPS.map((s) => (
@@ -93,7 +93,7 @@ export default function Home() {
         </section>
 
         {/* Security */}
-        <section className="mb-16">
+        <section className="mb-16 pl-4" style={{ borderLeft: '2px solid var(--border-strong)' }}>
           <div className="stamp">&mdash;&mdash; Security Properties &mdash;&mdash; Unclassified &mdash;&mdash;</div>
           <div>
             {SECURITY.map(([prop, detail]) => (
@@ -106,7 +106,7 @@ export default function Home() {
         </section>
 
         {/* Contracts */}
-        <section className="mb-16">
+        <section className="mb-16 pl-4" style={{ borderLeft: '2px solid var(--border-strong)' }}>
           <div className="stamp">&mdash;&mdash; Document Ref &mdash;&mdash; Unclassified &mdash;&mdash;</div>
           <div className="doc-panel">
             <div className="doc-panel-header">Deployed Contracts // Flow EVM Testnet</div>
@@ -123,7 +123,7 @@ export default function Home() {
         </section>
 
         {/* Limitations */}
-        <section className="mb-16">
+        <section className="mb-16 pl-4" style={{ borderLeft: '2px solid var(--border-strong)' }}>
           <div className="stamp">&mdash;&mdash; Known Limitations &mdash;&mdash; Declassified &mdash;&mdash;</div>
           <ol className="list-none" style={{ counterReset: 'lim' }}>
             {LIMITATIONS.map((text, i) => (
@@ -136,15 +136,29 @@ export default function Home() {
         </section>
 
         {/* Bottom CTA */}
-        <div className="mt-16 mb-12">
+        <div className="mt-16 mb-12 pt-12" style={{ borderTop: '1px solid var(--border)' }}>
+          <p className="text-[13px] mb-4" style={{ color: 'var(--text-label)' }}>Ready to bridge privately?</p>
           <Link href="/bridge" className="cta-btn">Launch App</Link>
         </div>
 
         {/* Footer */}
-        <footer className="py-6 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-label)' }}>
-          <span>PL_Genesis Hackathon</span>
-          <span> &middot; </span>
-          <a href="https://github.com/Yonkoo11/privacy-bridge" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--text-body)] transition-colors" style={{ color: 'var(--text-label)', textDecoration: 'none', borderBottom: '1px solid var(--border-strong)' }}>GitHub</a>
+        <footer className="py-6 text-xs flex items-center justify-between" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-label)' }}>
+          <span>PL Genesis Hackathon</span>
+          <a
+            href="https://github.com/Yonkoo11/privacy-bridge"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[13px] font-medium"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--text-body)',
+              textDecoration: 'none',
+              borderBottom: '1px solid var(--border-strong)',
+              paddingBottom: '1px',
+            }}
+          >
+            GitHub
+          </a>
         </footer>
 
       </div>

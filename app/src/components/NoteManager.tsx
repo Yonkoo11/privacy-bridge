@@ -14,8 +14,17 @@ export default function NoteManager() {
   } = useNotes();
 
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const passwordStrength = password.length === 0
+    ? null
+    : password.length < 8
+      ? 'weak'
+      : password.length < 16
+        ? 'fair'
+        : 'strong';
 
   const handleUnlock = async () => {
     if (!password) return;
@@ -65,20 +74,54 @@ export default function NoteManager() {
               <label className="block text-[13px] mb-1" style={{ color: 'var(--text-body)' }}>
                 Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password to decrypt notes"
-                className="w-full px-3 py-2.5 text-[13px] focus:outline-none"
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  background: 'var(--bg)',
-                  border: '1px solid var(--border-strong)',
-                  color: 'var(--text-body)',
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password to decrypt notes"
+                  className="w-full px-3 py-2.5 pr-16 text-[13px] focus:outline-none"
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    background: 'var(--bg)',
+                    border: '1px solid var(--border-strong)',
+                    color: 'var(--text-body)',
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] px-2 py-1"
+                  style={{ color: 'var(--text-label)', background: 'transparent' }}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              {passwordStrength && (
+                <div className="flex items-center gap-2 mt-1.5">
+                  <div className="flex gap-0.5 flex-1">
+                    {['weak', 'fair', 'strong'].map((level, i) => (
+                      <div
+                        key={level}
+                        className="h-0.5 flex-1"
+                        style={{
+                          background:
+                            (passwordStrength === 'weak' && i === 0) ? '#f87171'
+                            : (passwordStrength === 'fair' && i <= 1) ? '#fbbf24'
+                            : (passwordStrength === 'strong') ? '#34d399'
+                            : 'var(--border-strong)',
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px]" style={{
+                    color: passwordStrength === 'weak' ? '#f87171' : passwordStrength === 'fair' ? '#fbbf24' : '#34d399',
+                  }}>
+                    {passwordStrength}
+                  </span>
+                </div>
+              )}
             </div>
             <button
               onClick={handleUnlock}
@@ -158,18 +201,23 @@ export default function NoteManager() {
             )}
 
             {/* Actions */}
-            <div className="flex gap-px pt-2" style={{ background: 'var(--border)' }}>
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={handleExport}
-                className="flex-1 px-4 py-2.5 text-[13px]"
-                style={{ fontFamily: 'var(--font-mono)', background: 'var(--surface)', color: 'var(--text-body)', border: 'none' }}
+                className="cta-btn flex-1 text-center text-[13px]"
+                style={{ padding: '10px 16px' }}
               >
-                Export All
+                Export Backup
               </button>
               <button
                 onClick={() => fileRef.current?.click()}
                 className="flex-1 px-4 py-2.5 text-[13px]"
-                style={{ fontFamily: 'var(--font-mono)', background: 'var(--surface)', color: 'var(--text-body)', border: 'none' }}
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  background: 'var(--surface-raised)',
+                  color: 'var(--text-body)',
+                  border: '1px solid var(--border-strong)',
+                }}
               >
                 Import
               </button>
