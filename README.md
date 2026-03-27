@@ -1,6 +1,8 @@
 # Privacy Bridge
 
-Cross-chain bridge with cryptographic privacy. Lock tokens on Flow EVM, generate a Groth16 ZK proof off-chain, and claim a shielded balance on Starknet. No link between source and destination.
+Cross-chain bridge with cryptographic privacy. Lock tokens on Flow EVM, generate a Groth16 ZK proof off-chain, and claim pFLOW tokens on Starknet. No link between source and destination.
+
+**Live Demo:** [yonkoo11.github.io/privacy-bridge](https://yonkoo11.github.io/privacy-bridge)
 
 ## How It Works
 
@@ -8,7 +10,7 @@ Cross-chain bridge with cryptographic privacy. Lock tokens on Flow EVM, generate
 
 2. **Prove** -- Off-chain, fetch all commitments and rebuild the Merkle tree. Generate a Groth16 proof that you know a valid leaf without revealing which one.
 
-3. **Mint** -- Submit the proof to the Starknet bridge contract. The garaga verifier checks the Groth16 proof on-chain. If valid, your shielded balance is credited and the nullifier is marked spent. A relayer can submit proofs on your behalf for a fee.
+3. **Mint** -- Submit the proof to the Starknet bridge contract. The garaga verifier checks the Groth16 proof on-chain. If valid, pFLOW tokens (SNIP-2 ERC20) are minted to the recipient and the nullifier is marked spent. A relayer can submit proofs on your behalf for a fee.
 
 ## Architecture
 
@@ -18,7 +20,7 @@ Flow EVM                          Off-chain                         Starknet
 PrivacyBridge.sol                 SDK (Node.js)                     PrivacyBridge (Cairo)
   lock(commitment)  ---------->  snarkjs Groth16 proof  ---------->  garaga verifier
   on-chain Poseidon               merkle tree                       nullifier tracking
-  Merkle tree                     garaga calldata gen               shielded balances
+  Merkle tree                     garaga calldata gen               pFLOW ERC20 mint
   fixed denominations                                               relayer fees
   emergency withdraw                                                withdrawal timelock
 ```
@@ -114,6 +116,16 @@ node scripts/bridge.mjs prove --note note-0.json --recipient 0x...
 # Submit proof to Starknet
 node scripts/bridge.mjs mint --proof proof-0.json
 ```
+
+## Deployed Contracts
+
+**Flow EVM Testnet (chain_id: 545)**
+
+| Contract | Address |
+|----------|---------|
+| PoseidonT3 | `0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a` |
+| PoseidonT3Wrapper | `0x2eaEF8016D2a7Dc01677E57183a167649cB07402` |
+| PrivacyBridge | `0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca` |
 
 ## Safety Mechanisms
 
