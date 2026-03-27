@@ -3,7 +3,6 @@
 import { DENOMINATIONS } from '@/lib/constants';
 
 export default function Dashboard() {
-  // Placeholder data -- in production, these come from on-chain queries
   const stats = {
     tvl: '0.0000',
     totalDeposits: 0,
@@ -20,67 +19,59 @@ export default function Dashboard() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Warning banner */}
-      <div className="bg-amber-900/20 border border-amber-700/50 rounded-xl p-4">
-        <p className="text-amber-400 text-sm">
-          Small anonymity sets provide weak privacy. Wait for more deposits in
-          your denomination before withdrawing.
-        </p>
+      <div className="stamp" style={{ transform: 'none', display: 'block' }}>
+        Small anonymity sets provide weak privacy. Wait for more deposits in
+        your denomination before withdrawing.
       </div>
 
       {/* Overview stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+      <div className="grid grid-cols-2 gap-px" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
+        <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
+          <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
             Total Value Locked
           </div>
-          <div className="text-2xl font-semibold text-gray-100 tabular-nums">
+          <div className="text-xl font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
             {stats.tvl} FLOW
           </div>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+        <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
+          <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
             Total Deposits
           </div>
-          <div className="text-2xl font-semibold text-gray-100 tabular-nums">
+          <div className="text-xl font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
             {stats.totalDeposits}
           </div>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+        <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
+          <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
             Relayer Status
           </div>
-          <div className="text-lg text-gray-400">{stats.relayerStatus}</div>
+          <div className="text-base" style={{ color: 'var(--text-body)' }}>{stats.relayerStatus}</div>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+        <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
+          <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
             Relayer Fee
           </div>
-          <div className="text-lg text-gray-400">{stats.relayerFee}</div>
+          <div className="text-base" style={{ color: 'var(--text-body)' }}>{stats.relayerFee}</div>
         </div>
       </div>
 
       {/* Anonymity sets */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h3 className="text-sm font-medium text-gray-300 mb-4">
-          Anonymity Sets by Denomination
-        </h3>
-        <div className="space-y-3">
+      <div className="doc-panel">
+        <div className="doc-panel-header">Anonymity Sets by Denomination</div>
+        <div className="p-4 space-y-0">
           {denomSets.map((d, i) => (
             <div
               key={i}
-              className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0"
+              className="flex items-center justify-between py-2.5"
+              style={{ borderBottom: i < denomSets.length - 1 ? '1px solid var(--border)' : 'none' }}
             >
-              <span className="text-sm text-gray-400 font-mono">
+              <span className="text-[13px] font-mono" style={{ color: 'var(--text-body)' }}>
                 {d.label}
               </span>
               <span
-                className={`text-sm font-medium tabular-nums ${
-                  d.size === 0
-                    ? 'text-gray-400'
-                    : d.size < 5
-                      ? 'text-amber-400'
-                      : 'text-emerald-400'
-                }`}
+                className="text-[13px] font-medium tabular-nums"
+                style={{ color: d.size === 0 ? 'var(--text-label)' : d.size < 5 ? '#fbbf24' : '#34d399' }}
               >
                 {d.size} deposits
               </span>
@@ -90,13 +81,13 @@ export default function Dashboard() {
       </div>
 
       {/* Latest root */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h3 className="text-sm font-medium text-gray-300 mb-2">
-          Latest Merkle Root
-        </h3>
-        <p className="text-xs font-mono text-gray-400 break-all">
-          {stats.latestRoot}
-        </p>
+      <div className="doc-panel">
+        <div className="doc-panel-header">Latest Merkle Root</div>
+        <div className="p-4">
+          <p className="text-xs font-mono break-all" style={{ color: 'var(--text-label)' }}>
+            {stats.latestRoot}
+          </p>
+        </div>
       </div>
     </div>
   );

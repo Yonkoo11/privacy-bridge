@@ -81,7 +81,6 @@ export default function WithdrawForm() {
     setTreeError(null);
 
     try {
-      // Fetch all commitments from Flow EVM contract
       const nextIndex = await publicClient.readContract({
         address: PRIVACY_BRIDGE_ADDRESS,
         abi: PRIVACY_BRIDGE_ABI,
@@ -93,7 +92,6 @@ export default function WithdrawForm() {
         return;
       }
 
-      // Read Deposit events to get ordered commitments
       const logs = await publicClient.getLogs({
         address: PRIVACY_BRIDGE_ADDRESS,
         event: {
@@ -109,12 +107,10 @@ export default function WithdrawForm() {
         toBlock: 'latest',
       });
 
-      // Sort by leafIndex to get correct tree ordering
       const commitments = logs
         .sort((a, b) => Number(a.args.leafIndex! - b.args.leafIndex!))
         .map((log) => log.args.commitment!.toString());
 
-      // Find user's commitment in the tree
       const userCommitment = note.commitment;
       const leafIndex = commitments.findIndex((c) => c === userCommitment);
 
@@ -123,7 +119,6 @@ export default function WithdrawForm() {
         return;
       }
 
-      // Build merkle tree and get proof
       const { root, pathElements, pathIndices } = buildMerkleTree(commitments, leafIndex);
 
       await generateProof(recipient, {
@@ -138,31 +133,40 @@ export default function WithdrawForm() {
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-gray-100 mb-4">
+      <div className="p-6" style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)' }}>
+        <h2 className="text-base font-semibold mb-4 tracking-wide" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
           Withdraw from Privacy Bridge
         </h2>
 
         {/* Progress steps */}
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex items-center gap-0 mb-6">
           {STEPS.map((step, i) => (
-            <div key={i} className="flex items-center gap-2 flex-1">
+            <div key={i} className="flex items-center gap-0 flex-1">
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                  i < currentStep
-                    ? 'bg-emerald-600 text-white'
+                className="w-6 h-6 flex items-center justify-center text-xs font-medium shrink-0"
+                style={{
+                  fontFamily: 'var(--font-heading)',
+                  background: i < currentStep
+                    ? 'var(--text-heading)'
                     : i === currentStep
-                      ? 'bg-emerald-600/30 border border-emerald-500 text-emerald-400'
-                      : 'bg-gray-800 text-gray-400'
-                }`}
+                      ? 'var(--surface-raised)'
+                      : 'var(--bg)',
+                  color: i < currentStep
+                    ? 'var(--bg)'
+                    : i === currentStep
+                      ? 'var(--text-heading)'
+                      : 'var(--text-label)',
+                  border: i === currentStep
+                    ? '1px solid var(--text-heading)'
+                    : '1px solid var(--border-strong)',
+                }}
               >
                 {i < currentStep ? '\u2713' : i + 1}
               </div>
               {i < STEPS.length - 1 && (
                 <div
-                  className={`flex-1 h-px ${
-                    i < currentStep ? 'bg-emerald-600' : 'bg-gray-700'
-                  }`}
+                  className="flex-1 h-px"
+                  style={{ background: i < currentStep ? 'var(--text-heading)' : 'var(--border-strong)' }}
                 />
               )}
             </div>
@@ -177,19 +181,30 @@ export default function WithdrawForm() {
               onChange={(e) => setNoteInput(e.target.value)}
               placeholder="Paste your note JSON here..."
               rows={6}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm font-mono text-gray-300 placeholder:text-gray-400 resize-none focus:outline-none focus:border-gray-600"
+              className="w-full p-3 text-[13px] font-mono resize-none focus:outline-none"
+              style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border-strong)',
+                color: 'var(--text-body)',
+              }}
             />
-            <div className="flex gap-2">
+            <div className="flex gap-px" style={{ background: 'var(--border)' }}>
               <button
                 onClick={handlePasteNote}
                 disabled={!noteInput.trim()}
-                className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white text-sm font-medium rounded-lg"
+                className="cta-btn flex-1 text-center text-[13px]"
+                style={!noteInput.trim() ? {
+                  background: 'var(--surface-raised)',
+                  color: 'var(--text-label)',
+                  cursor: 'not-allowed',
+                } : {}}
               >
                 Load Note
               </button>
               <button
                 onClick={() => fileRef.current?.click()}
-                className="px-4 py-2.5 bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg hover:bg-gray-700"
+                className="flex-1 px-4 py-2.5 text-[13px]"
+                style={{ fontFamily: 'var(--font-mono)', background: 'var(--surface-raised)', color: 'var(--text-body)', border: 'none' }}
               >
                 Upload File
               </button>
@@ -207,19 +222,19 @@ export default function WithdrawForm() {
         {/* Step 2: Note loaded, enter recipient + generate proof */}
         {note && !proofData && (
           <div className="space-y-4">
-            <div className="bg-gray-800 rounded-lg p-4 text-xs font-mono text-gray-400 space-y-1">
+            <div className="p-4 text-xs font-mono space-y-1" style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-body)' }}>
               <div>
-                <span className="text-gray-400">Amount: </span>
+                <span style={{ color: 'var(--text-label)' }}>Amount: </span>
                 {(Number(note.amount) / 1e18).toFixed(4)} FLOW
               </div>
               <div className="break-all">
-                <span className="text-gray-400">Commitment: </span>
+                <span style={{ color: 'var(--text-label)' }}>Commitment: </span>
                 {note.commitment}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1">
+              <label className="block text-[13px] mb-1" style={{ color: 'var(--text-body)' }}>
                 Starknet Recipient Address
               </label>
               <input
@@ -227,14 +242,24 @@ export default function WithdrawForm() {
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder="0x..."
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm font-mono text-gray-300 placeholder:text-gray-400 focus:outline-none focus:border-gray-600"
+                className="w-full px-3 py-2.5 text-[13px] font-mono focus:outline-none"
+                style={{
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border-strong)',
+                  color: 'var(--text-body)',
+                }}
               />
             </div>
 
             <button
               onClick={handleGenerateProof}
               disabled={!recipient || status === 'proving'}
-              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg"
+              className="cta-btn w-full text-center"
+              style={!recipient || status === 'proving' ? {
+                background: 'var(--surface-raised)',
+                color: 'var(--text-label)',
+                cursor: 'not-allowed',
+              } : {}}
             >
               {status === 'proving' ? 'Generating proof...' : 'Generate Proof'}
             </button>
@@ -244,13 +269,18 @@ export default function WithdrawForm() {
         {/* Step 3: Proof ready, get calldata */}
         {proofData && !calldata && (
           <div className="space-y-4">
-            <div className="text-sm text-emerald-400">
+            <div className="text-[13px]" style={{ color: '#34d399' }}>
               Groth16 proof generated
             </div>
             <button
               onClick={getCalldata}
               disabled={status === 'fetching_calldata'}
-              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg"
+              className="cta-btn w-full text-center"
+              style={status === 'fetching_calldata' ? {
+                background: 'var(--surface-raised)',
+                color: 'var(--text-label)',
+                cursor: 'not-allowed',
+              } : {}}
             >
               {status === 'fetching_calldata'
                 ? 'Fetching calldata...'
@@ -262,11 +292,16 @@ export default function WithdrawForm() {
         {/* Step 4: Calldata ready, relay */}
         {calldata && status !== 'done' && (
           <div className="space-y-4">
-            <div className="text-sm text-emerald-400">Calldata ready</div>
+            <div className="text-[13px]" style={{ color: '#34d399' }}>Calldata ready</div>
             <button
               onClick={submitRelay}
               disabled={status === 'relaying'}
-              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg"
+              className="cta-btn w-full text-center"
+              style={status === 'relaying' ? {
+                background: 'var(--surface-raised)',
+                color: 'var(--text-label)',
+                cursor: 'not-allowed',
+              } : {}}
             >
               {status === 'relaying'
                 ? 'Submitting to relayer...'
@@ -278,10 +313,10 @@ export default function WithdrawForm() {
         {/* Done */}
         {status === 'done' && relayTxHash && (
           <div className="space-y-2">
-            <div className="text-sm text-emerald-400">
+            <div className="text-[13px]" style={{ color: '#34d399' }}>
               Withdrawal submitted successfully
             </div>
-            <div className="text-xs text-gray-400 font-mono break-all">
+            <div className="text-xs font-mono break-all" style={{ color: 'var(--text-body)' }}>
               TX: {relayTxHash}
             </div>
           </div>
@@ -289,8 +324,8 @@ export default function WithdrawForm() {
 
         {/* Error */}
         {(error || treeError) && (
-          <div className="mt-4 bg-red-900/20 border border-red-700/50 rounded-lg p-3">
-            <p className="text-red-400 text-sm">{error || treeError}</p>
+          <div className="mt-4 p-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
+            <p className="text-[13px]" style={{ color: '#f87171' }}>{error || treeError}</p>
           </div>
         )}
       </div>

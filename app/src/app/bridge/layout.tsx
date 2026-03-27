@@ -21,9 +21,13 @@ export default function BridgeLayout({
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b border-gray-800">
+      <header style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="text-lg font-semibold text-gray-100">
+          <Link
+            href="/"
+            className="text-[13px] font-bold tracking-[0.18em] uppercase"
+            style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)', textDecoration: 'none' }}
+          >
             Privacy Bridge
           </Link>
           <WalletConnect />
@@ -31,7 +35,7 @@ export default function BridgeLayout({
       </header>
 
       {/* Nav tabs */}
-      <nav className="border-b border-gray-800">
+      <nav style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-4xl mx-auto px-4 flex gap-1">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
@@ -39,11 +43,14 @@ export default function BridgeLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px ${
-                  isActive
-                    ? 'border-emerald-500 text-emerald-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-300'
-                }`}
+                className="px-4 py-2.5 text-[13px] font-medium -mb-px"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  color: isActive ? 'var(--text-heading)' : 'var(--text-label)',
+                  borderBottom: isActive ? '2px solid var(--text-heading)' : '2px solid transparent',
+                  textDecoration: 'none',
+                  letterSpacing: '0.04em',
+                }}
               >
                 {item.label}
               </Link>

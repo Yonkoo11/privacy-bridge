@@ -135,6 +135,11 @@ export default function Home() {
           </ol>
         </section>
 
+        {/* Bottom CTA */}
+        <div className="mt-16 mb-12">
+          <Link href="/bridge" className="cta-btn">Launch App</Link>
+        </div>
+
         {/* Footer */}
         <footer className="py-6 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-label)' }}>
           <span>PL_Genesis Hackathon</span>
