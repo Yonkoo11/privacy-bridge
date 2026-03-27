@@ -9,9 +9,8 @@ out/
 *.r1cs
 *.sym
 
-# Allow circuit artifacts needed by the web app (trusted setup outputs)
-!app/public/bridge.wasm
-!app/public/bridge_final.zkey
+# Circuit artifacts served at runtime, not bundled (causes OOM in next build)
+# Copy from circuits/target/ to app/public/ only for local dev
 target/
 .snfoundry_cache/
 
