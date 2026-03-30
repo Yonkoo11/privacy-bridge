@@ -81,7 +81,7 @@ export function useDeposit() {
             onSuccess: () => {
               setStatus('confirming');
             },
-            onError: (err) => {
+            onError: (err: Error) => {
               setError(err.message);
               setStatus('error');
             },
