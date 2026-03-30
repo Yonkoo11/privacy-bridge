@@ -24,8 +24,8 @@ body {
   background-color: var(--bg);
   color: var(--text-body);
   font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.65;
+  font-size: 15px;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -45,16 +45,17 @@ input[type='number'] {
 /* Classification stamp */
 .stamp {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-stamp);
   border: 1px solid #3a3a40;
   display: inline-block;
-  padding: 8px 16px;
+  padding: 10px 18px;
   margin-bottom: 32px;
   transform: rotate(-0.5deg);
+  line-height: 1.5;
 }
 
 /* Reverse-redaction hero line */
@@ -87,12 +88,12 @@ input[type='number'] {
 }
 .doc-panel-header {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-stamp);
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border-strong);
   background: var(--surface-raised);
 }
@@ -166,5 +167,5 @@ button:disabled {
 /* Responsive */
 @media (max-width: 640px) {
   .redact-bar { padding: 1px 8px; }
-  .stamp { margin-bottom: 24px; font-size: 9px; padding: 6px 10px; }
+  .stamp { margin-bottom: 24px; font-size: 11px; padding: 8px 12px; }
 }

@@ -43,7 +43,7 @@ export default function BridgeLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-3 sm:px-4 py-2.5 text-[13px] font-medium -mb-px whitespace-nowrap shrink-0"
+                className="px-3 sm:px-4 py-2.5 text-[15px] font-medium -mb-px whitespace-nowrap shrink-0"
                 style={{
                   fontFamily: 'var(--font-mono)',
                   color: isActive ? 'var(--text-heading)' : 'var(--text-label)',

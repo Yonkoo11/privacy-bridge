@@ -71,7 +71,7 @@ export default function NoteManager() {
         {!unlocked && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[13px] mb-1" style={{ color: 'var(--text-body)' }}>
+              <label className="block text-[15px] mb-1" style={{ color: 'var(--text-body)' }}>
                 Password
               </label>
               <div className="relative">
@@ -80,7 +80,7 @@ export default function NoteManager() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password to decrypt notes"
-                  className="w-full px-3 py-2.5 pr-16 text-[13px] focus:outline-none"
+                  className="w-full px-3 py-2.5 pr-16 text-[15px] focus:outline-none"
                   style={{
                     fontFamily: 'var(--font-mono)',
                     background: 'var(--bg)',
@@ -92,7 +92,7 @@ export default function NoteManager() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] px-2 py-1"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[13px] px-2 py-1"
                   style={{ color: 'var(--text-label)', background: 'transparent' }}
                 >
                   {showPassword ? 'Hide' : 'Show'}
@@ -115,7 +115,7 @@ export default function NoteManager() {
                       />
                     ))}
                   </div>
-                  <span className="text-[10px]" style={{
+                  <span className="text-[12px]" style={{
                     color: passwordStrength === 'weak' ? '#f87171' : passwordStrength === 'fair' ? '#fbbf24' : '#34d399',
                   }}>
                     {passwordStrength}
@@ -126,7 +126,7 @@ export default function NoteManager() {
             <button
               onClick={handleUnlock}
               disabled={!password}
-              className="cta-btn w-full text-center text-[13px]"
+              className="cta-btn w-full text-center text-[15px]"
               style={!password ? {
                 background: 'var(--surface-raised)',
                 color: 'var(--text-label)',
@@ -143,8 +143,8 @@ export default function NoteManager() {
           <div className="space-y-4">
             {notes.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-[13px]" style={{ color: 'var(--text-label)' }}>No notes found</p>
-                <p className="text-xs mt-1" style={{ color: 'var(--text-label)' }}>
+                <p className="text-[15px]" style={{ color: 'var(--text-label)' }}>No notes found</p>
+                <p className="text-sm mt-1" style={{ color: 'var(--text-label)' }}>
                   Notes will appear here after you make a deposit
                 </p>
               </div>
@@ -204,14 +204,14 @@ export default function NoteManager() {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={handleExport}
-                className="cta-btn flex-1 text-center text-[13px]"
+                className="cta-btn flex-1 text-center text-[15px]"
                 style={{ padding: '10px 16px' }}
               >
                 Export Backup
               </button>
               <button
                 onClick={() => fileRef.current?.click()}
-                className="flex-1 px-4 py-2.5 text-[13px]"
+                className="flex-1 px-4 py-2.5 text-[15px]"
                 style={{
                   fontFamily: 'var(--font-mono)',
                   background: 'var(--surface-raised)',
@@ -234,7 +234,7 @@ export default function NoteManager() {
 
         {error && (
           <div className="mt-4 p-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
-            <p className="text-[13px]" style={{ color: '#f87171' }}>{error}</p>
+            <p className="text-[15px]" style={{ color: '#f87171' }}>{error}</p>
           </div>
         )}
       </div>

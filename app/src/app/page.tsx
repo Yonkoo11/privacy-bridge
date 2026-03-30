@@ -59,7 +59,7 @@ export default function Home() {
             <div className="mb-1">Withdraw on another.</div>
             <div className="redact-bar mb-1">No link between them.</div>
           </div>
-          <p className="mt-6 text-sm leading-[1.7] max-w-[640px]" style={{ color: 'var(--text-body)' }}>
+          <p className="mt-6 text-base leading-[1.7] max-w-[640px]" style={{ color: 'var(--text-body)' }}>
             Groth16 proofs sever the on-chain trail between Flow&nbsp;EVM deposits and Starknet withdrawals. Fixed denomination pools, Poseidon Merkle tree, relayer pattern.
           </p>
           <div className="mt-8">
@@ -71,8 +71,8 @@ export default function Home() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-px mb-16 mt-12" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
           {SPECS.map(([label, value]) => (
             <div key={label} className="px-4 sm:px-6 py-4" style={{ background: 'var(--surface)' }}>
-              <div className="text-[10px] sm:text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>{label}</div>
-              <div className="text-[14px] sm:text-[15px] font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{value}</div>
+              <div className="text-[12px] sm:text-[13px] font-medium tracking-[0.1em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>{label}</div>
+              <div className="text-[16px] sm:text-[17px] font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{value}</div>
             </div>
           ))}
         </div>
@@ -84,9 +84,9 @@ export default function Home() {
             {FLOW_STEPS.map((s) => (
               <div key={s.n} className="relative mb-8 last:mb-0">
                 <div className="absolute -left-8 -top-0.5 w-6 text-center text-2xl font-bold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{s.n}</div>
-                <div className="text-base font-semibold mb-1 tracking-wide" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{s.verb}</div>
-                <div className="text-[14px] leading-[1.65] mb-2 max-w-[600px]" style={{ color: 'var(--text-body)' }}>{s.desc}</div>
-                <div className="text-[11px] tracking-[0.08em] uppercase" style={{ color: 'var(--text-label)' }}>{s.chain}</div>
+                <div className="text-lg font-semibold mb-1 tracking-wide" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{s.verb}</div>
+                <div className="text-[15px] leading-[1.7] mb-2 max-w-[600px]" style={{ color: 'var(--text-body)' }}>{s.desc}</div>
+                <div className="text-[13px] tracking-[0.08em] uppercase" style={{ color: 'var(--text-label)' }}>{s.chain}</div>
               </div>
             ))}
           </div>
@@ -98,8 +98,8 @@ export default function Home() {
           <div>
             {SECURITY.map(([prop, detail]) => (
               <div key={prop} className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-0 mb-px">
-                <span className="text-[13px] font-medium px-4 py-3" style={{ color: 'var(--text-heading)', background: 'var(--surface)', borderRight: '1px solid var(--border)' }}>{prop}</span>
-                <span className="text-[14px] px-4 py-3" style={{ color: 'var(--text-body)' }}>{detail}</span>
+                <span className="text-[15px] font-medium px-4 py-3" style={{ color: 'var(--text-heading)', background: 'var(--surface)', borderRight: '1px solid var(--border)' }}>{prop}</span>
+                <span className="text-[15px] px-4 py-3" style={{ color: 'var(--text-body)' }}>{detail}</span>
               </div>
             ))}
           </div>
@@ -113,11 +113,11 @@ export default function Home() {
             <div className="p-4">
               {CONTRACTS.map(([name, addr]) => (
                 <div key={name} className="flex items-baseline justify-between gap-4 py-2 flex-wrap">
-                  <span className="text-[13px] font-medium shrink-0" style={{ color: 'var(--text-heading)' }}>{name}</span>
-                  <span className="text-[13px] tabular-nums break-all" style={{ color: 'var(--text-stamp)' }}>{addr}</span>
+                  <span className="text-[15px] font-medium shrink-0" style={{ color: 'var(--text-heading)' }}>{name}</span>
+                  <span className="text-[14px] tabular-nums break-all" style={{ color: 'var(--text-stamp)' }}>{addr}</span>
                 </div>
               ))}
-              <div className="text-xs pt-3 mt-3" style={{ borderTop: '1px solid var(--border-strong)', color: 'var(--text-label)' }}>chain_id: 545</div>
+              <div className="text-sm pt-3 mt-3" style={{ borderTop: '1px solid var(--border-strong)', color: 'var(--text-label)' }}>chain_id: 545</div>
             </div>
           </div>
         </section>
@@ -127,8 +127,8 @@ export default function Home() {
           <div className="stamp">&mdash;&mdash; Known Limitations &mdash;&mdash; Declassified &mdash;&mdash;</div>
           <ol className="list-none" style={{ counterReset: 'lim' }}>
             {LIMITATIONS.map((text, i) => (
-              <li key={i} className="relative pl-6 py-3 text-[14px] leading-[1.6]" style={{ borderBottom: i < LIMITATIONS.length - 1 ? '1px solid var(--surface-raised)' : 'none', counterIncrement: 'lim' }}>
-                <span className="absolute left-0 text-xs font-semibold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-label)' }}>{String(i + 1).padStart(2, '0')}</span>
+              <li key={i} className="relative pl-8 py-3 text-[15px] leading-[1.7]" style={{ borderBottom: i < LIMITATIONS.length - 1 ? '1px solid var(--surface-raised)' : 'none', counterIncrement: 'lim' }}>
+                <span className="absolute left-0 text-sm font-semibold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-label)' }}>{String(i + 1).padStart(2, '0')}</span>
                 {text}
               </li>
             ))}
@@ -137,18 +137,18 @@ export default function Home() {
 
         {/* Bottom CTA */}
         <div className="mt-16 mb-12 pt-12" style={{ borderTop: '1px solid var(--border)' }}>
-          <p className="text-[13px] mb-4" style={{ color: 'var(--text-label)' }}>Ready to bridge privately?</p>
+          <p className="text-[15px] mb-4" style={{ color: 'var(--text-label)' }}>Ready to bridge privately?</p>
           <Link href="/bridge" className="cta-btn">Launch App</Link>
         </div>
 
         {/* Footer */}
-        <footer className="py-6 text-xs flex items-center justify-between" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-label)' }}>
+        <footer className="py-6 text-sm flex items-center justify-between" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-label)' }}>
           <span>PL Genesis Hackathon</span>
           <a
             href="https://github.com/Yonkoo11/privacy-bridge"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[13px] font-medium"
+            className="text-sm font-medium"
             style={{
               fontFamily: 'var(--font-mono)',
               color: 'var(--text-body)',

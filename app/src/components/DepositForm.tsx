@@ -69,7 +69,7 @@ export default function DepositForm() {
 
         {/* Step 1: Select denomination */}
         <div className="mb-6">
-          <label className="block text-[13px] mb-2" style={{ color: 'var(--text-body)' }}>
+          <label className="block text-[15px] mb-2" style={{ color: 'var(--text-body)' }}>
             Select Amount
           </label>
           <div className="grid grid-cols-2 gap-px" style={{ background: 'var(--border)' }}>
@@ -85,8 +85,8 @@ export default function DepositForm() {
                   border: selectedDenom === i ? '1px solid var(--text-heading)' : '1px solid transparent',
                 }}
               >
-                <div className="text-[13px] font-medium">{d.label}</div>
-                <div className="text-[10px] mt-0.5" style={{ color: 'var(--text-label)' }}>{DENOM_HINTS[d.label] ?? ''}</div>
+                <div className="text-[15px] font-medium">{d.label}</div>
+                <div className="text-[13px] mt-0.5" style={{ color: 'var(--text-label)' }}>{DENOM_HINTS[d.label] ?? ''}</div>
               </button>
             ))}
           </div>
@@ -140,14 +140,14 @@ export default function DepositForm() {
             <div className="flex gap-px" style={{ background: 'var(--border)' }}>
               <button
                 onClick={handleDownload}
-                className="flex-1 px-4 py-2.5 text-[13px]"
+                className="flex-1 px-4 py-2.5 text-[15px]"
                 style={{ fontFamily: 'var(--font-mono)', background: 'var(--surface)', color: 'var(--text-body)', border: 'none' }}
               >
                 Download Backup
               </button>
               <button
                 onClick={handleCopy}
-                className="flex-1 px-4 py-2.5 text-[13px]"
+                className="flex-1 px-4 py-2.5 text-[15px]"
                 style={{ fontFamily: 'var(--font-mono)', background: 'var(--surface)', color: 'var(--text-body)', border: 'none' }}
               >
                 Copy to Clipboard
@@ -173,20 +173,20 @@ export default function DepositForm() {
 
         {/* Status display */}
         {status === 'locking' && (
-          <div className="mt-4 text-[13px] status-pulse" style={{ color: 'var(--text-body)' }}>
+          <div className="mt-4 text-[15px] status-pulse" style={{ color: 'var(--text-body)' }}>
             Confirm transaction in your wallet
           </div>
         )}
 
         {status === 'confirming' && (
-          <div className="mt-4 text-[13px] status-pulse" style={{ color: 'var(--text-body)' }}>
+          <div className="mt-4 text-[15px] status-pulse" style={{ color: 'var(--text-body)' }}>
             Waiting for confirmation
           </div>
         )}
 
         {status === 'done' && isConfirmed && (
           <div className="mt-4 space-y-2">
-            <div className="text-[13px]" style={{ color: '#34d399' }}>
+            <div className="text-[15px]" style={{ color: '#34d399' }}>
               Deposit confirmed on Flow EVM
             </div>
             {txHash && (
@@ -194,7 +194,7 @@ export default function DepositForm() {
                 href={`https://evm-testnet.flowscan.io/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs"
+                className="text-sm"
                 style={{ color: 'var(--text-stamp)', borderBottom: '1px solid var(--border-strong)' }}
               >
                 View on FlowScan
@@ -205,7 +205,7 @@ export default function DepositForm() {
 
         {error && (
           <div className="mt-4 p-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
-            <p className="text-[13px]" style={{ color: '#f87171' }}>{error}</p>
+            <p className="text-[15px]" style={{ color: '#f87171' }}>{error}</p>
           </div>
         )}
       </div>

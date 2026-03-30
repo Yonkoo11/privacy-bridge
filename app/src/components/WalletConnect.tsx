@@ -11,12 +11,12 @@ export default function WalletConnect() {
   if (isConnected && address) {
     return (
       <div className="flex items-center gap-3">
-        <span className="text-[13px] font-mono tabular-nums" style={{ color: 'var(--text-body)' }}>
+        <span className="text-[15px] font-mono tabular-nums" style={{ color: 'var(--text-body)' }}>
           {address.slice(0, 6)}...{address.slice(-4)}
         </span>
         <button
           onClick={() => disconnect()}
-          className="px-3 py-1.5 text-[13px]"
+          className="px-3 py-1.5 text-[15px]"
           style={{
             fontFamily: 'var(--font-mono)',
             color: 'var(--text-body)',
@@ -33,7 +33,7 @@ export default function WalletConnect() {
   return (
     <button
       onClick={() => connect({ connector: injected() })}
-      className="cta-btn text-[13px]"
+      className="cta-btn text-[15px]"
       style={{ padding: '8px 20px' }}
     >
       Connect Wallet

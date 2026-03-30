@@ -109,11 +109,11 @@ export default function WithdrawForm() {
       });
 
       const commitments = logs
-        .sort((a, b) => Number(a.args.leafIndex! - b.args.leafIndex!))
-        .map((log) => log.args.commitment!.toString());
+        .sort((a: typeof logs[number], b: typeof logs[number]) => Number(a.args.leafIndex! - b.args.leafIndex!))
+        .map((log: typeof logs[number]) => log.args.commitment!.toString());
 
       const userCommitment = note.commitment;
-      const leafIndex = commitments.findIndex((c) => c === userCommitment);
+      const leafIndex = commitments.findIndex((c: string) => c === userCommitment);
 
       if (leafIndex === -1) {
         setTreeError('Your commitment was not found on-chain. Make sure the deposit is confirmed.');
@@ -165,7 +165,7 @@ export default function WithdrawForm() {
                 >
                   {i < currentStep ? '\u2713' : i + 1}
                 </div>
-                <span className="text-[9px] hidden sm:block" style={{ color: i <= currentStep ? 'var(--text-body)' : 'var(--text-label)', fontFamily: 'var(--font-mono)' }}>
+                <span className="text-[12px] hidden sm:block" style={{ color: i <= currentStep ? 'var(--text-body)' : 'var(--text-label)', fontFamily: 'var(--font-mono)' }}>
                   {step}
                 </span>
               </div>
@@ -182,7 +182,7 @@ export default function WithdrawForm() {
         {/* Step 1: Load note */}
         {!note && (
           <div className="space-y-3">
-            <p className="text-[12px]" style={{ color: 'var(--text-label)' }}>
+            <p className="text-[14px]" style={{ color: 'var(--text-label)' }}>
               Paste the JSON from your deposit note, or upload the backup file.
             </p>
             <textarea
@@ -190,7 +190,7 @@ export default function WithdrawForm() {
               onChange={(e) => setNoteInput(e.target.value)}
               placeholder='{"secret":"...","nullifier":"...","commitment":"...","amount":"..."}'
               rows={6}
-              className="w-full p-3 text-[13px] font-mono resize-none focus:outline-none"
+              className="w-full p-3 text-[15px] font-mono resize-none focus:outline-none"
               style={{
                 background: 'var(--bg)',
                 border: '1px solid var(--border-strong)',
@@ -201,7 +201,7 @@ export default function WithdrawForm() {
               <button
                 onClick={handlePasteNote}
                 disabled={!noteInput.trim()}
-                className="cta-btn flex-1 text-center text-[13px]"
+                className="cta-btn flex-1 text-center text-[15px]"
                 style={!noteInput.trim() ? {
                   background: 'var(--surface-raised)',
                   color: 'var(--text-label)',
@@ -212,7 +212,7 @@ export default function WithdrawForm() {
               </button>
               <button
                 onClick={() => fileRef.current?.click()}
-                className="flex-1 px-4 py-2.5 text-[13px]"
+                className="flex-1 px-4 py-2.5 text-[15px]"
                 style={{ fontFamily: 'var(--font-mono)', background: 'var(--surface-raised)', color: 'var(--text-body)', border: 'none' }}
               >
                 Upload File
@@ -243,7 +243,7 @@ export default function WithdrawForm() {
             </div>
 
             <div>
-              <label className="block text-[13px] mb-1" style={{ color: 'var(--text-body)' }}>
+              <label className="block text-[15px] mb-1" style={{ color: 'var(--text-body)' }}>
                 Starknet Recipient Address
               </label>
               <input
@@ -251,7 +251,7 @@ export default function WithdrawForm() {
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder="0x..."
-                className="w-full px-3 py-2.5 text-[13px] font-mono focus:outline-none"
+                className="w-full px-3 py-2.5 text-[15px] font-mono focus:outline-none"
                 style={{
                   background: 'var(--bg)',
                   border: `1px solid ${recipient && !isValidRecipient ? 'rgba(239,68,68,0.5)' : 'var(--border-strong)'}`,
@@ -259,7 +259,7 @@ export default function WithdrawForm() {
                 }}
               />
               {recipient && !isValidRecipient && (
-                <p className="text-[11px] mt-1" style={{ color: '#f87171' }}>
+                <p className="text-[13px] mt-1" style={{ color: '#f87171' }}>
                   Address must start with 0x and be at least 42 characters
                 </p>
               )}
@@ -283,7 +283,7 @@ export default function WithdrawForm() {
         {/* Step 3: Proof ready, get calldata */}
         {proofData && !calldata && (
           <div className="space-y-4">
-            <div className="text-[13px]" style={{ color: '#34d399' }}>
+            <div className="text-[15px]" style={{ color: '#34d399' }}>
               Groth16 proof generated
             </div>
             <button
@@ -306,7 +306,7 @@ export default function WithdrawForm() {
         {/* Step 4: Calldata ready, relay */}
         {calldata && status !== 'done' && (
           <div className="space-y-4">
-            <div className="text-[13px]" style={{ color: '#34d399' }}>Calldata ready</div>
+            <div className="text-[15px]" style={{ color: '#34d399' }}>Calldata ready</div>
             <button
               onClick={submitRelay}
               disabled={status === 'relaying'}
@@ -327,7 +327,7 @@ export default function WithdrawForm() {
         {/* Done */}
         {status === 'done' && relayTxHash && (
           <div className="space-y-2">
-            <div className="text-[13px]" style={{ color: '#34d399' }}>
+            <div className="text-[15px]" style={{ color: '#34d399' }}>
               Withdrawal submitted successfully
             </div>
             <div className="text-xs font-mono break-all" style={{ color: 'var(--text-body)' }}>
@@ -339,7 +339,7 @@ export default function WithdrawForm() {
         {/* Error */}
         {(error || treeError) && (
           <div className="mt-4 p-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
-            <p className="text-[13px]" style={{ color: '#f87171' }}>{error || treeError}</p>
+            <p className="text-[15px]" style={{ color: '#f87171' }}>{error || treeError}</p>
           </div>
         )}
       </div>

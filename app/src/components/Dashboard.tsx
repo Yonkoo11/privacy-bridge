@@ -30,7 +30,7 @@ export default function Dashboard() {
       {/* Overview stats */}
       <div className="grid grid-cols-2 gap-px" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
         <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
-          <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
+          <div className="text-[13px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
             Total Value Locked
           </div>
           <div className="text-xl font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
@@ -38,7 +38,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
-          <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
+          <div className="text-[13px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
             Total Deposits
           </div>
           <div className="text-xl font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
@@ -46,7 +46,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
-          <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
+          <div className="text-[13px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
             Relayer Status
           </div>
           <div className="text-base flex items-center gap-2" style={{ color: 'var(--text-body)' }}>
@@ -55,7 +55,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
-          <div className="text-[11px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
+          <div className="text-[13px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
             Relayer Fee
           </div>
           <div className="text-base" style={{ color: 'var(--text-body)' }}>{stats.relayerFee}</div>
@@ -65,8 +65,8 @@ export default function Dashboard() {
       {/* Empty state CTA */}
       {isEmpty && (
         <div className="p-5 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)' }}>
-          <p className="text-[13px] mb-3" style={{ color: 'var(--text-label)' }}>No deposits yet. Start building your anonymity set.</p>
-          <Link href="/bridge/deposit" className="cta-btn text-[13px]" style={{ padding: '10px 28px' }}>
+          <p className="text-[15px] mb-3" style={{ color: 'var(--text-label)' }}>No deposits yet. Start building your anonymity set.</p>
+          <Link href="/bridge/deposit" className="cta-btn text-[15px]" style={{ padding: '10px 28px' }}>
             Make First Deposit
           </Link>
         </div>
@@ -74,7 +74,7 @@ export default function Dashboard() {
 
       {/* Anonymity sets */}
       <div className="doc-panel">
-        <div className="doc-panel-header" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>Anonymity Sets by Denomination</div>
+        <div className="doc-panel-header" style={{ fontSize: '13px', letterSpacing: '0.08em' }}>Anonymity Sets by Denomination</div>
         <div className="p-4 space-y-0">
           {denomSets.map((d, i) => (
             <div
@@ -82,11 +82,11 @@ export default function Dashboard() {
               className="flex items-center justify-between py-2.5"
               style={{ borderBottom: i < denomSets.length - 1 ? '1px solid var(--border)' : 'none' }}
             >
-              <span className="text-[13px] font-mono" style={{ color: 'var(--text-body)' }}>
+              <span className="text-[15px] font-mono" style={{ color: 'var(--text-body)' }}>
                 {d.label}
               </span>
               <span
-                className="text-[13px] font-medium tabular-nums"
+                className="text-[15px] font-medium tabular-nums"
                 style={{ color: d.size === 0 ? 'var(--text-label)' : d.size < 5 ? '#fbbf24' : '#34d399' }}
               >
                 {d.size} deposits
@@ -98,9 +98,9 @@ export default function Dashboard() {
 
       {/* Latest root */}
       <div className="doc-panel">
-        <div className="doc-panel-header" style={{ fontSize: '11px', letterSpacing: '0.08em' }}>Latest Merkle Root</div>
+        <div className="doc-panel-header" style={{ fontSize: '13px', letterSpacing: '0.08em' }}>Latest Merkle Root</div>
         <div className="p-4">
-          <p className="text-xs font-mono break-all" style={{ color: 'var(--text-label)' }}>
+          <p className="text-sm font-mono break-all" style={{ color: 'var(--text-label)' }}>
             {stats.latestRoot ?? 'No roots relayed yet'}
           </p>
         </div>
