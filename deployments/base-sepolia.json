@@ -1,0 +1,11 @@
+{
+  "chain": "base-sepolia",
+  "network": "Base Sepolia",
+  "rpc": "https://sepolia.base.org",
+  "chainId": 84532,
+  "hasher_library": "0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a",
+  "hasher_address": "0x2eaEF8016D2a7Dc01677E57183a167649cB07402",
+  "contract_address": "0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca",
+  "deployer": "0x8902C8b707EB26Ed383F4Aeb86b6058b13190390",
+  "timestamp": "2026-03-31T22:03:19.041Z"
+}

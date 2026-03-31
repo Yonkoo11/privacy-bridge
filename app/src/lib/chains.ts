@@ -74,17 +74,17 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
   },
   [sepolia.id]: {
     chain: sepolia,
-    bridgeAddress: null,
+    bridgeAddress: '0x2eaEF8016D2a7Dc01677E57183a167649cB07402',
     tokenSymbol: 'pETH',
   },
   [baseSepolia.id]: {
     chain: baseSepolia,
-    bridgeAddress: null,
+    bridgeAddress: '0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca',
     tokenSymbol: 'pBASE',
   },
   [arbitrumSepolia.id]: {
     chain: arbitrumSepolia,
-    bridgeAddress: null,
+    bridgeAddress: '0x2eaEF8016D2a7Dc01677E57183a167649cB07402',
     tokenSymbol: 'pARB',
   },
   [polygonAmoy.id]: {
@@ -94,7 +94,7 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
   },
   [optimismSepolia.id]: {
     chain: optimismSepolia,
-    bridgeAddress: null,
+    bridgeAddress: '0x2eaEF8016D2a7Dc01677E57183a167649cB07402',
     tokenSymbol: 'pOP',
   },
 };

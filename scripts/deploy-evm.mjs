@@ -20,7 +20,7 @@ const DEPLOYMENTS_DIR = path.join(__dirname, '..', 'deployments');
 
 const CHAINS = {
   'flow-evm-testnet': { rpc: 'https://testnet.evm.nodes.onflow.org', chainId: 545, name: 'Flow EVM Testnet', symbol: 'FLOW' },
-  'sepolia': { rpc: 'https://rpc.sepolia.org', chainId: 11155111, name: 'Ethereum Sepolia', symbol: 'ETH' },
+  'sepolia': { rpc: 'https://ethereum-sepolia-rpc.publicnode.com', chainId: 11155111, name: 'Ethereum Sepolia', symbol: 'ETH' },
   'base-sepolia': { rpc: 'https://sepolia.base.org', chainId: 84532, name: 'Base Sepolia', symbol: 'ETH' },
   'arbitrum-sepolia': { rpc: 'https://sepolia-rollup.arbitrum.io/rpc', chainId: 421614, name: 'Arbitrum Sepolia', symbol: 'ETH' },
   'polygon-amoy': { rpc: 'https://rpc-amoy.polygon.technology', chainId: 80002, name: 'Polygon Amoy', symbol: 'POL' },

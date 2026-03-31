@@ -13,11 +13,11 @@ const SPECS = [
 
 const SUPPORTED_CHAINS = [
   { name: 'Flow EVM', symbol: 'FLOW', status: 'live' },
-  { name: 'Ethereum', symbol: 'ETH', status: 'soon' },
-  { name: 'Base', symbol: 'ETH', status: 'soon' },
-  { name: 'Arbitrum', symbol: 'ETH', status: 'soon' },
+  { name: 'Ethereum', symbol: 'ETH', status: 'live' },
+  { name: 'Base', symbol: 'ETH', status: 'live' },
+  { name: 'Arbitrum', symbol: 'ETH', status: 'live' },
   { name: 'Polygon', symbol: 'POL', status: 'soon' },
-  { name: 'Optimism', symbol: 'ETH', status: 'soon' },
+  { name: 'Optimism', symbol: 'ETH', status: 'live' },
 ];
 
 const FLOW_STEPS = [

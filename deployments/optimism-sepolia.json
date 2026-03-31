@@ -1,0 +1,11 @@
+{
+  "chain": "optimism-sepolia",
+  "network": "Optimism Sepolia",
+  "rpc": "https://sepolia.optimism.io",
+  "chainId": 11155420,
+  "hasher_library": "0x38d512FA6e74CDb0689Fd98805F3790F25471BEB",
+  "hasher_address": "0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a",
+  "contract_address": "0x2eaEF8016D2a7Dc01677E57183a167649cB07402",
+  "deployer": "0x8902C8b707EB26Ed383F4Aeb86b6058b13190390",
+  "timestamp": "2026-03-31T22:05:07.560Z"
+}
