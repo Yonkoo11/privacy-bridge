@@ -2,8 +2,10 @@
 
 import { useState, useRef } from 'react';
 import { usePublicClient } from 'wagmi';
+import { createPublicClient, http } from 'viem';
 import { useWithdraw } from '@/hooks/useWithdraw';
-import { PRIVACY_BRIDGE_ADDRESS, PRIVACY_BRIDGE_ABI } from '@/lib/constants';
+import { getBridgeAddress, PRIVACY_BRIDGE_ABI } from '@/lib/constants';
+import { getChainConfig } from '@/lib/chains';
 import { buildMerkleTree } from '@/lib/merkle';
 import type { NoteData } from '@/lib/encryption';
 
@@ -78,12 +80,29 @@ export default function WithdrawForm() {
   };
 
   const handleGenerateProof = async () => {
-    if (!note || !recipient || !publicClient) return;
+    if (!note || !recipient) return;
     setTreeError(null);
 
     try {
-      const nextLeafIndex = await publicClient.readContract({
-        address: PRIVACY_BRIDGE_ADDRESS,
+      // Use source chain from note (default to Flow for old notes)
+      const sourceChainId = note.sourceChainId ?? 545;
+      const chainConfig = getChainConfig(sourceChainId);
+      const bridgeAddress = getBridgeAddress(sourceChainId);
+
+      if (!bridgeAddress || !chainConfig) {
+        setTreeError(`Bridge not deployed on chain ${sourceChainId}`);
+        return;
+      }
+
+      // Create a client for the source chain (may differ from wallet chain)
+      const rpcUrl = chainConfig.chain.rpcUrls.default.http[0];
+      const sourceClient = createPublicClient({
+        chain: chainConfig.chain,
+        transport: http(rpcUrl),
+      });
+
+      const nextLeafIndex = await sourceClient.readContract({
+        address: bridgeAddress,
         abi: PRIVACY_BRIDGE_ABI,
         functionName: 'nextLeafIndex',
       }) as bigint;
@@ -94,7 +113,7 @@ export default function WithdrawForm() {
       }
 
       // Paginate getLogs in 10,000-block chunks (RPC limit)
-      const currentBlock = await publicClient.getBlockNumber();
+      const currentBlock = await sourceClient.getBlockNumber();
       const EVENT_DEF = {
         type: 'event' as const,
         name: 'CommitmentLocked' as const,
@@ -104,22 +123,22 @@ export default function WithdrawForm() {
         ],
       };
       const CHUNK = 9999n;
-      const logs: Awaited<ReturnType<typeof publicClient.getLogs>>[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const allLogs: any[] = [];
       for (let from = 0n; from <= currentBlock; from += CHUNK + 1n) {
         const to = from + CHUNK > currentBlock ? currentBlock : from + CHUNK;
-        const chunk = await publicClient.getLogs({
-          address: PRIVACY_BRIDGE_ADDRESS,
+        const chunk = await sourceClient.getLogs({
+          address: bridgeAddress,
           event: EVENT_DEF,
           fromBlock: from,
           toBlock: to,
         });
-        logs.push(chunk);
+        allLogs.push(...chunk);
       }
-      const allLogs = logs.flat();
 
       const commitments = allLogs
-        .sort((a, b) => Number(a.args.leafIndex! - b.args.leafIndex!))
-        .map((log) => log.args.commitment!.toString());
+        .sort((a: { args: { leafIndex: bigint } }, b: { args: { leafIndex: bigint } }) => Number(a.args.leafIndex - b.args.leafIndex))
+        .map((log: { args: { commitment: bigint } }) => log.args.commitment.toString());
 
       const userCommitment = note.commitment;
       const leafIndex = commitments.findIndex((c: string) => c === userCommitment);

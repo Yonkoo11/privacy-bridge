@@ -248,6 +248,8 @@ async function main() {
     classHash: tokenClass,
     constructorCalldata: CallData.compile({
       bridge: bridgeAddress,
+      name: '0x70464c4f57',      // 'pFLOW' as felt252
+      symbol: '0x70464c4f57',    // 'pFLOW' as felt252
     }),
   });
   await provider.waitForTransaction(tokenRes.transaction_hash);

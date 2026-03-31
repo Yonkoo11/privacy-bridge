@@ -4,21 +4,24 @@ import { useState } from 'react';
 import { useAccount, useConnect, useSwitchChain } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { useDeposit } from '@/hooks/useDeposit';
-import { DENOMINATIONS } from '@/lib/constants';
-import { flowEvmTestnet } from '@/lib/chains';
-
-const DENOM_HINTS: Record<string, string> = {
-  '0.0001 FLOW': 'Micro - test transactions',
-  '0.001 FLOW': 'Small - low-value transfers',
-  '0.01 FLOW': 'Medium - standard privacy',
-  '0.1 FLOW': 'Large - high-value privacy',
-};
+import { getDenominations, getDenomHints } from '@/lib/constants';
+import { SUPPORTED_CHAIN_IDS, getChainConfig, getExplorerTxUrl } from '@/lib/chains';
+import ChainSelector from './ChainSelector';
 
 export default function DepositForm() {
   const { isConnected, chain } = useAccount();
   const { connect } = useConnect();
   const { switchChain } = useSwitchChain();
-  const isWrongChain = isConnected && chain?.id !== flowEvmTestnet.id;
+
+  const chainId = chain?.id ?? 0;
+  const chainConfig = getChainConfig(chainId);
+  const isSupported = SUPPORTED_CHAIN_IDS.has(chainId);
+  const isDeployed = !!chainConfig?.bridgeAddress;
+  const chainName = chain?.name ?? 'Unknown';
+
+  const denominations = getDenominations(chainId);
+  const denomHints = getDenomHints(chainId);
+
   const {
     generateNote,
     lockDeposit,
@@ -33,8 +36,8 @@ export default function DepositForm() {
   const [noteSaved, setNoteSaved] = useState(false);
 
   const handleGenerate = () => {
-    const amount = DENOMINATIONS[selectedDenom].value;
-    generateNote(amount);
+    const amount = denominations[selectedDenom].value;
+    generateNote(amount, chainId);
     setNoteSaved(false);
   };
 
@@ -65,6 +68,9 @@ export default function DepositForm() {
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
+      {/* Chain selector */}
+      <ChainSelector />
+
       <div className="p-6" style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)' }}>
         <h2 className="text-base font-semibold mb-4 tracking-wide" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
           Deposit to Privacy Bridge
@@ -76,7 +82,7 @@ export default function DepositForm() {
             Select Amount
           </label>
           <div className="grid grid-cols-2 gap-px" style={{ background: 'var(--border)' }}>
-            {DENOMINATIONS.map((d, i) => (
+            {denominations.map((d, i) => (
               <button
                 key={i}
                 onClick={() => setSelectedDenom(i)}
@@ -89,7 +95,7 @@ export default function DepositForm() {
                 }}
               >
                 <div className="text-[15px] font-medium">{d.label}</div>
-                <div className="text-[13px] mt-0.5" style={{ color: 'var(--text-label)' }}>{DENOM_HINTS[d.label] ?? ''}</div>
+                <div className="text-[13px] mt-0.5" style={{ color: 'var(--text-label)' }}>{denomHints[d.label] ?? ''}</div>
               </button>
             ))}
           </div>
@@ -104,18 +110,14 @@ export default function DepositForm() {
             >
               Connect Wallet to Deposit
             </button>
-          ) : isWrongChain ? (
-            <button
-              onClick={() => switchChain({ chainId: flowEvmTestnet.id })}
-              className="cta-btn w-full text-center"
-              style={{
-                background: 'rgba(251,191,36,0.1)',
-                color: '#fbbf24',
-                border: '1px solid rgba(251,191,36,0.3)',
-              }}
-            >
-              Switch to Flow EVM Testnet
-            </button>
+          ) : !isSupported ? (
+            <div className="p-4 text-center text-[15px]" style={{ color: '#f87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
+              Unsupported network. Select a supported chain above.
+            </div>
+          ) : !isDeployed ? (
+            <div className="p-4 text-center text-[15px]" style={{ color: '#fbbf24', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)' }}>
+              {chainName} bridge coming soon. Switch to Flow EVM to deposit now.
+            </div>
           ) : (
             <button
               onClick={handleGenerate}
@@ -147,7 +149,11 @@ export default function DepositForm() {
                 </div>
                 <div>
                   <span style={{ color: 'var(--text-label)' }}>amount: </span>
-                  {DENOMINATIONS[selectedDenom].label}
+                  {denominations[selectedDenom].label}
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-label)' }}>source: </span>
+                  {chainName}
                 </div>
               </div>
             </div>
@@ -180,7 +186,7 @@ export default function DepositForm() {
               } : {}}
             >
               {noteSaved
-                ? 'Lock on Flow EVM'
+                ? `Lock on ${chainName}`
                 : 'Save note first to enable deposit'}
             </button>
           </div>
@@ -202,17 +208,17 @@ export default function DepositForm() {
         {status === 'done' && isConfirmed && (
           <div className="mt-4 space-y-2">
             <div className="text-[15px]" style={{ color: '#34d399' }}>
-              Deposit confirmed on Flow EVM
+              Deposit confirmed on {chainName}
             </div>
             {txHash && (
               <a
-                href={`https://evm-testnet.flowscan.io/tx/${txHash}`}
+                href={getExplorerTxUrl(chainId, txHash)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm"
                 style={{ color: 'var(--text-stamp)', borderBottom: '1px solid var(--border-strong)' }}
               >
-                View on FlowScan
+                View on Explorer
               </a>
             )}
           </div>

@@ -3,15 +3,11 @@
 import { useState, useCallback } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { poseidon2 } from 'poseidon-lite';
-import {
-  PRIVACY_BRIDGE_ADDRESS,
-  PRIVACY_BRIDGE_ABI,
-} from '@/lib/constants';
+import { getBridgeAddress, PRIVACY_BRIDGE_ABI } from '@/lib/constants';
 import type { NoteData } from '@/lib/encryption';
 
 type DepositStatus = 'idle' | 'generating' | 'ready' | 'locking' | 'confirming' | 'done' | 'error';
 
-// BN254 scalar field prime
 const FIELD_PRIME = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
 
 function randomFieldElement(): bigint {
@@ -34,7 +30,7 @@ export function useDeposit() {
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
 
-  const generateNote = useCallback((amount: bigint) => {
+  const generateNote = useCallback((amount: bigint, sourceChainId?: number) => {
     try {
       setStatus('generating');
       setError(null);
@@ -42,7 +38,6 @@ export function useDeposit() {
       const secret = randomFieldElement();
       const nullifier = randomFieldElement();
 
-      // commitment = poseidon2([poseidon2([secret, nullifier]), amount])
       const innerHash = poseidon2([secret, nullifier]);
       const commitment = poseidon2([innerHash, amount]);
       const nullifierHash = poseidon2([nullifier, nullifier]);
@@ -54,6 +49,7 @@ export function useDeposit() {
         nullifierHash: nullifierHash.toString(),
         amount: amount.toString(),
         timestamp: Date.now(),
+        sourceChainId,
       };
 
       setNoteData(note);
@@ -67,14 +63,21 @@ export function useDeposit() {
   }, []);
 
   const lockDeposit = useCallback(
-    (commitment: bigint, amount: bigint) => {
+    (commitment: bigint, amount: bigint, chainId?: number) => {
       try {
         setStatus('locking');
         setError(null);
 
+        const bridgeAddress = getBridgeAddress(chainId ?? 545);
+        if (!bridgeAddress) {
+          setError('Bridge not deployed on this chain');
+          setStatus('error');
+          return;
+        }
+
         writeContract(
           {
-            address: PRIVACY_BRIDGE_ADDRESS,
+            address: bridgeAddress,
             abi: PRIVACY_BRIDGE_ABI,
             functionName: 'lock',
             args: [commitment],
@@ -98,7 +101,6 @@ export function useDeposit() {
     [writeContract]
   );
 
-  // Update status when confirmed
   if (isConfirmed && status === 'confirming') {
     setStatus('done');
   }

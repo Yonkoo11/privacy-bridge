@@ -7,22 +7,31 @@ const SPECS = [
   ['Tree', 'Poseidon depth-24'],
   ['Calldata', '1,977 felts'],
   ['Tests', '93/93'],
-  ['Pools', '4 denominations'],
+  ['Chains', '6 networks'],
   ['Root Buffer', '30 entries'],
 ];
 
+const SUPPORTED_CHAINS = [
+  { name: 'Flow EVM', symbol: 'FLOW', status: 'live' },
+  { name: 'Ethereum', symbol: 'ETH', status: 'soon' },
+  { name: 'Base', symbol: 'ETH', status: 'soon' },
+  { name: 'Arbitrum', symbol: 'ETH', status: 'soon' },
+  { name: 'Polygon', symbol: 'POL', status: 'soon' },
+  { name: 'Optimism', symbol: 'ETH', status: 'soon' },
+];
+
 const FLOW_STEPS = [
-  { n: '1', verb: 'Lock', desc: 'Deposit a fixed denomination into the PrivacyBridge contract. A Poseidon commitment is inserted into the on-chain Merkle tree.', chain: 'Flow EVM' },
+  { n: '1', verb: 'Lock', desc: 'Deposit a fixed denomination into the PrivacyBridge contract on any supported EVM chain. A Poseidon commitment is inserted into the on-chain Merkle tree.', chain: 'Any EVM Source' },
   { n: '2', verb: 'Prove', desc: 'Generate a Groth16 proof off-chain. The proof attests to knowledge of a valid commitment in the tree without revealing which one.', chain: 'Off-chain / Browser' },
   { n: '3', verb: 'Verify', desc: 'The garaga verifier on Starknet checks the Groth16 proof on-chain. Nullifier hash is checked against the spent set.', chain: 'Starknet' },
-  { n: '4', verb: 'Claim', desc: 'Tokens are minted to the recipient on Starknet. The nullifier is marked spent. No link to the original deposit is visible.', chain: 'Starknet' },
+  { n: '4', verb: 'Claim', desc: 'Shielded tokens are minted to the recipient on Starknet. The nullifier is marked spent. No link to the original deposit is visible.', chain: 'Starknet' },
 ];
 
 const SECURITY = [
-  ['Fixed Denominations', '0.0001, 0.001, 0.01, 0.1 FLOW'],
+  ['Fixed Denominations', '0.0001, 0.001, 0.01, 0.1 native token per chain'],
   ['On-chain Merkle Tree', 'Poseidon incremental, depth 24, 30-root buffer'],
   ['Commitment Hiding', 'Poseidon(Poseidon(secret, nullifier), amount)'],
-  ['Clean Events', 'Mint emits nullifier_hash + amount only'],
+  ['Minimal Events', 'Mint emits nullifier_hash only, no amount or recipient'],
   ['Relayer Pattern', 'Fee-protected via max_fee_bps bound'],
   ['Withdrawal Timelock', 'Configurable delay, root_timestamps'],
   ['Emergency Withdraw', '30-day timelock, owner-initiated'],
@@ -36,7 +45,7 @@ const CONTRACTS = [
 
 const LIMITATIONS = [
   '1-party trusted setup. The proving key was generated without a multi-party ceremony. A compromised ceremony allows forged proofs. Production requires an MPC ceremony with 100+ participants.',
-  'One-directional bridge. pFLOW tokens on Starknet have no redemption path back to FLOW on the source chain. This is a proof of concept, not a full bridge.',
+  'One-directional bridge. Shielded tokens on Starknet have no redemption path back to the source chain. This is a proof of concept, not a full bridge.',
   'Root relay is centralized. The watcher uses a single owner key to relay Merkle roots. A malicious operator could post a fake root containing fabricated commitments.',
   'Emergency withdraw is a single-key rug vector, mitigated by a 30-day timelock. Users have 30 days to exit if the owner initiates emergency mode.',
   'Amount is a public circuit input. While denomination pools provide uniform deposit sizes, the amount is visible on both chains. A production version should remove amount from public signals.',
@@ -50,26 +59,43 @@ export default function Home() {
         {/* Header */}
         <header className="flex items-baseline justify-between py-4" style={{ borderBottom: '1px solid var(--border)' }}>
           <span className="text-[13px] font-bold tracking-[0.18em] uppercase" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>Privacy Bridge</span>
-          <span className="text-xs tracking-wider" style={{ color: 'var(--text-label)' }}>Flow EVM &rarr; Starknet</span>
+          <span className="text-xs tracking-wider" style={{ color: 'var(--text-label)' }}>Multichain &rarr; Starknet</span>
         </header>
 
         {/* Hero */}
         <section className="pt-12 pb-8 sm:pt-16">
           <div className="text-[28px] sm:text-[38px] font-bold leading-[1.25] sm:leading-[1.15]" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)', letterSpacing: '-0.01em' }}>
-            <div className="mb-1">Deposit on one chain.</div>
-            <div className="mb-1">Withdraw on another.</div>
+            <div className="mb-1">Deposit on any chain.</div>
+            <div className="mb-1">Withdraw on Starknet.</div>
             <div className="redact-bar mb-1">No link between them.</div>
           </div>
           <p className="mt-6 text-base leading-[1.7] max-w-[640px]" style={{ color: 'var(--text-body)' }}>
-            Groth16 proofs sever the on-chain trail between Flow&nbsp;EVM deposits and Starknet withdrawals. Fixed denomination pools, Poseidon Merkle tree, relayer pattern.
+            Groth16 proofs sever the on-chain trail between EVM deposits and Starknet withdrawals. Six source networks, fixed denomination pools, Poseidon Merkle tree, relayer pattern.
           </p>
           <div className="mt-8">
             <Link href="/bridge" className="cta-btn">Launch App</Link>
           </div>
         </section>
 
+        {/* Supported Chains */}
+        <section className="mb-16 mt-12">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-px" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
+            {SUPPORTED_CHAINS.map((c) => (
+              <div key={c.name} className="px-3 py-4 text-center" style={{ background: 'var(--surface)' }}>
+                <div className="text-[14px] font-medium" style={{ fontFamily: 'var(--font-heading)', color: c.status === 'live' ? 'var(--text-heading)' : 'var(--text-label)' }}>
+                  {c.name}
+                </div>
+                <div className="text-[12px] mt-0.5" style={{ color: 'var(--text-label)' }}>{c.symbol}</div>
+                <div className="text-[10px] mt-1 uppercase tracking-wider" style={{ color: c.status === 'live' ? '#34d399' : 'var(--text-label)' }}>
+                  {c.status === 'live' ? 'Live' : 'Soon'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Specs */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-px mb-16 mt-12" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-px mb-16" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
           {SPECS.map(([label, value]) => (
             <div key={label} className="px-4 sm:px-6 py-4" style={{ background: 'var(--surface)' }}>
               <div className="text-[12px] sm:text-[13px] font-medium tracking-[0.1em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>{label}</div>
@@ -118,7 +144,9 @@ export default function Home() {
                   <span className="text-[14px] tabular-nums break-all" style={{ color: 'var(--text-stamp)' }}>{addr}</span>
                 </div>
               ))}
-              <div className="text-sm pt-3 mt-3" style={{ borderTop: '1px solid var(--border-strong)', color: 'var(--text-label)' }}>chain_id: 545</div>
+              <div className="text-sm pt-3 mt-3" style={{ borderTop: '1px solid var(--border-strong)', color: 'var(--text-label)' }}>
+                chain_id: 545 &mdash; Additional chain deployments in progress
+              </div>
             </div>
           </div>
         </section>
@@ -144,7 +172,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="py-6 text-sm flex items-center justify-between" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-label)' }}>
-          <span>PL Genesis Hackathon</span>
+          <span>Privacy Bridge</span>
           <a
             href="https://github.com/Yonkoo11/privacy-bridge"
             target="_blank"

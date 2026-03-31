@@ -5,6 +5,7 @@ export interface NoteData {
   commitment: string;
   nullifierHash: string;
   timestamp: number;
+  sourceChainId?: number;
 }
 
 async function deriveKey(

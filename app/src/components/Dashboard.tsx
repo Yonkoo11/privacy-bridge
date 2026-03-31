@@ -1,9 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { DENOMINATIONS } from '@/lib/constants';
+import { useAccount } from 'wagmi';
+import { getDenominations } from '@/lib/constants';
+import { SUPPORTED_CHAINS, getChainConfig } from '@/lib/chains';
+import ChainSelector from './ChainSelector';
 
 export default function Dashboard() {
+  const { chain } = useAccount();
+  const chainId = chain?.id ?? 545;
+  const chainConfig = getChainConfig(chainId);
+  const symbol = chain?.nativeCurrency?.symbol ?? 'FLOW';
+  const denominations = getDenominations(chainId);
+
   const stats = {
     tvl: '0.0000',
     totalDeposits: 0,
@@ -14,13 +23,16 @@ export default function Dashboard() {
 
   const isEmpty = stats.totalDeposits === 0;
 
-  const denomSets = DENOMINATIONS.map((d) => ({
+  const denomSets = denominations.map((d) => ({
     label: d.label,
     size: 0,
   }));
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {/* Chain selector */}
+      <ChainSelector />
+
       {/* Warning banner */}
       <div className="stamp" style={{ transform: 'none', display: 'block' }}>
         Small anonymity sets provide weak privacy. Wait for more deposits in
@@ -34,7 +46,7 @@ export default function Dashboard() {
             Total Value Locked
           </div>
           <div className="text-xl font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
-            {stats.tvl} FLOW
+            {stats.tvl} {symbol}
           </div>
         </div>
         <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
@@ -56,16 +68,22 @@ export default function Dashboard() {
         </div>
         <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
           <div className="text-[13px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
-            Relayer Fee
+            Supported Chains
           </div>
-          <div className="text-base" style={{ color: 'var(--text-body)' }}>{stats.relayerFee}</div>
+          <div className="text-xl font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
+            {SUPPORTED_CHAINS.length}
+          </div>
         </div>
       </div>
 
       {/* Empty state CTA */}
       {isEmpty && (
         <div className="p-5 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)' }}>
-          <p className="text-[15px] mb-3" style={{ color: 'var(--text-label)' }}>No deposits yet. Start building your anonymity set.</p>
+          <p className="text-[15px] mb-3" style={{ color: 'var(--text-label)' }}>
+            {chainConfig?.bridgeAddress
+              ? 'No deposits yet. Start building your anonymity set.'
+              : `Bridge not yet deployed on ${chain?.name ?? 'this network'}. Switch to Flow EVM.`}
+          </p>
           <Link href="/bridge/deposit" className="cta-btn text-[15px]" style={{ padding: '10px 28px' }}>
             Make First Deposit
           </Link>

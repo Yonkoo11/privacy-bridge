@@ -66,9 +66,14 @@ mod ShieldedToken {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, bridge: starknet::ContractAddress) {
-        self._name.write('pFLOW');
-        self._symbol.write('pFLOW');
+    fn constructor(
+        ref self: ContractState,
+        bridge: starknet::ContractAddress,
+        name: felt252,
+        symbol: felt252,
+    ) {
+        self._name.write(name);
+        self._symbol.write(symbol);
         self._decimals.write(18);
         self._bridge.write(bridge);
     }
