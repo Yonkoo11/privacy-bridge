@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount, useConnect } from 'wagmi';
+import { useAccount, useConnect, useSwitchChain } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { useDeposit } from '@/hooks/useDeposit';
 import { DENOMINATIONS } from '@/lib/constants';
+import { flowEvmTestnet } from '@/lib/chains';
 
 const DENOM_HINTS: Record<string, string> = {
   '0.0001 FLOW': 'Micro - test transactions',
@@ -14,8 +15,10 @@ const DENOM_HINTS: Record<string, string> = {
 };
 
 export default function DepositForm() {
-  const { isConnected } = useAccount();
+  const { isConnected, chain } = useAccount();
   const { connect } = useConnect();
+  const { switchChain } = useSwitchChain();
+  const isWrongChain = isConnected && chain?.id !== flowEvmTestnet.id;
   const {
     generateNote,
     lockDeposit,
@@ -94,7 +97,26 @@ export default function DepositForm() {
 
         {/* Step 2: Generate note */}
         {!noteData && (
-          isConnected ? (
+          !isConnected ? (
+            <button
+              onClick={() => connect({ connector: injected() })}
+              className="cta-btn w-full text-center"
+            >
+              Connect Wallet to Deposit
+            </button>
+          ) : isWrongChain ? (
+            <button
+              onClick={() => switchChain({ chainId: flowEvmTestnet.id })}
+              className="cta-btn w-full text-center"
+              style={{
+                background: 'rgba(251,191,36,0.1)',
+                color: '#fbbf24',
+                border: '1px solid rgba(251,191,36,0.3)',
+              }}
+            >
+              Switch to Flow EVM Testnet
+            </button>
+          ) : (
             <button
               onClick={handleGenerate}
               disabled={status === 'generating'}
@@ -106,13 +128,6 @@ export default function DepositForm() {
               } : {}}
             >
               Generate Note
-            </button>
-          ) : (
-            <button
-              onClick={() => connect({ connector: injected() })}
-              className="cta-btn w-full text-center"
-            >
-              Connect Wallet to Deposit
             </button>
           )
         )}

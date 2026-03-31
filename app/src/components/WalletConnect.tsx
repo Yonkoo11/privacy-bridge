@@ -1,12 +1,33 @@
 'use client';
 
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi';
 import { injected } from 'wagmi/connectors';
+import { flowEvmTestnet } from '@/lib/chains';
 
 export default function WalletConnect() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chain } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const { switchChain } = useSwitchChain();
+
+  const isWrongChain = isConnected && chain?.id !== flowEvmTestnet.id;
+
+  if (isConnected && isWrongChain) {
+    return (
+      <button
+        onClick={() => switchChain({ chainId: flowEvmTestnet.id })}
+        className="px-3 py-1.5 text-[15px]"
+        style={{
+          fontFamily: 'var(--font-mono)',
+          color: '#fbbf24',
+          background: 'rgba(251,191,36,0.1)',
+          border: '1px solid rgba(251,191,36,0.3)',
+        }}
+      >
+        Switch to Flow EVM
+      </button>
+    );
+  }
 
   if (isConnected && address) {
     return (
