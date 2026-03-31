@@ -11,14 +11,17 @@ import type { NoteData } from '@/lib/encryption';
 
 type DepositStatus = 'idle' | 'generating' | 'ready' | 'locking' | 'confirming' | 'done' | 'error';
 
-function randomBigInt(): bigint {
-  const bytes = new Uint8Array(31); // 31 bytes to stay under field prime
+// BN254 scalar field prime
+const FIELD_PRIME = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
+
+function randomFieldElement(): bigint {
+  const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   let result = 0n;
   for (const b of bytes) {
     result = (result << 8n) + BigInt(b);
   }
-  return result;
+  return result % FIELD_PRIME;
 }
 
 export function useDeposit() {
@@ -36,8 +39,8 @@ export function useDeposit() {
       setStatus('generating');
       setError(null);
 
-      const secret = randomBigInt();
-      const nullifier = randomBigInt();
+      const secret = randomFieldElement();
+      const nullifier = randomFieldElement();
 
       // commitment = poseidon2([poseidon2([secret, nullifier]), amount])
       const innerHash = poseidon2([secret, nullifier]);

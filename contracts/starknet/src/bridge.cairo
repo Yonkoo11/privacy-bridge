@@ -60,11 +60,10 @@ mod PrivacyBridge {
         RootUpdated: RootUpdated,
     }
 
-    // Fix 4: Removed storacha_cid from event
     #[derive(Drop, starknet::Event)]
     struct ShieldedMint {
         nullifier_hash: u256,
-        amount: u256,
+        // amount intentionally excluded — emitting it links deposit denomination to withdrawal
     }
 
     #[derive(Drop, starknet::Event)]
@@ -160,10 +159,8 @@ mod PrivacyBridge {
                 token.mint(caller, fee);
             }
 
-            // Fix 4: Emit event without storacha_cid or recipient
             self.emit(ShieldedMint {
                 nullifier_hash,
-                amount,
             });
         }
 

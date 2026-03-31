@@ -55,12 +55,13 @@ function check(condition, msg) {
   else { console.log(`  FAIL: ${msg}`); fail++; }
 }
 
+const FIELD_PRIME = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
 function randomBigInt() {
-  const bytes = new Uint8Array(31);
+  const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   let result = 0n;
   for (const b of bytes) result = (result << 8n) + BigInt(b);
-  return result;
+  return result % FIELD_PRIME;
 }
 
 function splitU256(val) {

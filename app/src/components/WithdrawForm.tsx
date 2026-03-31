@@ -82,13 +82,13 @@ export default function WithdrawForm() {
     setTreeError(null);
 
     try {
-      const nextIndex = await publicClient.readContract({
+      const nextLeafIndex = await publicClient.readContract({
         address: PRIVACY_BRIDGE_ADDRESS,
         abi: PRIVACY_BRIDGE_ABI,
-        functionName: 'nextIndex',
+        functionName: 'nextLeafIndex',
       }) as bigint;
 
-      if (nextIndex === 0n) {
+      if (nextLeafIndex === 0n) {
         setTreeError('No deposits found on-chain');
         return;
       }
@@ -97,11 +97,10 @@ export default function WithdrawForm() {
         address: PRIVACY_BRIDGE_ADDRESS,
         event: {
           type: 'event',
-          name: 'Deposit',
+          name: 'CommitmentLocked',
           inputs: [
             { type: 'uint256', name: 'commitment', indexed: true },
             { type: 'uint256', name: 'leafIndex', indexed: false },
-            { type: 'uint256', name: 'timestamp', indexed: false },
           ],
         },
         fromBlock: 0n,

@@ -47,7 +47,7 @@ contract PrivacyBridge {
     uint256[25] public ZEROS;
 
     // Events
-    event CommitmentLocked(uint256 commitment, address token);
+    event CommitmentLocked(uint256 indexed commitment, uint256 leafIndex);
     event NewRoot(uint256 root);
     event EmergencyInitiated(uint256 executeAfter);
     event EmergencyCancelled();
@@ -97,7 +97,7 @@ contract PrivacyBridge {
         // Insert into Merkle tree
         _insert(commitment);
 
-        emit CommitmentLocked(commitment, address(0));
+        emit CommitmentLocked(commitment, nextLeafIndex - 1);
     }
 
     /**

@@ -22,7 +22,7 @@ const PRIVACY_BRIDGE_ABI = [
   'function emergencyWithdrawTime() view returns (uint256)',
   'function allowedDenominations(uint256) view returns (bool)',
   'function owner() view returns (address)',
-  'event CommitmentLocked(uint256 commitment, address token)',
+  'event CommitmentLocked(uint256 indexed commitment, uint256 leafIndex)',
   'event NewRoot(uint256 root)',
   'event EmergencyInitiated(uint256 executeAfter)',
   'event EmergencyCancelled()',
