@@ -34,7 +34,7 @@ PrivacyBridge.sol                 SDK (Node.js)                     PrivacyBridg
 - **Fixed denomination pools** -- All deposits in a pool have the same amount (0.0001, 0.001, 0.01, or 0.1 FLOW). Eliminates amount-based transaction linking.
 - **Commitment hiding** -- On-chain commitment is Poseidon(Poseidon(secret, nullifier), amount). Observer cannot extract secret, nullifier, or link to withdrawal.
 - **Nullifier binding** -- Each deposit has a unique nullifier. Double-spend is prevented on-chain.
-- **No privacy-leaking events** -- Mint events emit only the nullifier hash and amount. No recipient, no Storacha CID, no off-chain identifiers.
+- **Minimal event exposure** -- Mint events emit only the nullifier hash. No recipient, no amount, no Storacha CID, no off-chain identifiers.
 - **On-chain Merkle tree** -- Poseidon incremental tree on Flow EVM. Root history stored on Starknet for trustless verification.
 - **Relayer support** -- Anyone can submit proofs on behalf of users. Relayer earns a configurable fee (max 5%). Users don't need to reveal their Starknet address to the sequencer.
 - **Withdrawal timelock** -- Configurable delay between deposit and withdrawal prevents timing correlation attacks.
@@ -135,10 +135,12 @@ node scripts/bridge.mjs mint --proof proof-0.json
 
 ## Known Limitations
 
-- **1-party trusted setup** -- Local Powers of Tau ceremony. Not suitable for production without an MPC ceremony.
-- **BN254 curve** -- Not quantum resistant. Future version could use STARK proofs.
+- **1-party trusted setup** -- Local Powers of Tau ceremony. The ceremony operator can forge proofs. Production requires an MPC ceremony with 100+ participants.
+- **One-directional bridge** -- pFLOW tokens on Starknet have no redemption path back to FLOW. This is a proof of concept, not a production bridge.
+- **Root relay centralized** -- The watcher uses a single owner key. A malicious operator could relay a fake root containing fabricated commitments.
+- **Emergency withdraw rug vector** -- Single key with 30-day timelock. Users must monitor EmergencyInitiated events to exit in time.
+- **Amount as public input** -- While denomination pools enforce uniform sizes, the amount is visible as a circuit public signal on both chains. A production version should remove it.
 - **Anonymity set = pool size** -- With few deposits, timing analysis can narrow the anonymity set. Privacy improves with more users.
-- **Root relay still centralized** -- On-chain tree on Flow is trustlessly verifiable, but relay to Starknet still requires owner. Future: use a cross-chain messaging protocol.
 
 ## Tech Stack
 

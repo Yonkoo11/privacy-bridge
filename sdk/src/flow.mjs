@@ -63,8 +63,11 @@ export async function lockTokens(contractAddress, wallet, commitment, amountWei)
   const tx = await contract.lock(commitment, { value: amountWei });
   const receipt = await tx.wait();
 
-  const depositCount = await contract.getDepositCount();
-  const leafIndex = Number(depositCount) - 1;
+  // Extract leafIndex from CommitmentLocked event rather than a separate RPC call
+  const lockEvent = receipt.logs
+    .map(l => { try { return contract.interface.parseLog(l); } catch { return null; } })
+    .find(e => e?.name === 'CommitmentLocked');
+  const leafIndex = lockEvent ? Number(lockEvent.args[1]) : Number(await contract.getDepositCount()) - 1;
 
   return {
     txHash: receipt.hash,
@@ -76,7 +79,7 @@ export async function lockTokens(contractAddress, wallet, commitment, amountWei)
 
 /**
  * Fetch all commitments from the bridge contract via event logs.
- * Returns commitments in deposit order (chronological) for Merkle tree reconstruction.
+ * Returns commitments sorted by leafIndex for correct Merkle tree reconstruction.
  */
 export async function fetchAllCommitments(contractAddress, provider) {
   const contract = getBridgeContract(contractAddress, provider);
@@ -84,7 +87,10 @@ export async function fetchAllCommitments(contractAddress, provider) {
   const filter = contract.filters.CommitmentLocked();
   const events = await contract.queryFilter(filter, 0, 'latest');
 
-  return events.map(e => BigInt(e.args[0]));
+  return events
+    .map(e => ({ commitment: BigInt(e.args[0]), leafIndex: Number(e.args[1]) }))
+    .sort((a, b) => a.leafIndex - b.leafIndex)
+    .map(e => e.commitment);
 }
 
 export { FLOW_EVM_TESTNET, PRIVACY_BRIDGE_ABI };

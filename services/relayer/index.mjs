@@ -71,6 +71,9 @@ function log(level, msg, data) {
 // Rate limiter (10 req/min per IP, in-memory)
 // ---------------------------------------------------------------------------
 
+// Storacha client (initialized in main, null if W3UP_EMAIL not configured)
+let storachaClient = null;
+
 const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 10;
@@ -102,11 +105,18 @@ setInterval(() => {
 // HTTP helpers
 // ---------------------------------------------------------------------------
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 function sendJson(res, status, body) {
   const json = JSON.stringify(body);
   res.writeHead(status, {
     'Content-Type': 'application/json',
     'Content-Length': Buffer.byteLength(json),
+    ...CORS_HEADERS,
   });
   res.end(json);
 }
@@ -140,12 +150,11 @@ function parseBody(req) {
   });
 }
 
+// Use socket address for rate limiting (x-forwarded-for is trivially spoofable).
+// If behind a reverse proxy, configure the proxy to set a trusted header
+// and update this function to read from that header instead.
 function getClientIP(req) {
-  return (
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-    req.socket.remoteAddress ||
-    'unknown'
-  );
+  return req.socket.remoteAddress || 'unknown';
 }
 
 // ---------------------------------------------------------------------------
@@ -306,9 +315,6 @@ function handleHealth(res) {
 // Server
 // ---------------------------------------------------------------------------
 
-// Storacha client (initialized lazily in main, null if not configured)
-let storachaClient = null;
-
 async function main() {
   validateConfig();
 
@@ -346,6 +352,13 @@ async function main() {
     const { method, url } = req;
 
     try {
+      // CORS preflight
+      if (method === 'OPTIONS') {
+        res.writeHead(204, CORS_HEADERS);
+        res.end();
+        return;
+      }
+
       if (method === 'POST' && url === '/relay') {
         await handleRelay(req, res, account, bridgeContract);
       } else if (method === 'GET' && url === '/fee') {

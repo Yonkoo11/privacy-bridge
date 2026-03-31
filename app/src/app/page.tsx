@@ -35,10 +35,11 @@ const CONTRACTS = [
 ];
 
 const LIMITATIONS = [
-  'Root relay is centralized. The watcher service uses a single owner key to post Merkle roots cross-chain. A malicious operator can delay roots but cannot steal funds.',
-  'Garaga calldata proxy is a centralized service. It can cause transaction failures but cannot forge proofs or redirect withdrawals.',
+  '1-party trusted setup. The proving key was generated without a multi-party ceremony. A compromised ceremony allows forged proofs. Production requires an MPC ceremony with 100+ participants.',
+  'One-directional bridge. pFLOW tokens on Starknet have no redemption path back to FLOW on the source chain. This is a proof of concept, not a full bridge.',
+  'Root relay is centralized. The watcher uses a single owner key to relay Merkle roots. A malicious operator could post a fake root containing fabricated commitments.',
   'Emergency withdraw is a single-key rug vector, mitigated by a 30-day timelock. Users have 30 days to exit if the owner initiates emergency mode.',
-  '1-party trusted setup. The proving key was generated without a multi-party ceremony. A compromised setup allows forged proofs.',
+  'Amount is a public circuit input. While denomination pools provide uniform deposit sizes, the amount is visible on both chains. A production version should remove amount from public signals.',
 ];
 
 export default function Home() {

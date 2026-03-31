@@ -48,11 +48,18 @@ function log(level, msg, data) {
 // HTTP helpers
 // ---------------------------------------------------------------------------
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 function sendJson(res, status, body) {
   const json = JSON.stringify(body);
   res.writeHead(status, {
     'Content-Type': 'application/json',
     'Content-Length': Buffer.byteLength(json),
+    ...CORS_HEADERS,
   });
   res.end(json);
 }
@@ -250,6 +257,12 @@ async function main() {
     const { method, url } = req;
 
     try {
+      if (method === 'OPTIONS') {
+        res.writeHead(204, CORS_HEADERS);
+        res.end();
+        return;
+      }
+
       if (method === 'POST' && url === '/calldata') {
         await handleCalldata(req, res);
       } else if (method === 'GET' && url === '/health') {
