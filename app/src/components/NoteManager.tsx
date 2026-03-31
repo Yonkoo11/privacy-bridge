@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useNotes } from '@/hooks/useNotes';
+import { getChainConfig } from '@/lib/chains';
 
 export default function NoteManager() {
   const {
@@ -164,7 +165,7 @@ export default function NoteManager() {
                       <div className="space-y-1 text-xs font-mono flex-1 min-w-0" style={{ color: 'var(--text-body)' }}>
                         <div>
                           <span style={{ color: 'var(--text-label)' }}>Amount: </span>
-                          {(Number(note.amount) / 1e18).toFixed(4)} FLOW
+                          {(Number(note.amount) / 1e18).toFixed(4)} {note.sourceChainId ? (getChainConfig(note.sourceChainId)?.chain.nativeCurrency.symbol ?? 'ETH') : 'FLOW'}
                         </div>
                         <div className="break-all">
                           <span style={{ color: 'var(--text-label)' }}>Commitment: </span>

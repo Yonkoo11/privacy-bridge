@@ -198,7 +198,7 @@ async function handleRelay(req, res, account, bridgeContract) {
     return;
   }
 
-  const { calldata, max_fee_bps } = body;
+  const { calldata, max_fee_bps, sourceChain } = body;
 
   if (!Array.isArray(calldata) || calldata.length === 0) {
     sendJson(res, 400, { error: 'calldata must be a non-empty array of strings' });
@@ -210,8 +210,11 @@ async function handleRelay(req, res, account, bridgeContract) {
     return;
   }
 
+  // sourceChain is optional for now -- logged for routing when multiple Starknet bridges exist
+
   log('INFO', 'Relay request received', {
     ip,
+    sourceChain: sourceChain || 'default',
     calldataLength: calldata.length,
     max_fee_bps,
   });

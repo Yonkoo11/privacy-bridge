@@ -7,9 +7,9 @@
  * Restart-safe: persists last processed block to watcher-state.json.
  *
  * Config (env vars):
- *   FLOW_RPC_URL             - Flow EVM RPC endpoint
+ *   SOURCE_RPC_URL             - Flow EVM RPC endpoint
  *   STARKNET_RPC_URL         - Starknet RPC endpoint
- *   FLOW_BRIDGE_ADDRESS      - PrivacyBridge contract on Flow EVM
+ *   SOURCE_BRIDGE_ADDRESS      - PrivacyBridge contract on Flow EVM
  *   STARKNET_BRIDGE_ADDRESS  - PrivacyBridge contract on Starknet
  *   RELAY_PRIVATE_KEY        - ETH private key (for signing -- not used for watching, kept for future use)
  *   STARKNET_ACCOUNT_ADDRESS - Starknet account address that owns the bridge
@@ -27,22 +27,25 @@ import { fileURLToPath } from 'node:url';
 // Config
 // ---------------------------------------------------------------------------
 
-const FLOW_RPC_URL = process.env.FLOW_RPC_URL || 'https://testnet.evm.nodes.onflow.org';
+// SOURCE_CHAIN identifies which EVM source chain this watcher instance monitors.
+// Run one watcher per source chain (e.g., SOURCE_CHAIN=flow-evm-testnet).
+const SOURCE_CHAIN = process.env.SOURCE_CHAIN || 'flow-evm-testnet';
+const SOURCE_RPC_URL = process.env.SOURCE_RPC_URL || 'https://testnet.evm.nodes.onflow.org';
 const STARKNET_RPC_URL = process.env.STARKNET_RPC_URL || 'http://localhost:5050';
-const FLOW_BRIDGE_ADDRESS = process.env.FLOW_BRIDGE_ADDRESS;
+const SOURCE_BRIDGE_ADDRESS = process.env.SOURCE_BRIDGE_ADDRESS || process.env.SOURCE_BRIDGE_ADDRESS;
 const STARKNET_BRIDGE_ADDRESS = process.env.STARKNET_BRIDGE_ADDRESS;
 const STARKNET_ACCOUNT_ADDRESS = process.env.STARKNET_ACCOUNT_ADDRESS;
 const STARKNET_PRIVATE_KEY = process.env.STARKNET_PRIVATE_KEY;
 const POLL_INTERVAL_MS = parseInt(process.env.POLL_INTERVAL_MS || '15000', 10);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const STATE_FILE = path.join(__dirname, 'watcher-state.json');
+const STATE_FILE = path.join(__dirname, `watcher-state-${SOURCE_CHAIN}.json`);
 
 // ---------------------------------------------------------------------------
 // ABI (only what we need)
 // ---------------------------------------------------------------------------
 
-const FLOW_BRIDGE_ABI = [
+const SOURCE_BRIDGE_ABI = [
   'event NewRoot(uint256 root)',
   'function getLatestRoot() view returns (uint256)',
 ];
@@ -99,7 +102,7 @@ function log(level, msg, data) {
 
 function validateConfig() {
   const required = {
-    FLOW_BRIDGE_ADDRESS,
+    SOURCE_BRIDGE_ADDRESS,
     STARKNET_BRIDGE_ADDRESS,
     STARKNET_ACCOUNT_ADDRESS,
     STARKNET_PRIVATE_KEY,
@@ -119,9 +122,9 @@ function validateConfig() {
 // Core relay logic
 // ---------------------------------------------------------------------------
 
-async function relayNewRoots(flowContract, starknetContract, starknetAccount) {
+async function relayNewRoots(sourceContract, starknetContract, starknetAccount) {
   const state = loadState();
-  const currentBlock = await flowContract.runner.provider.getBlockNumber();
+  const currentBlock = await sourceContract.runner.provider.getBlockNumber();
 
   if (currentBlock <= state.lastBlock) {
     return; // no new blocks
@@ -132,10 +135,10 @@ async function relayNewRoots(flowContract, starknetContract, starknetAccount) {
 
   log('INFO', `Scanning blocks ${fromBlock} - ${toBlock}`);
 
-  const filter = flowContract.filters.NewRoot();
+  const filter = sourceContract.filters.NewRoot();
   let events;
   try {
-    events = await flowContract.queryFilter(filter, fromBlock, toBlock);
+    events = await sourceContract.queryFilter(filter, fromBlock, toBlock);
   } catch (err) {
     log('ERROR', 'Failed to query Flow events', { error: err.message });
     return;
@@ -197,17 +200,17 @@ async function relayNewRoots(flowContract, starknetContract, starknetAccount) {
 // Health check
 // ---------------------------------------------------------------------------
 
-async function healthCheck(flowContract, starknetContract) {
+async function healthCheck(sourceContract, starknetContract) {
   try {
-    const flowRoot = await flowContract.getLatestRoot();
+    const sourceRoot = await sourceContract.getLatestRoot();
     const starknetRoot = await starknetContract.get_merkle_root();
 
-    const flowHex = '0x' + BigInt(flowRoot).toString(16);
+    const sourceHex = '0x' + BigInt(sourceRoot).toString(16);
     const starknetHex = '0x' + BigInt(starknetRoot).toString(16);
-    const synced = flowHex === starknetHex;
+    const synced = sourceHex === starknetHex;
 
-    log('HEALTH', 'Root comparison', {
-      flow: flowHex,
+    log('HEALTH', `Root comparison [${SOURCE_CHAIN}]`, {
+      source: sourceHex,
       starknet: starknetHex,
       synced,
     });
@@ -223,20 +226,21 @@ async function healthCheck(flowContract, starknetContract) {
 async function main() {
   validateConfig();
 
-  log('INFO', 'Starting Root Relay Watcher', {
-    flowRpc: FLOW_RPC_URL,
+  log('INFO', `Starting Root Relay Watcher [${SOURCE_CHAIN}]`, {
+    sourceChain: SOURCE_CHAIN,
+    sourceRpc: SOURCE_RPC_URL,
     starknetRpc: STARKNET_RPC_URL,
-    flowBridge: FLOW_BRIDGE_ADDRESS,
+    sourceBridge: SOURCE_BRIDGE_ADDRESS,
     starknetBridge: STARKNET_BRIDGE_ADDRESS,
     pollInterval: POLL_INTERVAL_MS,
   });
 
-  // Flow EVM setup
-  const flowProvider = new ethers.JsonRpcProvider(FLOW_RPC_URL);
-  const flowContract = new ethers.Contract(
-    FLOW_BRIDGE_ADDRESS,
-    FLOW_BRIDGE_ABI,
-    flowProvider,
+  // Source EVM chain setup
+  const sourceProvider = new ethers.JsonRpcProvider(SOURCE_RPC_URL);
+  const sourceContract = new ethers.Contract(
+    SOURCE_BRIDGE_ADDRESS,
+    SOURCE_BRIDGE_ABI,
+    sourceProvider,
   );
 
   // Starknet setup
@@ -255,7 +259,7 @@ async function main() {
   );
 
   // Initial health check
-  await healthCheck(flowContract, starknetContract);
+  await healthCheck(sourceContract, starknetContract);
 
   // Poll loop
   let running = true;
@@ -264,7 +268,7 @@ async function main() {
   const poll = async () => {
     while (running) {
       try {
-        await relayNewRoots(flowContract, starknetContract, starknetAccount);
+        await relayNewRoots(sourceContract, starknetContract, starknetAccount);
       } catch (err) {
         log('ERROR', 'Poll cycle failed', { error: err.message });
       }
@@ -274,7 +278,7 @@ async function main() {
 
   // Health check every 60s
   healthTimer = setInterval(
-    () => healthCheck(flowContract, starknetContract),
+    () => healthCheck(sourceContract, starknetContract),
     60_000,
   );
 

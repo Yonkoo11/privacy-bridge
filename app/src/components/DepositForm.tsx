@@ -63,7 +63,7 @@ export default function DepositForm() {
 
   const handleLock = () => {
     if (!noteData) return;
-    lockDeposit(BigInt(noteData.commitment), BigInt(noteData.amount));
+    lockDeposit(BigInt(noteData.commitment), BigInt(noteData.amount), chainId);
   };
 
   return (
