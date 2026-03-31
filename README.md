@@ -1,28 +1,34 @@
 # Privacy Bridge
 
-Cross-chain bridge with cryptographic privacy. Lock tokens on Flow EVM, generate a Groth16 ZK proof off-chain, and claim pFLOW tokens on Starknet. No link between source and destination.
+Multichain ZK privacy bridge. Lock tokens on any supported EVM chain, generate a Groth16 proof off-chain, and claim shielded tokens on Starknet. No link between source and destination.
+
+**Supported source chains:** Flow EVM, Ethereum, Base, Arbitrum, Polygon, Optimism
 
 **Live Demo:** [yonkoo11.github.io/privacy-bridge](https://yonkoo11.github.io/privacy-bridge)
 
 ## How It Works
 
-1. **Lock** -- Deposit FLOW tokens into a fixed-denomination pool on Flow EVM. The contract computes an on-chain Poseidon Merkle tree root. Your commitment hides secret, nullifier, and amount.
+1. **Lock** -- Deposit native tokens into a fixed-denomination pool on any supported EVM chain. The contract computes an on-chain Poseidon Merkle tree root. Your commitment hides secret, nullifier, and amount.
 
-2. **Prove** -- Off-chain, fetch all commitments and rebuild the Merkle tree. Generate a Groth16 proof that you know a valid leaf without revealing which one.
+2. **Prove** -- Off-chain, fetch all commitments from the source chain and rebuild the Merkle tree. Generate a Groth16 proof that you know a valid leaf without revealing which one.
 
-3. **Mint** -- Submit the proof to the Starknet bridge contract. The garaga verifier checks the Groth16 proof on-chain. If valid, pFLOW tokens (SNIP-2 ERC20) are minted to the recipient and the nullifier is marked spent. A relayer can submit proofs on your behalf for a fee.
+3. **Mint** -- Submit the proof to the Starknet bridge contract for that source chain. The garaga verifier checks the Groth16 proof on-chain. If valid, shielded tokens (SNIP-2 ERC20) are minted to the recipient and the nullifier is marked spent. A relayer can submit proofs on your behalf for a fee.
 
 ## Architecture
 
 ```
-Flow EVM                          Off-chain                         Starknet
----------                         ---------                         --------
+Any EVM Source Chain              Off-chain                         Starknet
+--------------------              ---------                         --------
 PrivacyBridge.sol                 SDK (Node.js)                     PrivacyBridge (Cairo)
   lock(commitment)  ---------->  snarkjs Groth16 proof  ---------->  garaga verifier
   on-chain Poseidon               merkle tree                       nullifier tracking
-  Merkle tree                     garaga calldata gen               pFLOW ERC20 mint
+  Merkle tree                     garaga calldata gen               shielded ERC20 mint
   fixed denominations                                               relayer fees
   emergency withdraw                                                withdrawal timelock
+
+Supported: Flow EVM | Ethereum | Base | Arbitrum | Polygon | Optimism
+Each source chain gets its own bridge+token pair on Starknet.
+Same circuit, same verifier, separate anonymity pools per chain.
 ```
 
 **ZK Circuit** -- Circom, 6634 constraints, depth-24 Merkle tree, 4 public inputs (root, nullifierHash, recipient, amount). Private inputs: secret, nullifier, Merkle path.
@@ -102,6 +108,14 @@ node scripts/rpc-proxy.mjs
 # Terminal 3: deploy and test
 node scripts/deploy-devnet.mjs
 node tests/e2e-devnet.test.mjs
+```
+
+### Deploy to New Chain
+
+```bash
+DEPLOY_PRIVATE_KEY=0x... node scripts/deploy-evm.mjs --chain sepolia
+DEPLOY_PRIVATE_KEY=0x... node scripts/deploy-evm.mjs --chain base-sepolia
+# Supported: flow-evm-testnet, sepolia, base-sepolia, arbitrum-sepolia, polygon-amoy, optimism-sepolia
 ```
 
 ### CLI Usage
