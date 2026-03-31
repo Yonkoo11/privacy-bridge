@@ -93,23 +93,33 @@ export default function WithdrawForm() {
         return;
       }
 
-      const logs = await publicClient.getLogs({
-        address: PRIVACY_BRIDGE_ADDRESS,
-        event: {
-          type: 'event',
-          name: 'CommitmentLocked',
-          inputs: [
-            { type: 'uint256', name: 'commitment', indexed: true },
-            { type: 'uint256', name: 'leafIndex', indexed: false },
-          ],
-        },
-        fromBlock: 0n,
-        toBlock: 'latest',
-      });
+      // Paginate getLogs in 10,000-block chunks (RPC limit)
+      const currentBlock = await publicClient.getBlockNumber();
+      const EVENT_DEF = {
+        type: 'event' as const,
+        name: 'CommitmentLocked' as const,
+        inputs: [
+          { type: 'uint256' as const, name: 'commitment' as const, indexed: true },
+          { type: 'uint256' as const, name: 'leafIndex' as const, indexed: false },
+        ],
+      };
+      const CHUNK = 9999n;
+      const logs: Awaited<ReturnType<typeof publicClient.getLogs>>[] = [];
+      for (let from = 0n; from <= currentBlock; from += CHUNK + 1n) {
+        const to = from + CHUNK > currentBlock ? currentBlock : from + CHUNK;
+        const chunk = await publicClient.getLogs({
+          address: PRIVACY_BRIDGE_ADDRESS,
+          event: EVENT_DEF,
+          fromBlock: from,
+          toBlock: to,
+        });
+        logs.push(chunk);
+      }
+      const allLogs = logs.flat();
 
-      const commitments = logs
-        .sort((a: typeof logs[number], b: typeof logs[number]) => Number(a.args.leafIndex! - b.args.leafIndex!))
-        .map((log: typeof logs[number]) => log.args.commitment!.toString());
+      const commitments = allLogs
+        .sort((a, b) => Number(a.args.leafIndex! - b.args.leafIndex!))
+        .map((log) => log.args.commitment!.toString());
 
       const userCommitment = note.commitment;
       const leafIndex = commitments.findIndex((c: string) => c === userCommitment);
