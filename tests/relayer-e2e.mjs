@@ -89,6 +89,15 @@ async function main() {
   await provider.waitForTransaction(setRootTx.transaction_hash);
   console.log('3. Root set on-chain');
 
+  // 3b. Set relayer fee to 50 bps (0.5%)
+  const setFeeTx = await account.execute({
+    contractAddress: deploy.bridge_address,
+    entrypoint: 'set_relayer_fee',
+    calldata: CallData.compile({ fee_bps: { low: '50', high: '0' } }),
+  });
+  await provider.waitForTransaction(setFeeTx.transaction_hash);
+  console.log('3b. Relayer fee set to 50 bps');
+
   // 4. Get calldata via proxy
   console.log('4. Calling calldata proxy...');
   const cdRes = await fetch(`${CALLDATA_URL}/calldata`, {
