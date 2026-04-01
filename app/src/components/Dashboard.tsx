@@ -32,96 +32,86 @@ export default function Dashboard() {
   const rootHex = latestRoot ? `0x${latestRoot.toString(16).padStart(64, '0')}` : null;
   const isEmpty = totalDeposits === 0;
 
-  const denomSets = denominations.map((d) => ({
-    label: d.label,
-    size: 0, // Per-denom counts would require event indexing
-  }));
+  // Mock anonymity counts per denomination (would need event indexing for real data)
+  const anonCounts = [0, 0, 0, 0];
+
+  const renderAnonBar = (count: number) => {
+    const segs = 10;
+    const filled = Math.min(Math.round((count / 30) * segs), segs);
+    return (
+      <div className="anon-bar">
+        {Array.from({ length: segs }).map((_, i) => (
+          <span key={i} className={`anon-bar-seg ${i < filled ? (count >= 5 ? 'filled-green' : 'filled-amber') : ''}`} />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <ChainSelector />
 
       <div className="stamp" style={{ transform: 'none', display: 'block' }}>
-        Small anonymity sets provide weak privacy. Wait for more deposits in
-        your denomination before withdrawing.
+        Small anonymity sets provide weak privacy. Wait for more deposits before withdrawing.
       </div>
 
-      <div className="grid grid-cols-2 gap-px" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
-        <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
-          <div className="text-[13px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
-            Total Deposits
-          </div>
+      {/* Stats row */}
+      <div className="grid grid-cols-3 gap-px" style={{ background: 'var(--border)', border: '1px solid var(--border)' }}>
+        <div className="px-4 py-4" style={{ background: 'var(--surface)' }}>
+          <div className="text-[10px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>Deposits</div>
           <div className="text-xl font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
             {bridgeAddress ? totalDeposits : '--'}
           </div>
         </div>
-        <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
-          <div className="text-[13px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
-            Native Currency
-          </div>
-          <div className="text-xl font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
-            {symbol}
-          </div>
+        <div className="px-4 py-4" style={{ background: 'var(--surface)' }}>
+          <div className="text-[10px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>Currency</div>
+          <div className="text-xl font-semibold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>{symbol}</div>
         </div>
-        <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
-          <div className="text-[13px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
-            Relayer Status
-          </div>
-          <div className="text-base flex items-center gap-2" style={{ color: 'var(--text-body)' }}>
+        <div className="px-4 py-4" style={{ background: 'var(--surface)' }}>
+          <div className="text-[10px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>Relayer</div>
+          <div className="text-[13px] flex items-center gap-2" style={{ color: 'var(--text-label)' }}>
             <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: 'var(--text-label)' }} />
-            Not connected
-          </div>
-        </div>
-        <div className="px-5 py-4" style={{ background: 'var(--surface)' }}>
-          <div className="text-[13px] font-medium tracking-[0.12em] uppercase mb-1" style={{ color: 'var(--text-label)' }}>
-            Supported Chains
-          </div>
-          <div className="text-xl font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-heading)' }}>
-            {SUPPORTED_CHAINS.length}
+            Offline
           </div>
         </div>
       </div>
 
       {isEmpty && (
         <div className="p-5 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)' }}>
-          <p className="text-[15px] mb-3" style={{ color: 'var(--text-label)' }}>
-            {bridgeAddress
-              ? 'No deposits yet. Start building your anonymity set.'
-              : `Bridge not yet deployed on ${chain?.name ?? 'this network'}.`}
+          <p className="text-[13px] mb-3" style={{ color: 'var(--text-label)' }}>
+            {bridgeAddress ? 'No deposits yet. Start building your anonymity set.' : `Bridge not deployed on ${chain?.name ?? 'this network'}.`}
           </p>
-          <Link href="/bridge/deposit" className="cta-btn text-[15px]" style={{ padding: '10px 28px' }}>
-            Make First Deposit
-          </Link>
+          <Link href="/bridge/deposit" className="cta-btn text-[12px]" style={{ padding: '10px 28px' }}>Make First Deposit</Link>
         </div>
       )}
 
+      {/* Anonymity sets with bar charts */}
+      <div className="stamp" style={{ transform: 'rotate(-0.5deg)' }}>
+        &mdash;&mdash; Anonymity Intelligence &mdash;&mdash; Unclassified &mdash;&mdash;
+      </div>
       <div className="doc-panel">
-        <div className="doc-panel-header" style={{ fontSize: '13px', letterSpacing: '0.08em' }}>Anonymity Sets by Denomination</div>
+        <div className="doc-panel-header" style={{ fontSize: '11px' }}>Anonymity Sets by Denomination</div>
         <div className="p-4 space-y-0">
-          {denomSets.map((d, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between py-2.5"
-              style={{ borderBottom: i < denomSets.length - 1 ? '1px solid var(--border)' : 'none' }}
-            >
-              <span className="text-[15px] font-mono" style={{ color: 'var(--text-body)' }}>
-                {d.label}
+          {denominations.map((d, i) => (
+            <div key={i} className="flex items-center gap-3 py-3" style={{ borderBottom: i < denominations.length - 1 ? '1px solid var(--border)' : 'none' }}>
+              <span className="text-[13px] font-mono shrink-0 w-28" style={{ color: 'var(--text-body)' }}>{d.label}</span>
+              {renderAnonBar(anonCounts[i])}
+              <span className="text-[12px] tabular-nums shrink-0 w-20 text-right" style={{ color: anonCounts[i] === 0 ? 'var(--text-label)' : anonCounts[i] < 5 ? 'var(--amber)' : 'var(--accent)' }}>
+                {anonCounts[i]} deposits
               </span>
-              <span
-                className="text-[15px] font-medium tabular-nums"
-                style={{ color: d.size === 0 ? 'var(--text-label)' : d.size < 5 ? '#fbbf24' : '#34d399' }}
-              >
-                {d.size} deposits
+              <span className="text-[10px] uppercase tracking-wider shrink-0 w-16 text-right" style={{ color: anonCounts[i] >= 5 ? 'var(--accent)' : anonCounts[i] > 0 ? 'var(--amber)' : 'var(--text-label)' }}>
+                {anonCounts[i] >= 5 ? 'Strong' : anonCounts[i] > 0 ? 'Small' : 'Empty'}
               </span>
             </div>
           ))}
         </div>
       </div>
 
+      {/* Merkle root */}
       <div className="doc-panel">
-        <div className="doc-panel-header" style={{ fontSize: '13px', letterSpacing: '0.08em' }}>Latest Merkle Root</div>
+        <div className="doc-panel-header" style={{ fontSize: '11px' }}>Latest Merkle Root</div>
         <div className="p-4">
-          <p className="text-sm font-mono break-all" style={{ color: 'var(--text-label)' }}>
+          <p className="text-[12px] font-mono break-all" style={{ color: rootHex ? 'var(--text-stamp)' : 'var(--text-label)' }}>
             {rootHex ?? 'No roots relayed yet'}
           </p>
         </div>
