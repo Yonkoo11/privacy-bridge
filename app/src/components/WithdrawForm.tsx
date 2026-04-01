@@ -167,6 +167,13 @@ export default function WithdrawForm() {
           Withdraw from Privacy Bridge
         </h2>
 
+        {/* Starknet withdrawal status */}
+        {note && note.sourceChainId && note.sourceChainId !== 545 && (
+          <div className="mb-4 p-3 text-[14px]" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)', color: '#fbbf24' }}>
+            Starknet withdrawal for {getChainConfig(note.sourceChainId)?.chain.name ?? 'this chain'} is being deployed. Your deposit is safe and the note will work once the Starknet bridge for this chain is live.
+          </div>
+        )}
+
         {/* Progress steps */}
         <div className="flex items-center gap-0 mb-6">
           {STEPS.map((step, i) => (
@@ -262,7 +269,7 @@ export default function WithdrawForm() {
             <div className="p-4 text-xs font-mono space-y-1" style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-body)' }}>
               <div>
                 <span style={{ color: 'var(--text-label)' }}>Amount: </span>
-                {(Number(note.amount) / 1e18).toFixed(4)} FLOW
+                {(Number(note.amount) / 1e18).toFixed(4)} {getChainConfig(note.sourceChainId ?? 545)?.chain.nativeCurrency.symbol ?? 'ETH'}
               </div>
               <div className="break-all">
                 <span style={{ color: 'var(--text-label)' }}>Commitment: </span>

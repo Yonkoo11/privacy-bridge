@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Bridge — Declassified</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== RESET ===== */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ===== TOKENS ===== */
+  :root {
+    --bg: #0c0c10;
+    --surface: #14141c;
+    --surface-raised: #1a1a24;
+
+    --text-heading: #f4f4f5;
+    --text-body: #a8a8b3;
+    --text-label: #64647a;
+    --text-stamp: #e8e4d9;
+
+    --redact-bar: #f4f4f5;
+    --redact-bg: #0c0c10;
+
+    --font-heading: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+    --space-unit: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    --radius: 0px;
+  }
+
+  /* ===== BASE ===== */
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text-body);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ===== LAYOUT ===== */
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+  }
+
+  /* ===== HEADER BAR ===== */
+  .header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid #1e1e2a;
+    margin-bottom: var(--space-16);
+  }
+
+  .header__brand {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-heading);
+  }
+
+  .header__route {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-label);
+    letter-spacing: 0.04em;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    padding: var(--space-12) 0 var(--space-8) 0;
+  }
+
+  .hero__line {
+    font-family: var(--font-heading);
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--text-heading);
+    margin-bottom: var(--space-2);
+  }
+
+  .hero__line--redacted {
+    display: inline-block;
+    background: var(--text-heading);
+    color: var(--bg);
+    padding: 2px 12px;
+    margin-bottom: var(--space-2);
+  }
+
+  .hero__sub {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-body);
+    margin-top: var(--space-6);
+    max-width: 640px;
+  }
+
+  /* ===== SPECS ROW ===== */
+  .specs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: #1e1e2a;
+    border: 1px solid #1e1e2a;
+    margin-top: var(--space-12);
+    margin-bottom: var(--space-16);
+  }
+
+  .spec {
+    background: var(--surface);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .spec__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-label);
+    margin-bottom: var(--space-unit);
+  }
+
+  .spec__value {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-heading);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== SECTION STAMP ===== */
+  .stamp {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-stamp);
+    border: 1px solid #3a3a40;
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-8);
+    transform: rotate(-0.5deg);
+  }
+
+  .section {
+    margin-bottom: var(--space-16);
+  }
+
+  /* ===== PROTOCOL FLOW ===== */
+  .flow {
+    position: relative;
+    padding-left: var(--space-8);
+  }
+
+  .flow::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: #2a2a36;
+  }
+
+  .flow__step {
+    position: relative;
+    margin-bottom: var(--space-8);
+  }
+
+  .flow__step:last-child {
+    margin-bottom: 0;
+  }
+
+  .flow__number {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-heading);
+    position: absolute;
+    left: calc(-1 * var(--space-8));
+    top: -2px;
+    width: 24px;
+    text-align: center;
+  }
+
+  .flow__title {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-heading);
+    margin-bottom: var(--space-unit);
+    letter-spacing: 0.02em;
+  }
+
+  .flow__desc {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-body);
+    margin-bottom: var(--space-2);
+    max-width: 600px;
+  }
+
+  .flow__chain {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-label);
+  }
+
+  /* ===== SECURITY PROPERTIES ===== */
+  .security-list {
+    list-style: none;
+  }
+
+  .security-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 0;
+    margin-bottom: 1px;
+  }
+
+  .security-item__name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-heading);
+    background: var(--surface);
+    padding: var(--space-3) var(--space-4);
+    border-right: 1px solid #1e1e2a;
+  }
+
+  .security-item__impl {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-body);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg);
+  }
+
+  /* ===== CONTRACTS PANEL ===== */
+  .doc-panel {
+    border: 1px solid #2a2a36;
+    background: var(--surface);
+  }
+
+  .doc-panel__header {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-stamp);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid #2a2a36;
+    background: var(--surface-raised);
+  }
+
+  .doc-panel__body {
+    padding: var(--space-4) var(--space-4);
+  }
+
+  .contract-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-2) 0;
+  }
+
+  .contract-row__name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-heading);
+    flex-shrink: 0;
+  }
+
+  .contract-row__addr {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-stamp);
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+    text-align: right;
+  }
+
+  .doc-panel__meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-label);
+    padding-top: var(--space-3);
+    margin-top: var(--space-3);
+    border-top: 1px solid #2a2a36;
+  }
+
+  /* ===== KNOWN LIMITATIONS ===== */
+  .limitations {
+    list-style: none;
+    counter-reset: lim;
+  }
+
+  .limitations li {
+    counter-increment: lim;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid #1a1a24;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-body);
+    padding-left: var(--space-6);
+    position: relative;
+  }
+
+  .limitations li:last-child {
+    border-bottom: none;
+  }
+
+  .limitations li::before {
+    content: counter(lim, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-label);
+  }
+
+  /* ===== CTA ===== */
+  .cta-wrap {
+    margin-top: var(--space-16);
+    margin-bottom: var(--space-12);
+  }
+
+  .cta-btn {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--text-heading);
+    border: none;
+    padding: 14px 40px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .cta-btn:active {
+    background: #d4d4d8;
+  }
+
+  .cta-btn:focus-visible {
+    outline: 2px solid var(--text-stamp);
+    outline-offset: 4px;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    padding: var(--space-6) 0;
+    border-top: 1px solid #1e1e2a;
+    margin-top: var(--space-12);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-label);
+  }
+
+  .footer a {
+    color: var(--text-label);
+    text-decoration: none;
+    border-bottom: 1px solid #2a2a36;
+  }
+
+  .footer a:hover {
+    color: var(--text-body);
+    border-color: var(--text-body);
+  }
+
+  .footer a:focus-visible {
+    outline: 2px solid var(--text-stamp);
+    outline-offset: 2px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 640px) {
+    .hero__line {
+      font-size: 28px;
+    }
+
+    .hero__line--redacted {
+      padding: 1px 8px;
+    }
+
+    .specs {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .security-item {
+      grid-template-columns: 1fr;
+    }
+
+    .security-item__name {
+      border-right: none;
+      border-bottom: 1px solid #1e1e2a;
+    }
+
+    .contract-row {
+      flex-direction: column;
+      gap: var(--space-unit);
+    }
+
+    .contract-row__addr {
+      text-align: left;
+    }
+
+    .header {
+      margin-bottom: var(--space-8);
+    }
+
+    .section {
+      margin-bottom: var(--space-12);
+    }
+  }
+
+  @media (max-width: 400px) {
+    .hero__line {
+      font-size: 24px;
+    }
+
+    .specs {
+      grid-template-columns: 1fr;
+    }
+
+    .page {
+      padding: 0 var(--space-4);
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="page">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header__brand">Privacy Bridge</div>
+      <div class="header__route">Flow EVM &rarr; Starknet</div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero" aria-label="Overview">
+      <div class="hero__line">Deposit on one chain.</div>
+      <div class="hero__line">Withdraw on another.</div>
+      <div class="hero__line hero__line--redacted">No link between them.</div>
+
+      <p class="hero__sub">Groth16 proofs sever the on-chain trail between Flow EVM deposits and Starknet withdrawals. Fixed denomination pools, Poseidon Merkle tree, relayer pattern.</p>
+    </section>
+
+    <!-- SPECS -->
+    <div class="specs" role="region" aria-label="System specifications">
+      <div class="spec">
+        <div class="spec__label">Circuit</div>
+        <div class="spec__value">6,634 constraints</div>
+      </div>
+      <div class="spec">
+        <div class="spec__label">Tree</div>
+        <div class="spec__value">Poseidon depth-24</div>
+      </div>
+      <div class="spec">
+        <div class="spec__label">Calldata</div>
+        <div class="spec__value">1,977 felts</div>
+      </div>
+      <div class="spec">
+        <div class="spec__label">Tests</div>
+        <div class="spec__value">93/93</div>
+      </div>
+      <div class="spec">
+        <div class="spec__label">Pools</div>
+        <div class="spec__value">4 denominations</div>
+      </div>
+      <div class="spec">
+        <div class="spec__label">Root Buffer</div>
+        <div class="spec__value">30 entries</div>
+      </div>
+    </div>
+
+    <!-- PROTOCOL FLOW -->
+    <section class="section" aria-label="Protocol flow">
+      <div class="stamp">&#9472;&#9472; Protocol Flow &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+      <div class="flow">
+        <div class="flow__step">
+          <div class="flow__number">1</div>
+          <div class="flow__title">Lock</div>
+          <div class="flow__desc">Deposit a fixed denomination into the PrivacyBridge contract. A Poseidon commitment is inserted into the on-chain Merkle tree.</div>
+          <div class="flow__chain">Flow EVM</div>
+        </div>
+        <div class="flow__step">
+          <div class="flow__number">2</div>
+          <div class="flow__title">Prove</div>
+          <div class="flow__desc">Generate a Groth16 proof off-chain. The proof attests to knowledge of a valid commitment in the tree without revealing which one.</div>
+          <div class="flow__chain">Off-chain / Browser</div>
+        </div>
+        <div class="flow__step">
+          <div class="flow__number">3</div>
+          <div class="flow__title">Verify</div>
+          <div class="flow__desc">The garaga verifier on Starknet checks the Groth16 proof on-chain. Nullifier hash is checked against the spent set.</div>
+          <div class="flow__chain">Starknet</div>
+        </div>
+        <div class="flow__step">
+          <div class="flow__number">4</div>
+          <div class="flow__title">Claim</div>
+          <div class="flow__desc">Tokens are minted to the recipient on Starknet. The nullifier is marked spent. No link to the original deposit is visible.</div>
+          <div class="flow__chain">Starknet</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECURITY PROPERTIES -->
+    <section class="section" aria-label="Security properties">
+      <div class="stamp">&#9472;&#9472; Security Properties &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+      <ul class="security-list">
+        <li class="security-item">
+          <span class="security-item__name">Fixed Denominations</span>
+          <span class="security-item__impl">0.0001, 0.001, 0.01, 0.1 FLOW</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">On-chain Merkle Tree</span>
+          <span class="security-item__impl">Poseidon incremental, depth 24, 30-root buffer</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Commitment Hiding</span>
+          <span class="security-item__impl">Poseidon(Poseidon(secret, nullifier), amount)</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Clean Events</span>
+          <span class="security-item__impl">Mint emits nullifier_hash + amount only</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Relayer Pattern</span>
+          <span class="security-item__impl">Fee-protected via max_fee_bps bound</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Withdrawal Timelock</span>
+          <span class="security-item__impl">Configurable delay, root_timestamps</span>
+        </li>
+        <li class="security-item">
+          <span class="security-item__name">Emergency Withdraw</span>
+          <span class="security-item__impl">30-day timelock, owner-initiated</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- DEPLOYED CONTRACTS -->
+    <section class="section" aria-label="Deployed contracts">
+      <div class="stamp">&#9472;&#9472; Document Ref &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+      <div class="doc-panel">
+        <div class="doc-panel__header">Deployed Contracts // Flow EVM Testnet</div>
+        <div class="doc-panel__body">
+          <div class="contract-row">
+            <span class="contract-row__name">PoseidonT3</span>
+            <span class="contract-row__addr">0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a</span>
+          </div>
+          <div class="contract-row">
+            <span class="contract-row__name">PoseidonT3Wrapper</span>
+            <span class="contract-row__addr">0x2eaEF8016D2a7Dc01677E57183a167649cB07402</span>
+          </div>
+          <div class="contract-row">
+            <span class="contract-row__name">PrivacyBridge</span>
+            <span class="contract-row__addr">0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca</span>
+          </div>
+          <div class="doc-panel__meta">chain_id: 545</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KNOWN LIMITATIONS -->
+    <section class="section" aria-label="Known limitations">
+      <div class="stamp">&#9472;&#9472; Known Limitations &#9472;&#9472; Declassified &#9472;&#9472;</div>
+      <ol class="limitations">
+        <li>Root relay is centralized. The watcher service uses a single owner key to post Merkle roots cross-chain. A malicious operator can delay roots but cannot steal funds.</li>
+        <li>Garaga calldata proxy is a centralized service. It can cause transaction failures but cannot forge proofs or redirect withdrawals.</li>
+        <li>Emergency withdraw is a single-key rug vector, mitigated by a 30-day timelock. Users have 30 days to exit if the owner initiates emergency mode.</li>
+        <li>1-party trusted setup. The proving key was generated without a multi-party ceremony. A compromised setup allows forged proofs.</li>
+      </ol>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-wrap">
+      <a href="#" class="cta-btn">Launch App</a>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>PL_Genesis Hackathon</span>
+      <span> &middot; </span>
+      <a href="https://github.com/Yonkoo11/privacy-bridge" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </footer>
+
+  </div>
+
+</body>
+</html>

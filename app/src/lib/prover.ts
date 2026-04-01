@@ -18,8 +18,9 @@ export async function generateProof(
 ): Promise<ProofResult> {
   const snarkjs = await import('snarkjs');
 
-  const wasmPath = '/bridge.wasm';
-  const zkeyPath = '/bridge_final.zkey';
+  const base = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const wasmPath = `${base}/bridge.wasm`;
+  const zkeyPath = `${base}/bridge_final.zkey`;
 
   const result = await snarkjs.groth16.fullProve(
     witness,
@@ -41,7 +42,8 @@ export async function verifyProof(
 ): Promise<boolean> {
   const snarkjs = await import('snarkjs');
 
-  const vkeyResponse = await fetch('/verification_key.json');
+  const base = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const vkeyResponse = await fetch(`${base}/verification_key.json`);
   const vkey = await vkeyResponse.json();
 
   return snarkjs.groth16.verify(vkey, publicSignals, proof);

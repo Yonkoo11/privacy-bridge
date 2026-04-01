@@ -37,10 +37,12 @@ const SECURITY = [
   ['Emergency Withdraw', '30-day timelock, owner-initiated'],
 ];
 
-const CONTRACTS = [
-  ['PoseidonT3', '0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a'],
-  ['PoseidonT3Wrapper', '0x2eaEF8016D2a7Dc01677E57183a167649cB07402'],
-  ['PrivacyBridge', '0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca'],
+const DEPLOYED_CHAINS = [
+  { chain: 'Flow EVM Testnet', chainId: 545, bridge: '0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca' },
+  { chain: 'Ethereum Sepolia', chainId: 11155111, bridge: '0x2eaEF8016D2a7Dc01677E57183a167649cB07402' },
+  { chain: 'Base Sepolia', chainId: 84532, bridge: '0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca' },
+  { chain: 'Arbitrum Sepolia', chainId: 421614, bridge: '0x2eaEF8016D2a7Dc01677E57183a167649cB07402' },
+  { chain: 'Optimism Sepolia', chainId: 11155420, bridge: '0x2eaEF8016D2a7Dc01677E57183a167649cB07402' },
 ];
 
 const LIMITATIONS = [
@@ -136,16 +138,19 @@ export default function Home() {
         <section className="mb-16 pl-4" style={{ borderLeft: '2px solid var(--border-strong)' }}>
           <div className="stamp">&mdash;&mdash; Document Ref &mdash;&mdash; Unclassified &mdash;&mdash;</div>
           <div className="doc-panel">
-            <div className="doc-panel-header">Deployed Contracts // Flow EVM Testnet</div>
+            <div className="doc-panel-header">Deployed Contracts // 5 EVM Chains</div>
             <div className="p-4">
-              {CONTRACTS.map(([name, addr]) => (
-                <div key={name} className="flex items-baseline justify-between gap-4 py-2 flex-wrap">
-                  <span className="text-[15px] font-medium shrink-0" style={{ color: 'var(--text-heading)' }}>{name}</span>
-                  <span className="text-[14px] tabular-nums break-all" style={{ color: 'var(--text-stamp)' }}>{addr}</span>
+              {DEPLOYED_CHAINS.map((c) => (
+                <div key={c.chainId} className="flex items-baseline justify-between gap-4 py-2.5 flex-wrap" style={{ borderBottom: '1px solid var(--border)' }}>
+                  <div className="shrink-0">
+                    <span className="text-[15px] font-medium" style={{ color: 'var(--text-heading)' }}>{c.chain}</span>
+                    <span className="text-[12px] ml-2" style={{ color: 'var(--text-label)' }}>#{c.chainId}</span>
+                  </div>
+                  <span className="text-[13px] tabular-nums break-all font-mono" style={{ color: 'var(--text-stamp)' }}>{c.bridge}</span>
                 </div>
               ))}
-              <div className="text-sm pt-3 mt-3" style={{ borderTop: '1px solid var(--border-strong)', color: 'var(--text-label)' }}>
-                chain_id: 545 &mdash; Additional chain deployments in progress
+              <div className="text-sm pt-3 mt-1" style={{ color: 'var(--text-label)' }}>
+                Identical PrivacyBridge.sol deployed on each chain &mdash; Polygon Amoy coming soon
               </div>
             </div>
           </div>

@@ -133,13 +133,27 @@ node scripts/bridge.mjs mint --proof proof-0.json
 
 ## Deployed Contracts
 
-**Flow EVM Testnet (chain_id: 545)**
+### EVM Source Chains (PrivacyBridge.sol)
+
+| Chain | Chain ID | Bridge Address |
+|-------|----------|---------------|
+| Flow EVM Testnet | 545 | `0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca` |
+| Ethereum Sepolia | 11155111 | `0x2eaEF8016D2a7Dc01677E57183a167649cB07402` |
+| Base Sepolia | 84532 | `0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca` |
+| Arbitrum Sepolia | 421614 | `0x2eaEF8016D2a7Dc01677E57183a167649cB07402` |
+| Optimism Sepolia | 11155420 | `0x2eaEF8016D2a7Dc01677E57183a167649cB07402` |
+| Polygon Amoy | 80002 | Not deployed (insufficient testnet funds) |
+
+Identical PrivacyBridge.sol deployed on each chain. Same ABI, same Poseidon Merkle tree, same denomination pools.
+
+### Starknet Destination (devnet)
 
 | Contract | Address |
 |----------|---------|
-| PoseidonT3 | `0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a` |
-| PoseidonT3Wrapper | `0x2eaEF8016D2a7Dc01677E57183a167649cB07402` |
-| PrivacyBridge | `0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca` |
+| PrivacyBridge (Cairo) | `0x498a5db3d556c07881cdac008d07c48bc7c602d6987f7d30c8b13aae291342` |
+| ShieldedToken (pFLOW) | `0x5e82efcc944d4548356f1da6b48b7a24dd607b3690cfce87ddd0e86c38195c8` |
+
+Note: Starknet contracts are deployed on local devnet. The token constructor accepts name/symbol parameters for multichain deployment (pETH, pBASE, pARB, pOP). Additional bridge+token pairs for non-Flow source chains are pending deployment.
 
 ## Safety Mechanisms
 
@@ -161,7 +175,7 @@ node scripts/bridge.mjs mint --proof proof-0.json
 | Component | Technology |
 |-----------|-----------|
 | ZK Circuit | Circom 2.1.9 + snarkjs (Groth16/BN254) |
-| Source Chain | Flow EVM (Solidity 0.8.20) |
+| Source Chains | Flow EVM, Ethereum, Base, Arbitrum, Optimism (Solidity 0.8.20) |
 | Destination Chain | Starknet (Cairo 2.14.0) |
 | On-chain Verifier | garaga 1.0.1 |
 | Hash Function | Poseidon (BN254 scalar field) |

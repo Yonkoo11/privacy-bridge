@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Bridge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* =========================================
+     DESIGN TOKENS
+     DNA: WIRE-GROTESK-SPLIT-EDGE-MOTION
+     ========================================= */
+  :root {
+    --bg: #09090b;
+    --surface: #111113;
+    --surface-hover: #161618;
+    --text: #ededed;
+    --text-secondary: #888;
+    --text-muted: #555;
+    --accent: #3b82f6;
+    --border: rgba(255, 255, 255, 0.08);
+
+    --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    --space-4xl: 96px;
+    --space-5xl: 128px;
+
+    --radius: 0px;
+    --max-width: 1120px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-content, .section-reveal {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* =========================================
+     RESET & BASE
+     ========================================= */
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    background-color: var(--bg);
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* =========================================
+     LAYOUT
+     ========================================= */
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
+  }
+
+  /* =========================================
+     HEADER
+     ========================================= */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-brand {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .header-route {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  /* =========================================
+     HERO — SPLIT LAYOUT
+     ========================================= */
+  .hero {
+    padding: var(--space-5xl) 0 var(--space-4xl);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.7fr;
+    gap: var(--space-3xl);
+    align-items: start;
+  }
+
+  .hero-content {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .hero-content.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .hero-headline {
+    font-family: var(--font-body);
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .hero-sub {
+    margin-top: var(--space-lg);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    max-width: 480px;
+  }
+
+  .hero-cta {
+    display: inline-block;
+    margin-top: var(--space-xl);
+    padding: 14px 36px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    min-height: 48px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    transition: background 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .hero-cta:hover {
+    background: #2563eb;
+  }
+
+  .hero-cta:active {
+    background: #1d4ed8;
+    transform: translateY(1px);
+  }
+
+  .hero-cta:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  /* Specs panel */
+  .specs-panel {
+    background: var(--surface);
+    padding: var(--space-xl);
+    position: relative;
+  }
+
+  .specs-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .specs-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .spec-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .spec-row:last-child {
+    border-bottom: none;
+  }
+
+  .spec-key {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+
+  .spec-value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* =========================================
+     SECTION TITLES
+     ========================================= */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-xl);
+  }
+
+  /* =========================================
+     SECTION REVEAL (IntersectionObserver)
+     ========================================= */
+  .section-reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .section-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* =========================================
+     PROTOCOL FLOW — 4-COLUMN GRID
+     ========================================= */
+  .flow-section {
+    padding: var(--space-4xl) 0;
+  }
+
+  .flow-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .flow-cell {
+    padding: var(--space-lg);
+    border-right: 1px solid var(--border);
+    transition: background 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .flow-cell:first-child {
+    padding-left: 0;
+  }
+
+  .flow-cell:last-child {
+    border-right: none;
+    padding-right: 0;
+  }
+
+  .flow-cell:hover {
+    background: var(--surface-hover);
+  }
+
+  .flow-step {
+    font-family: var(--font-body);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: var(--space-md);
+  }
+
+  .flow-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: var(--space-sm);
+  }
+
+  .flow-desc {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  .flow-chain {
+    margin-top: var(--space-md);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* =========================================
+     SECURITY — ALTERNATING ROWS
+     ========================================= */
+  .security-section {
+    padding: var(--space-4xl) 0;
+  }
+
+  .security-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
+    align-items: baseline;
+  }
+
+  .security-row:nth-child(odd) {
+    background: var(--surface);
+  }
+
+  .security-property {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .security-impl {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* =========================================
+     CONTRACTS — SURFACE PANEL
+     ========================================= */
+  .contracts-section {
+    padding: var(--space-4xl) 0;
+  }
+
+  .contracts-panel {
+    background: var(--surface);
+    padding: var(--space-xl);
+  }
+
+  .contract-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    gap: var(--space-lg);
+  }
+
+  .contract-row:last-child {
+    border-bottom: none;
+  }
+
+  .contract-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+
+  .contract-address {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+    text-align: right;
+  }
+
+  .contract-meta {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* =========================================
+     LIMITATIONS — SIMPLE ROWS
+     ========================================= */
+  .limits-section {
+    padding: var(--space-4xl) 0;
+  }
+
+  .limit-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-lg);
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--border);
+    align-items: baseline;
+  }
+
+  .limit-row:last-child {
+    border-bottom: none;
+  }
+
+  .limit-property {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+
+  .limit-desc {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* =========================================
+     FOOTER
+     ========================================= */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: var(--space-lg);
+  }
+
+  .footer-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-left {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .footer-right a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 150ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .footer-right a:hover {
+    color: var(--text);
+  }
+
+  .footer-right a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  /* =========================================
+     FOCUS STATES (global)
+     ========================================= */
+  a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  /* =========================================
+     RESPONSIVE
+     ========================================= */
+
+  /* Tablet */
+  @media (max-width: 960px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+
+    .hero-headline {
+      font-size: 42px;
+    }
+
+    .hero {
+      padding: var(--space-4xl) 0 var(--space-3xl);
+    }
+
+    .flow-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .flow-cell:nth-child(2) {
+      border-right: none;
+    }
+
+    .flow-cell:nth-child(1),
+    .flow-cell:nth-child(2) {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .flow-cell:nth-child(3) {
+      border-right: 1px solid var(--border);
+    }
+
+    .security-row {
+      grid-template-columns: 180px 1fr;
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .hero {
+      padding: var(--space-3xl) 0 var(--space-2xl);
+    }
+
+    .hero-headline {
+      font-size: 32px;
+    }
+
+    .hero-sub {
+      font-size: 15px;
+    }
+
+    .flow-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .flow-cell {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      padding: var(--space-lg) 0;
+    }
+
+    .flow-cell:first-child {
+      padding-left: 0;
+    }
+
+    .flow-cell:last-child {
+      border-bottom: none;
+    }
+
+    .flow-cell:nth-child(3) {
+      border-right: none;
+    }
+
+    .security-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-xs);
+    }
+
+    .security-property {
+      white-space: normal;
+    }
+
+    .limit-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-xs);
+    }
+
+    .contract-row {
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .contract-address {
+      text-align: left;
+      font-size: 12px;
+    }
+
+    .footer-inner {
+      flex-direction: column;
+      gap: var(--space-sm);
+      text-align: center;
+    }
+  }
+
+  /* Small mobile */
+  @media (max-width: 400px) {
+    .hero-headline {
+      font-size: 28px;
+    }
+
+    .container {
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+    }
+
+    .header {
+      padding: var(--space-md);
+    }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="header">
+    <div class="header-brand">Privacy Bridge</div>
+    <div class="header-route">Flow EVM &rarr; Starknet</div>
+  </header>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content" id="heroContent">
+          <h1 class="hero-headline">Deposit on one chain.<br>Withdraw on another.<br>No link between them.</h1>
+          <p class="hero-sub">Privacy Bridge uses Groth16 zero-knowledge proofs to break the on-chain link between deposits on Flow EVM and withdrawals on Starknet. The proof attests you know a valid commitment without revealing which one.</p>
+          <a href="#" class="hero-cta">Launch App</a>
+        </div>
+        <div class="specs-panel hero-content" id="specsPanel">
+          <div class="specs-title">Specs</div>
+          <div class="spec-row">
+            <span class="spec-key">Circuit</span>
+            <span class="spec-value">6,634 constraints</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Tree</span>
+            <span class="spec-value">depth-24 Poseidon</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Calldata</span>
+            <span class="spec-value">1,977 felts</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Denominations</span>
+            <span class="spec-value">4 fixed pools</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Root buffer</span>
+            <span class="spec-value">30 entries</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Proof system</span>
+            <span class="spec-value">Groth16 / BN254</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROTOCOL FLOW ===================== -->
+  <section class="flow-section">
+    <div class="container section-reveal">
+      <div class="section-title">Protocol Flow</div>
+      <div class="flow-grid">
+        <div class="flow-cell">
+          <div class="flow-step">01</div>
+          <div class="flow-name">Lock</div>
+          <div class="flow-desc">Deposit a fixed denomination into the PrivacyBridge contract. A Poseidon commitment is inserted into the on-chain Merkle tree. No link between your address and the commitment is exposed.</div>
+          <div class="flow-chain">Flow EVM</div>
+        </div>
+        <div class="flow-cell">
+          <div class="flow-step">02</div>
+          <div class="flow-name">Prove</div>
+          <div class="flow-desc">Generate a Groth16 proof off-chain. The proof attests to knowledge of a valid leaf in the Merkle tree without revealing which one. 6,634 constraints.</div>
+          <div class="flow-chain">Client-side</div>
+        </div>
+        <div class="flow-cell">
+          <div class="flow-step">03</div>
+          <div class="flow-name">Relay</div>
+          <div class="flow-desc">The current Merkle root is relayed from Flow to Starknet. A ring buffer of 30 roots ensures users have time to submit proofs against recent state.</div>
+          <div class="flow-chain">Cross-chain</div>
+        </div>
+        <div class="flow-cell">
+          <div class="flow-step">04</div>
+          <div class="flow-name">Claim</div>
+          <div class="flow-desc">Submit the proof to the Starknet bridge contract. The garaga verifier checks the BN254 pairing on-chain. Funds mint to the recipient. Nullifier marked spent.</div>
+          <div class="flow-chain">Starknet</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECURITY ===================== -->
+  <section class="security-section">
+    <div class="container section-reveal">
+      <div class="section-title">Security Properties</div>
+      <div class="security-rows">
+        <div class="security-row">
+          <span class="security-property">Fixed denominations</span>
+          <span class="security-impl">0.0001, 0.001, 0.01, 0.1 FLOW. Equal amounts prevent value-based correlation.</span>
+        </div>
+        <div class="security-row">
+          <span class="security-property">On-chain Merkle tree</span>
+          <span class="security-impl">Poseidon incremental, depth 24, 30-root ring buffer prevents front-running.</span>
+        </div>
+        <div class="security-row">
+          <span class="security-property">Commitment hiding</span>
+          <span class="security-impl">Poseidon(Poseidon(secret, nullifier), amount). Preimage never published.</span>
+        </div>
+        <div class="security-row">
+          <span class="security-property">Clean events</span>
+          <span class="security-impl">Mint emits nullifier_hash + amount only. No from/to. No CID references.</span>
+        </div>
+        <div class="security-row">
+          <span class="security-property">Relayer pattern</span>
+          <span class="security-impl">Fee-protected via max_fee_bps. Relayer cannot extract more than user agreed.</span>
+        </div>
+        <div class="security-row">
+          <span class="security-property">Withdrawal timelock</span>
+          <span class="security-impl">Configurable delay via root_timestamps. Grows anonymity set before claim.</span>
+        </div>
+        <div class="security-row">
+          <span class="security-property">Emergency withdraw</span>
+          <span class="security-impl">30-day timelock, owner-initiated. Users can exit via normal proof path.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTRACTS ===================== -->
+  <section class="contracts-section">
+    <div class="container section-reveal">
+      <div class="section-title">Deployed Contracts</div>
+      <div class="contracts-panel">
+        <div class="contract-row">
+          <span class="contract-name">PoseidonT3</span>
+          <span class="contract-address">0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a</span>
+        </div>
+        <div class="contract-row">
+          <span class="contract-name">PoseidonT3Wrapper</span>
+          <span class="contract-address">0x2eaEF8016D2a7Dc01677E57183a167649cB07402</span>
+        </div>
+        <div class="contract-row">
+          <span class="contract-name">PrivacyBridge</span>
+          <span class="contract-address">0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca</span>
+        </div>
+        <div class="contract-meta">chain_id: 545 // Flow EVM Testnet</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LIMITATIONS ===================== -->
+  <section class="limits-section">
+    <div class="container section-reveal">
+      <div class="section-title">Known Limitations</div>
+      <div class="limit-row">
+        <span class="limit-property">root_relay</span>
+        <span class="limit-desc">Centralized relayer pushes Merkle roots from Flow to Starknet. Can cause liveness failure but cannot steal funds.</span>
+      </div>
+      <div class="limit-row">
+        <span class="limit-property">trusted_setup</span>
+        <span class="limit-desc">Single-party ceremony. A compromised setup would allow forged proofs. Production would require multi-party computation.</span>
+      </div>
+      <div class="limit-row">
+        <span class="limit-property">anonymity_set</span>
+        <span class="limit-desc">Starts at zero. Privacy grows with each deposit into the same denomination pool. Dashboard warns users of current set size.</span>
+      </div>
+      <div class="limit-row">
+        <span class="limit-property">emergency_key</span>
+        <span class="limit-desc">Single owner key can trigger emergency withdrawal after 30-day timelock. Mitigated but not eliminated.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-left">PL_Genesis Hackathon</span>
+      <span class="footer-right"><a href="https://github.com/yonkoo11/privacy-bridge" target="_blank" rel="noopener noreferrer">GitHub &#8599;</a></span>
+    </div>
+  </footer>
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <script>
+    // Hero fade-in on load (12px upward, 400ms)
+    window.addEventListener('DOMContentLoaded', function() {
+      var heroElements = document.querySelectorAll('.hero-content');
+      // Stagger the two hero elements slightly
+      heroElements.forEach(function(el, i) {
+        setTimeout(function() {
+          el.classList.add('visible');
+        }, i * 120);
+      });
+    });
+
+    // IntersectionObserver for section reveals (16px, 500ms)
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      document.querySelectorAll('.section-reveal').forEach(function(el) {
+        observer.observe(el);
+      });
+    } else {
+      // Fallback: show everything immediately
+      document.querySelectorAll('.section-reveal').forEach(function(el) {
+        el.classList.add('visible');
+      });
+    }
+  </script>
+
+</body>
+</html>
