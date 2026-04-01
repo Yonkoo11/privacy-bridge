@@ -47,13 +47,16 @@
 - Per-denomination deposit counts in Dashboard
 
 ### Deploy wallet: 0x8902C8b707EB26Ed383F4Aeb86b6058b13190390
-### Design Status
-- Round 3 of /design workflow in progress
-- Phase 1.5 (research) complete -- see ai/design-research.md
-- Phase 2 (3 proposals) next -- need to generate 3 HTML proposal files
-- Research covered: Tornado Cash, Railgun, Aztec, LayerSwap, Stargate, Across, Wormhole
-- Key design innovations to incorporate: anonymity set display, Source->Dest panels, 1-click withdrawal
-- Current "Redact" theme (zero border-radius, classified docs, stamps) is our brand -- evolve it, don't replace
+### NEXT STEP: Generate 3 design proposals
+- Read ai/design-research.md for the full research brief
+- Read ai/design-progress.md for design workflow state (Round 3, Phase 2 in progress)
+- Read existing proposals/ directory for Round 2 proposals (selected: Redact theme)
+- Generate 3 new HTML proposals that EVOLVE the Redact theme for multichain
+- Key innovations: anonymity set display per denomination, Source->Dest bridge panels, 1-click withdrawal
+- Style config at ~/.claude/style.config.md
+- Design lessons at ~/.claude/projects/-Users-yonko/memory/design-lessons.md
+- Current CSS: app/src/app/globals.css (IBM Plex Mono + Space Grotesk, zero border-radius, gap-px grids, stamps)
+- Current components: app/src/components/ (ChainSelector, DepositForm, WithdrawForm, Dashboard, NoteManager)
 
 ### Build: cd app && NEXT_PUBLIC_BASE_PATH="/privacy-bridge" npx next build
 ### Deploy: cd app && npx gh-pages -d out
