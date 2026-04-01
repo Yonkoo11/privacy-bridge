@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Bridge — Dossier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== RESET ===== */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ===== TOKENS ===== */
+  :root {
+    --bg: #0c0c10;
+    --surface: #14141c;
+    --surface-raised: #1a1a24;
+
+    --text-heading: #f4f4f5;
+    --text-body: #a8a8b3;
+    --text-label: #64647a;
+    --text-stamp: #e8e4d9;
+
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+
+    --font-heading: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    --radius: 0px;
+    --border: #2a2a36;
+    --border-subtle: #1e1e2a;
+  }
+
+  /* ===== BASE ===== */
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text-body);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ===== LAYOUT ===== */
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+    padding-bottom: var(--space-16);
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .header__brand {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-heading);
+  }
+
+  .header__meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-label);
+  }
+
+  /* ===== CHAIN SELECTOR ===== */
+  .chain-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .chain-bar::-webkit-scrollbar { display: none; }
+
+  .chain-tab {
+    flex-shrink: 0;
+    padding: var(--space-3) var(--space-4);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-label);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    line-height: 1.3;
+  }
+  .chain-tab:hover { color: var(--text-body); }
+  .chain-tab.active {
+    color: var(--text-heading);
+    border-bottom-color: var(--text-heading);
+  }
+  .chain-tab.dimmed {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .chain-tab .chain-currency {
+    display: block;
+    font-size: 9px;
+    color: var(--text-label);
+    margin-top: 2px;
+    letter-spacing: 0.12em;
+  }
+  .chain-tab.active .chain-currency { color: var(--text-body); }
+
+  /* ===== HERO ===== */
+  .hero {
+    padding: var(--space-16) 0 var(--space-12);
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-family: var(--font-heading);
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--text-heading);
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .hero .redact-line {
+    display: inline;
+    background: var(--text-heading);
+    color: var(--bg);
+    padding: 2px 8px;
+  }
+
+  .hero__sub {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-body);
+    max-width: 680px;
+    margin: var(--space-6) auto 0;
+    line-height: 1.7;
+  }
+
+  /* ===== SPECS ROW ===== */
+  .specs-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: var(--border);
+    margin-bottom: var(--space-16);
+  }
+
+  .spec-cell {
+    background: var(--surface);
+    padding: var(--space-4);
+    text-align: center;
+  }
+
+  .spec-cell__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-label);
+    margin-bottom: var(--space-1);
+  }
+
+  .spec-cell__value {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-heading);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== STAMP HEADER ===== */
+  .stamp {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-stamp);
+    border: 1px solid #3a3a40;
+    padding: var(--space-2) var(--space-4);
+    display: inline-block;
+    transform: rotate(-0.5deg);
+    margin-bottom: var(--space-6);
+  }
+
+  /* ===== SECTION SPACING ===== */
+  .section {
+    margin-bottom: var(--space-16);
+  }
+
+  /* ===== DOSSIER (BRIDGE PANEL) ===== */
+  .dossier {
+    display: grid;
+    grid-template-columns: 1fr 48px 1fr;
+    gap: 0;
+    margin-bottom: var(--space-16);
+  }
+
+  .dossier-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .panel-tab {
+    background: var(--surface-raised);
+    padding: var(--space-2) var(--space-4);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-stamp);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-body {
+    padding: var(--space-6);
+  }
+
+  /* Denomination grid */
+  .denom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+
+  .denom-btn {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-3) var(--space-2);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-heading);
+  }
+  .denom-btn:hover { border-color: var(--text-body); }
+  .denom-btn.selected { border-color: var(--text-heading); }
+  .denom-btn:focus-visible {
+    outline: 2px solid var(--text-stamp);
+    outline-offset: 4px;
+  }
+
+  .denom-anon {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    margin-top: 4px;
+    color: var(--green);
+  }
+  .denom-anon.empty { color: var(--text-label); }
+
+  /* Buttons */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-align: center;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:focus-visible {
+    outline: 2px solid var(--text-stamp);
+    outline-offset: 4px;
+  }
+
+  .btn--primary {
+    background: var(--text-heading);
+    color: var(--bg);
+  }
+
+  .btn--secondary {
+    background: var(--surface-raised);
+    color: var(--text-heading);
+    border: 1px solid var(--border);
+  }
+
+  .btn--disabled {
+    background: var(--surface-raised);
+    color: var(--text-label);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* Note display */
+  .note-display {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: var(--space-4);
+    margin: var(--space-4) 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-stamp);
+  }
+
+  .note-display__row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+  }
+  .note-display__row span:first-child {
+    color: var(--text-label);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-4) 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-body);
+    cursor: pointer;
+  }
+  .checkbox-row input[type="checkbox"] {
+    accent-color: var(--text-heading);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    margin-bottom: var(--space-4);
+  }
+  .btn-row .btn { border-radius: var(--radius); }
+
+  /* Textarea */
+  .field-textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-heading);
+    resize: vertical;
+    margin-bottom: var(--space-4);
+    line-height: 1.5;
+  }
+  .field-textarea::placeholder { color: var(--text-label); }
+  .field-textarea:focus {
+    outline: none;
+    border-color: var(--text-stamp);
+  }
+  .field-textarea:focus-visible {
+    outline: 2px solid var(--text-stamp);
+    outline-offset: 4px;
+  }
+
+  /* Input */
+  .field-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-label);
+    margin-bottom: var(--space-1);
+    display: block;
+  }
+
+  .field-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-heading);
+    margin-bottom: var(--space-4);
+  }
+  .field-input::placeholder { color: var(--text-label); }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--text-stamp);
+  }
+  .field-input:focus-visible {
+    outline: 2px solid var(--text-stamp);
+    outline-offset: 4px;
+  }
+
+  /* Progress steps */
+  .progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: var(--space-6) 0 var(--space-3);
+    position: relative;
+  }
+
+  .progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    position: relative;
+    z-index: 1;
+  }
+
+  .step__dot {
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-label);
+  }
+  .step.completed .step__dot {
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .step.active .step__dot {
+    border-color: var(--text-heading);
+    color: var(--text-heading);
+    animation: pulse-step 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-step {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .step__label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-label);
+  }
+  .step.completed .step__label { color: var(--green); }
+  .step.active .step__label { color: var(--text-heading); }
+
+  .progress-status {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-body);
+    text-align: center;
+  }
+
+  /* Dossier connector */
+  .dossier-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8) 0;
+    position: relative;
+  }
+
+  .connector-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--text-label);
+  }
+
+  .connector-line {
+    flex: 1;
+    border-left: 1px dashed var(--border);
+    min-height: 80px;
+  }
+
+  .connector-arrow {
+    font-size: 16px;
+    color: var(--text-label);
+    padding: var(--space-2) 0;
+    font-family: var(--font-mono);
+  }
+
+  /* ===== ANONYMITY SETS TABLE ===== */
+  .anon-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .anon-table th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-label);
+    text-align: left;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .anon-table td {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-heading);
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .anon-bar {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  .status-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .status-tag.growing { color: var(--green); }
+  .status-tag.small { color: var(--amber); }
+  .status-tag.empty { color: var(--text-label); }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-3) 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-label);
+    border-top: 1px solid var(--border-subtle);
+    margin-top: var(--space-4);
+  }
+  .meta-row .val {
+    color: var(--text-stamp);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .status-dot.connected { background: var(--green); }
+  .status-dot.disconnected { background: var(--text-label); }
+
+  /* ===== CONTRACTS TABLE ===== */
+  .doc-panel {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    margin-bottom: var(--space-4);
+  }
+
+  .doc-panel__header {
+    background: var(--surface-raised);
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-label);
+  }
+
+  .contracts-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .contracts-table th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-label);
+    text-align: left;
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .contracts-table td {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .contracts-table .addr { color: var(--text-stamp); }
+  .contracts-table .chain-name { color: var(--text-heading); }
+
+  .doc-panel__footer {
+    padding: var(--space-2) var(--space-4);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-label);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .doc-panel__footer .val { color: var(--text-stamp); }
+
+  /* ===== PROTOCOL FLOW ===== */
+  .flow-timeline {
+    position: relative;
+    padding-left: 48px;
+  }
+
+  .flow-timeline::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .flow-step {
+    position: relative;
+    margin-bottom: var(--space-8);
+  }
+  .flow-step:last-child { margin-bottom: 0; }
+
+  .flow-step__num {
+    position: absolute;
+    left: -48px;
+    top: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-heading);
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .flow-step__title {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-heading);
+    margin-bottom: var(--space-1);
+  }
+
+  .flow-step__desc {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-body);
+    line-height: 1.6;
+  }
+
+  .flow-step__chain {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-label);
+    margin-top: var(--space-1);
+  }
+
+  /* ===== SECURITY / KV LIST ===== */
+  .kv-list {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .kv-list dt,
+  .kv-list dd {
+    background: var(--surface);
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .kv-list dt {
+    color: var(--text-label);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+  }
+
+  .kv-list dd {
+    color: var(--text-heading);
+  }
+
+  /* ===== LIMITATIONS ===== */
+  .limitations-list {
+    list-style: none;
+    counter-reset: lim;
+  }
+
+  .limitations-list li {
+    counter-increment: lim;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-body);
+    display: flex;
+    gap: var(--space-3);
+    align-items: baseline;
+  }
+
+  .limitations-list li::before {
+    content: counter(lim, decimal-leading-zero) ".";
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-label);
+    flex-shrink: 0;
+    width: 28px;
+  }
+
+  /* ===== CTA + FOOTER ===== */
+  .cta {
+    text-align: center;
+    padding: var(--space-12) 0;
+  }
+
+  .cta .btn {
+    display: inline-block;
+    width: auto;
+    padding: var(--space-4) var(--space-12);
+    font-size: 15px;
+  }
+
+  .footer {
+    text-align: center;
+    padding: var(--space-8) 0;
+    border-top: 1px solid var(--border-subtle);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-label);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 800px) {
+    .specs-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 28px; }
+
+    .specs-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dossier {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .dossier-connector {
+      flex-direction: row;
+      padding: var(--space-4) 0;
+      gap: var(--space-2);
+    }
+
+    .connector-line {
+      border-left: none;
+      border-top: 1px dashed var(--border);
+      min-height: 0;
+      min-width: 40px;
+      flex: 1;
+    }
+
+    .kv-list {
+      grid-template-columns: 1fr;
+    }
+
+    .chain-tab {
+      padding: var(--space-2) var(--space-3);
+      font-size: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ===== 1. HEADER ===== -->
+  <header class="header">
+    <span class="header__brand">Privacy Bridge</span>
+    <span class="header__meta">MULTICHAIN // 6 NETWORKS</span>
+  </header>
+
+  <!-- Chain Selector Bar -->
+  <nav class="chain-bar" role="tablist" aria-label="Source chain selector">
+    <button class="chain-tab active" role="tab" aria-selected="true">
+      Flow EVM
+      <span class="chain-currency">FLOW</span>
+    </button>
+    <button class="chain-tab" role="tab" aria-selected="false">
+      Ethereum
+      <span class="chain-currency">ETH</span>
+    </button>
+    <button class="chain-tab" role="tab" aria-selected="false">
+      Base
+      <span class="chain-currency">ETH</span>
+    </button>
+    <button class="chain-tab" role="tab" aria-selected="false">
+      Arbitrum
+      <span class="chain-currency">ETH</span>
+    </button>
+    <button class="chain-tab dimmed" role="tab" aria-selected="false" aria-disabled="true">
+      Polygon <span style="font-size:8px;opacity:0.6;margin-left:2px;">SOON</span>
+      <span class="chain-currency">POL</span>
+    </button>
+    <button class="chain-tab" role="tab" aria-selected="false">
+      Optimism
+      <span class="chain-currency">ETH</span>
+    </button>
+  </nav>
+
+  <!-- ===== 2. HERO ===== -->
+  <section class="hero">
+    <h1>Deposit on any chain.</h1>
+    <h1>Withdraw on Starknet.</h1>
+    <h1><span class="redact-line">No link between them.</span></h1>
+    <p class="hero__sub">Groth16 proofs sever the on-chain trail between deposits on 6 EVM chains and withdrawals on Starknet. Fixed denomination pools, Poseidon Merkle tree, relayer pattern.</p>
+  </section>
+
+  <!-- ===== 3. SPECS ROW ===== -->
+  <div class="specs-grid">
+    <div class="spec-cell">
+      <div class="spec-cell__label">Circuit</div>
+      <div class="spec-cell__value">6,634</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-cell__label">Tree</div>
+      <div class="spec-cell__value">Depth 24</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-cell__label">Calldata</div>
+      <div class="spec-cell__value">1,977</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-cell__label">Tests</div>
+      <div class="spec-cell__value">93/93</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-cell__label">Networks</div>
+      <div class="spec-cell__value">6</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-cell__label">Root Buffer</div>
+      <div class="spec-cell__value">30</div>
+    </div>
+  </div>
+
+  <!-- ===== 4. DOSSIER BRIDGE PANEL ===== -->
+  <div class="dossier">
+
+    <!-- LEFT: SOURCE -->
+    <div class="dossier-panel">
+      <div class="panel-tab">Source // Flow EVM Testnet</div>
+      <div class="panel-body">
+
+        <!-- Denomination selector -->
+        <div class="denom-grid">
+          <button class="denom-btn selected">
+            0.0001 FLOW
+            <div class="denom-anon">~12 deposits</div>
+          </button>
+          <button class="denom-btn">
+            0.001 FLOW
+            <div class="denom-anon">~4 deposits</div>
+          </button>
+          <button class="denom-btn">
+            0.01 FLOW
+            <div class="denom-anon empty">0 deposits</div>
+          </button>
+          <button class="denom-btn">
+            0.1 FLOW
+            <div class="denom-anon empty">0 deposits</div>
+          </button>
+        </div>
+
+        <!-- Generate Note -->
+        <button class="btn btn--primary" style="margin-bottom: var(--space-4);">Generate Note</button>
+
+        <!-- Note Display -->
+        <div class="note-display">
+          <div class="note-display__row">
+            <span>Commitment</span>
+            <span>0x4a1f8c...e7d3b2</span>
+          </div>
+          <div class="note-display__row">
+            <span>Amount</span>
+            <span>0.0001 FLOW</span>
+          </div>
+          <div class="note-display__row">
+            <span>Source</span>
+            <span>Flow EVM Testnet</span>
+          </div>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" checked>
+          I have backed up my note
+        </label>
+
+        <div class="btn-row">
+          <button class="btn btn--secondary">Download</button>
+          <button class="btn btn--secondary">Copy</button>
+        </div>
+
+        <button class="btn btn--primary">Lock Deposit</button>
+      </div>
+    </div>
+
+    <!-- CONNECTOR -->
+    <div class="dossier-connector" aria-hidden="true">
+      <div class="connector-dot"></div>
+      <div class="connector-line"></div>
+      <div class="connector-arrow">&rarr;</div>
+      <div class="connector-line"></div>
+      <div class="connector-dot"></div>
+    </div>
+
+    <!-- RIGHT: DESTINATION -->
+    <div class="dossier-panel">
+      <div class="panel-tab">Destination // Starknet</div>
+      <div class="panel-body">
+
+        <textarea class="field-textarea" rows="6" placeholder="Paste your deposit note here...&#10;&#10;The note contains the secret and nullifier needed to generate a withdrawal proof."></textarea>
+
+        <button class="btn btn--secondary" style="margin-bottom: var(--space-4);">Upload File</button>
+
+        <label class="field-label">Starknet Address</label>
+        <input class="field-input" type="text" placeholder="0x04a1b2c3d4e5f6...">
+
+        <button class="btn btn--primary" style="margin-bottom: var(--space-6);">Withdraw</button>
+
+        <!-- Progress indicator -->
+        <div class="progress-steps">
+          <div class="step completed">
+            <div class="step__dot">&check;</div>
+            <div class="step__label">Load</div>
+          </div>
+          <div class="step active">
+            <div class="step__dot">2</div>
+            <div class="step__label">Prove</div>
+          </div>
+          <div class="step">
+            <div class="step__dot">3</div>
+            <div class="step__label">Verify</div>
+          </div>
+          <div class="step">
+            <div class="step__dot">4</div>
+            <div class="step__label">Claim</div>
+          </div>
+        </div>
+        <div class="progress-status">Generating proof...</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 5. ANONYMITY SETS ===== -->
+  <section class="section">
+    <div class="stamp">&#9472;&#9472; Anonymity Sets &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+
+    <table class="anon-table">
+      <thead>
+        <tr>
+          <th>Denomination</th>
+          <th>Deposits</th>
+          <th>Set Size</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0.0001 FLOW</td>
+          <td>12</td>
+          <td><span class="anon-bar" style="color:var(--green);">&#9608;&#9608;&#9608;&#9608;&#9601;&#9601;&#9601;&#9601;</span></td>
+          <td><span class="status-tag growing">GROWING</span></td>
+        </tr>
+        <tr>
+          <td>0.001 FLOW</td>
+          <td>4</td>
+          <td><span class="anon-bar" style="color:var(--amber);">&#9608;&#9608;&#9601;&#9601;&#9601;&#9601;&#9601;&#9601;</span></td>
+          <td><span class="status-tag small">SMALL</span></td>
+        </tr>
+        <tr>
+          <td>0.01 FLOW</td>
+          <td>0</td>
+          <td><span class="anon-bar" style="color:var(--text-label);">&#9601;&#9601;&#9601;&#9601;&#9601;&#9601;&#9601;&#9601;</span></td>
+          <td><span class="status-tag empty">EMPTY</span></td>
+        </tr>
+        <tr>
+          <td>0.1 FLOW</td>
+          <td>0</td>
+          <td><span class="anon-bar" style="color:var(--text-label);">&#9601;&#9601;&#9601;&#9601;&#9601;&#9601;&#9601;&#9601;</span></td>
+          <td><span class="status-tag empty">EMPTY</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="meta-row">
+      <span>Latest Merkle Root: <span class="val">0x02a4f8c1d7e3b9...6a5f2e1d</span></span>
+      <span>Relayer Status: <span class="status-dot connected"></span><span class="val">Connected</span></span>
+    </div>
+  </section>
+
+  <!-- ===== 6. DEPLOYED CONTRACTS ===== -->
+  <section class="section">
+    <div class="stamp">&#9472;&#9472; Document Ref &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+
+    <div class="doc-panel">
+      <div class="doc-panel__header">Deployed Contracts</div>
+      <table class="contracts-table">
+        <thead>
+          <tr>
+            <th>Chain</th>
+            <th>Bridge Address</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="chain-name">Flow EVM</td>
+            <td class="addr">0xd1959eA3d6...E5328Ca</td>
+            <td><span class="status-tag growing">LIVE</span></td>
+          </tr>
+          <tr>
+            <td class="chain-name">Ethereum Sepolia</td>
+            <td class="addr">0x2eaEF8016D...cB07402</td>
+            <td><span class="status-tag growing">LIVE</span></td>
+          </tr>
+          <tr>
+            <td class="chain-name">Base Sepolia</td>
+            <td class="addr">0xd1959eA3d6...E5328Ca</td>
+            <td><span class="status-tag growing">LIVE</span></td>
+          </tr>
+          <tr>
+            <td class="chain-name">Arbitrum Sepolia</td>
+            <td class="addr">0x2eaEF8016D...cB07402</td>
+            <td><span class="status-tag growing">LIVE</span></td>
+          </tr>
+          <tr>
+            <td class="chain-name">Optimism Sepolia</td>
+            <td class="addr">0x2eaEF8016D...cB07402</td>
+            <td><span class="status-tag growing">LIVE</span></td>
+          </tr>
+          <tr>
+            <td class="chain-name">Polygon Amoy</td>
+            <td class="addr">&mdash;</td>
+            <td><span class="status-tag small">PENDING</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="doc-panel__footer">deploy_wallet: <span class="val">0x8902C8b707EB26Ed383F4Aeb86b6058b13190390</span></div>
+    </div>
+  </section>
+
+  <!-- ===== 7. PROTOCOL FLOW ===== -->
+  <section class="section">
+    <div class="stamp">&#9472;&#9472; Protocol Flow &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+
+    <div class="flow-timeline">
+      <div class="flow-step">
+        <div class="flow-step__num">1</div>
+        <div class="flow-step__title">Lock</div>
+        <div class="flow-step__desc">Deposit a fixed denomination into the source chain bridge contract. A Poseidon commitment is inserted into the on-chain Merkle tree.</div>
+        <div class="flow-step__chain">chain: Flow EVM</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step__num">2</div>
+        <div class="flow-step__title">Prove</div>
+        <div class="flow-step__desc">Generate a Groth16 proof of Merkle membership without revealing the deposit leaf. The proof includes nullifier hash and recipient address.</div>
+        <div class="flow-step__chain">chain: Off-chain</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step__num">3</div>
+        <div class="flow-step__title">Verify</div>
+        <div class="flow-step__desc">Garaga verifier checks the Groth16 proof on Starknet. Nullifier is recorded to prevent double-spend.</div>
+        <div class="flow-step__chain">chain: Starknet</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step__num">4</div>
+        <div class="flow-step__title">Claim</div>
+        <div class="flow-step__desc">Tokens minted to recipient address on Starknet. The Mint event emits only nullifier_hash and amount. No link to source deposit.</div>
+        <div class="flow-step__chain">chain: Starknet</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 8. SECURITY PROPERTIES ===== -->
+  <section class="section">
+    <div class="stamp">&#9472;&#9472; Security Properties &#9472;&#9472; Unclassified &#9472;&#9472;</div>
+
+    <dl class="kv-list">
+      <dt>Fixed Denominations</dt>
+      <dd>0.0001, 0.001, 0.01, 0.1 [native]</dd>
+
+      <dt>On-chain Merkle Tree</dt>
+      <dd>Poseidon incremental, depth 24, 30-root buffer</dd>
+
+      <dt>Commitment Hiding</dt>
+      <dd>Poseidon(Poseidon(secret, nullifier), amount)</dd>
+
+      <dt>Clean Events</dt>
+      <dd>Mint emits nullifier_hash + amount only</dd>
+
+      <dt>Relayer Pattern</dt>
+      <dd>Fee-protected via max_fee_bps bound</dd>
+
+      <dt>Multichain</dt>
+      <dd>Same circuit, separate bridge per source chain</dd>
+    </dl>
+  </section>
+
+  <!-- ===== 9. KNOWN LIMITATIONS ===== -->
+  <section class="section">
+    <div class="stamp">&#9472;&#9472; Known Limitations &#9472;&#9472; Declassified &#9472;&#9472;</div>
+
+    <ol class="limitations-list">
+      <li>Root relay centralized (single owner key)</li>
+      <li>Garaga calldata proxy centralized</li>
+      <li>Emergency withdraw is single-key (30-day timelock)</li>
+      <li>1-party trusted setup (no MPC ceremony)</li>
+      <li>Starknet bridge pairs for non-Flow chains pending deployment</li>
+    </ol>
+  </section>
+
+  <!-- ===== 10. CTA + FOOTER ===== -->
+  <div class="cta">
+    <a href="#" class="btn btn--primary" style="text-decoration:none;">Launch App</a>
+  </div>
+
+  <footer class="footer">
+    PL_Genesis Hackathon &middot; GitHub
+  </footer>
+
+</div>
+</body>
+</html>
