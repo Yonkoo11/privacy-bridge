@@ -8,6 +8,7 @@ import { useDeposit } from '@/hooks/useDeposit';
 import { getDenominations } from '@/lib/constants';
 import { SUPPORTED_CHAIN_IDS, getChainConfig, getExplorerTxUrl } from '@/lib/chains';
 import ChainSelector from './ChainSelector';
+import { useAnonSets } from '@/hooks/useAnonSets';
 
 export default function DepositForm() {
   const { isConnected, chain } = useAccount();
@@ -29,8 +30,7 @@ export default function DepositForm() {
   const [noteSaved, setNoteSaved] = useState(false);
   const [backedUp, setBackedUp] = useState(false);
 
-  // Mock anonymity set counts (would come from on-chain in production)
-  const anonCounts = [12, 4, 0, 0];
+  const { totalDeposits } = useAnonSets(chainId);
 
   const handleGenerate = () => {
     const amount = denominations[selectedDenom].value;
@@ -62,21 +62,6 @@ export default function DepositForm() {
     lockDeposit(BigInt(noteData.commitment), BigInt(noteData.amount), chainId);
   };
 
-  const renderAnonBar = (count: number) => {
-    const segs = 10;
-    const filled = Math.min(Math.round((count / 30) * segs), segs);
-    return (
-      <div className="denom-bar" style={{ width: 80 }}>
-        {Array.from({ length: segs }).map((_, i) => (
-          <span
-            key={i}
-            className={`denom-bar-seg ${i < filled ? (count >= 5 ? 'filled' : 'warn') : ''}`}
-          />
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className="max-w-lg mx-auto space-y-6">
       {/* Chain transit map */}
@@ -87,7 +72,15 @@ export default function DepositForm() {
           &mdash;&mdash; Departure // Deposit &mdash;&mdash;
         </div>
 
-        {/* Denomination selector - vertical list with anonymity bars */}
+        {/* Pool size indicator */}
+        <div className="flex items-center justify-between mb-4 px-2 py-2" style={{ borderLeft: `2px solid ${totalDeposits >= 5 ? 'var(--accent)' : totalDeposits > 0 ? 'var(--amber)' : 'var(--text-label)'}` }}>
+          <span className="text-[11px] uppercase tracking-[0.08em]" style={{ color: 'var(--text-label)' }}>Pool Size</span>
+          <span className="text-[13px] font-semibold tabular-nums" style={{ fontFamily: 'var(--font-heading)', color: totalDeposits >= 5 ? 'var(--accent)' : totalDeposits > 0 ? 'var(--amber)' : 'var(--text-label)' }}>
+            {totalDeposits} {totalDeposits === 1 ? 'deposit' : 'deposits'}
+          </span>
+        </div>
+
+        {/* Denomination selector */}
         <div className="mb-6">
           <label className="block text-[11px] uppercase tracking-[0.08em] mb-3" style={{ color: 'var(--text-label)' }}>
             Select Amount
@@ -98,15 +91,12 @@ export default function DepositForm() {
                 key={i}
                 onClick={() => setSelectedDenom(i)}
                 className={`denom-row-transit ${selectedDenom === i ? 'selected' : ''}`}
+                style={{ gridTemplateColumns: '20px 1fr' }}
               >
                 <span className="denom-radio" />
                 <span className="text-[13px] font-medium" style={{ color: 'var(--text-heading)', fontFamily: 'var(--font-mono)' }}>
                   {d.label}
                 </span>
-                <span className="text-[11px]" style={{ color: anonCounts[i] >= 5 ? 'var(--accent)' : anonCounts[i] > 0 ? 'var(--amber)' : 'var(--text-label)' }}>
-                  ~{anonCounts[i]} in set
-                </span>
-                {renderAnonBar(anonCounts[i])}
               </button>
             ))}
           </div>

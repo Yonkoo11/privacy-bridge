@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAccount, useReadContract } from 'wagmi';
 import { getDenominations, getBridgeAddress, PRIVACY_BRIDGE_ABI } from '@/lib/constants';
-import { SUPPORTED_CHAINS, getChainConfig } from '@/lib/chains';
+import { getChainConfig } from '@/lib/chains';
 import ChainSelector from './ChainSelector';
 
 export default function Dashboard() {
@@ -32,10 +32,7 @@ export default function Dashboard() {
   const rootHex = latestRoot ? `0x${latestRoot.toString(16).padStart(64, '0')}` : null;
   const isEmpty = totalDeposits === 0;
 
-  // Mock anonymity counts per denomination (would need event indexing for real data)
-  const anonCounts = [0, 0, 0, 0];
-
-  const renderAnonBar = (count: number) => {
+  const renderPoolBar = (count: number) => {
     const segs = 10;
     const filled = Math.min(Math.round((count / 30) * segs), segs);
     return (
@@ -90,20 +87,31 @@ export default function Dashboard() {
         &mdash;&mdash; Anonymity Intelligence &mdash;&mdash; Unclassified &mdash;&mdash;
       </div>
       <div className="doc-panel">
-        <div className="doc-panel-header" style={{ fontSize: '11px' }}>Anonymity Sets by Denomination</div>
-        <div className="p-4 space-y-0">
+        <div className="doc-panel-header" style={{ fontSize: '11px' }}>Pool Anonymity</div>
+        <div className="p-4">
+          {/* Pool-wide bar */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-[11px] uppercase tracking-[0.08em] shrink-0" style={{ color: 'var(--text-label)' }}>Total Pool</span>
+            {renderPoolBar(totalDeposits)}
+            <span className="text-[14px] font-semibold tabular-nums shrink-0" style={{ fontFamily: 'var(--font-heading)', color: totalDeposits >= 5 ? 'var(--accent)' : totalDeposits > 0 ? 'var(--amber)' : 'var(--text-label)' }}>
+              {bridgeAddress ? totalDeposits : '--'}
+            </span>
+            <span className="text-[10px] uppercase tracking-wider shrink-0" style={{ color: totalDeposits >= 5 ? 'var(--accent)' : totalDeposits > 0 ? 'var(--amber)' : 'var(--text-label)' }}>
+              {totalDeposits >= 5 ? 'Growing' : totalDeposits > 0 ? 'Small' : 'Empty'}
+            </span>
+          </div>
+
+          {/* Denominations available */}
+          <div className="text-[11px] uppercase tracking-[0.08em] mb-2" style={{ color: 'var(--text-label)' }}>Denominations</div>
           {denominations.map((d, i) => (
-            <div key={i} className="flex items-center gap-3 py-3" style={{ borderBottom: i < denominations.length - 1 ? '1px solid var(--border)' : 'none' }}>
-              <span className="text-[13px] font-mono shrink-0 w-28" style={{ color: 'var(--text-body)' }}>{d.label}</span>
-              {renderAnonBar(anonCounts[i])}
-              <span className="text-[12px] tabular-nums shrink-0 w-20 text-right" style={{ color: anonCounts[i] === 0 ? 'var(--text-label)' : anonCounts[i] < 5 ? 'var(--amber)' : 'var(--accent)' }}>
-                {anonCounts[i]} deposits
-              </span>
-              <span className="text-[10px] uppercase tracking-wider shrink-0 w-16 text-right" style={{ color: anonCounts[i] >= 5 ? 'var(--accent)' : anonCounts[i] > 0 ? 'var(--amber)' : 'var(--text-label)' }}>
-                {anonCounts[i] >= 5 ? 'Strong' : anonCounts[i] > 0 ? 'Small' : 'Empty'}
-              </span>
+            <div key={i} className="flex items-center justify-between py-2" style={{ borderBottom: i < denominations.length - 1 ? '1px solid var(--border)' : 'none' }}>
+              <span className="text-[13px] font-mono" style={{ color: 'var(--text-body)' }}>{d.label}</span>
+              <span className="text-[11px]" style={{ color: 'var(--text-label)' }}>Available</span>
             </div>
           ))}
+          <p className="text-[11px] mt-3" style={{ color: 'var(--text-label)' }}>
+            Per-denomination breakdown requires an off-chain indexer.
+          </p>
         </div>
       </div>
 
