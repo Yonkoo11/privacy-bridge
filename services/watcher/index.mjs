@@ -32,7 +32,7 @@ import { fileURLToPath } from 'node:url';
 const SOURCE_CHAIN = process.env.SOURCE_CHAIN || 'flow-evm-testnet';
 const SOURCE_RPC_URL = process.env.SOURCE_RPC_URL || 'https://testnet.evm.nodes.onflow.org';
 const STARKNET_RPC_URL = process.env.STARKNET_RPC_URL || 'http://localhost:5050';
-const SOURCE_BRIDGE_ADDRESS = process.env.SOURCE_BRIDGE_ADDRESS || process.env.SOURCE_BRIDGE_ADDRESS;
+const SOURCE_BRIDGE_ADDRESS = process.env.SOURCE_BRIDGE_ADDRESS;
 const STARKNET_BRIDGE_ADDRESS = process.env.STARKNET_BRIDGE_ADDRESS;
 const STARKNET_ACCOUNT_ADDRESS = process.env.STARKNET_ACCOUNT_ADDRESS;
 const STARKNET_PRIVATE_KEY = process.env.STARKNET_PRIVATE_KEY;

@@ -5,6 +5,14 @@ import { generateProof as generateSnarkProof } from '@/lib/prover';
 import { RELAYER_URL, CALLDATA_URL } from '@/lib/constants';
 import type { NoteData } from '@/lib/encryption';
 
+const CHAIN_ID_TO_KEY: Record<number, string> = {
+  545: 'flow-evm',
+  11155111: 'sepolia',
+  84532: 'base-sepolia',
+  421614: 'arbitrum-sepolia',
+  11155420: 'optimism-sepolia',
+};
+
 type WithdrawStatus =
   | 'idle'
   | 'loaded'
@@ -140,6 +148,7 @@ export function useWithdraw() {
         body: JSON.stringify({
           calldata: calldata.calldata,
           max_fee_bps: calldata.max_fee_bps,
+          sourceChain: CHAIN_ID_TO_KEY[note?.sourceChainId ?? 545] ?? 'flow-evm',
         }),
       });
 
@@ -154,7 +163,7 @@ export function useWithdraw() {
       setError(err instanceof Error ? err.message : 'Relay submission failed');
       setStatus('error');
     }
-  }, [calldata]);
+  }, [calldata, note]);
 
   return {
     loadNote,

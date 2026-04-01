@@ -18,18 +18,45 @@
  */
 
 import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { RpcProvider, Account, Contract, CallData, constants } from 'starknet';
 import { createReceipt, uploadReceipt } from '../../sdk/src/storacha.mjs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 
 const STARKNET_RPC_URL = process.env.STARKNET_RPC_URL || 'http://localhost:5050';
-const STARKNET_BRIDGE_ADDRESS = process.env.STARKNET_BRIDGE_ADDRESS;
+const STARKNET_BRIDGE_ADDRESS = process.env.STARKNET_BRIDGE_ADDRESS; // default/fallback bridge
 const RELAYER_PRIVATE_KEY = process.env.RELAYER_PRIVATE_KEY;
 const STARKNET_ACCOUNT_ADDRESS = process.env.STARKNET_ACCOUNT_ADDRESS;
 const PORT = parseInt(process.env.PORT || '3001', 10);
+
+// Multichain routing table: sourceChain -> Starknet bridge address
+const BRIDGE_ROUTING = {};
+function loadMultichainConfig() {
+  const mcPath = path.join(__dirname, '..', '..', 'deploy-multichain.json');
+  if (fs.existsSync(mcPath)) {
+    const mc = JSON.parse(fs.readFileSync(mcPath, 'utf8'));
+    for (const [key, info] of Object.entries(mc)) {
+      BRIDGE_ROUTING[key] = info.bridge_address;
+    }
+    log('INFO', `Loaded multichain routing for ${Object.keys(BRIDGE_ROUTING).length} chains`);
+  }
+  // Always have the default
+  if (STARKNET_BRIDGE_ADDRESS) {
+    BRIDGE_ROUTING['default'] = STARKNET_BRIDGE_ADDRESS;
+  }
+}
+
+function resolveBridgeAddress(sourceChain) {
+  if (sourceChain && BRIDGE_ROUTING[sourceChain]) return BRIDGE_ROUTING[sourceChain];
+  return BRIDGE_ROUTING['default'] || STARKNET_BRIDGE_ADDRESS;
+}
 
 // ---------------------------------------------------------------------------
 // ABI (only what we need)
@@ -163,7 +190,6 @@ function getClientIP(req) {
 
 function validateConfig() {
   const required = {
-    STARKNET_BRIDGE_ADDRESS,
     RELAYER_PRIVATE_KEY,
     STARKNET_ACCOUNT_ADDRESS,
   };
@@ -174,6 +200,11 @@ function validateConfig() {
 
   if (missing.length > 0) {
     log('ERROR', `Missing required env vars: ${missing.join(', ')}`);
+    process.exit(1);
+  }
+
+  if (!STARKNET_BRIDGE_ADDRESS && Object.keys(BRIDGE_ROUTING).length === 0) {
+    log('ERROR', 'No bridge addresses configured. Set STARKNET_BRIDGE_ADDRESS or provide deploy-multichain.json');
     process.exit(1);
   }
 }
@@ -210,18 +241,21 @@ async function handleRelay(req, res, account, bridgeContract) {
     return;
   }
 
-  // sourceChain is optional for now -- logged for routing when multiple Starknet bridges exist
+  // Resolve the correct Starknet bridge for this source chain
+  const targetBridge = resolveBridgeAddress(sourceChain);
 
   log('INFO', 'Relay request received', {
     ip,
     sourceChain: sourceChain || 'default',
+    targetBridge,
     calldataLength: calldata.length,
     max_fee_bps,
   });
 
   try {
-    // Get current on-chain fee
-    const feeBps = await bridgeContract.get_relayer_fee();
+    // Create contract instance for the target bridge
+    const targetContract = new Contract(BRIDGE_ABI, targetBridge, account);
+    const feeBps = await targetContract.get_relayer_fee();
     const feeNum = Number(feeBps);
 
     if (feeNum === 0) {
@@ -239,7 +273,7 @@ async function handleRelay(req, res, account, bridgeContract) {
 
     const tx = await account.execute([
       {
-        contractAddress: STARKNET_BRIDGE_ADDRESS,
+        contractAddress: targetBridge,
         entrypoint: 'mint',
         calldata: CallData.compile({
           full_proof_with_hints: calldata,
@@ -265,7 +299,7 @@ async function handleRelay(req, res, account, bridgeContract) {
           commitment: BigInt(calldata[0] || '0'),
           nullifierHash: BigInt(calldata[1] || '0'),
           amount: BigInt(calldata[2] || '0'),
-          sourceChain: 'flow-evm-testnet',
+          sourceChain: sourceChain || 'unknown',
           destChain: 'starknet',
         });
         receiptCid = await uploadReceipt(storachaClient, bridgeReceipt);
@@ -319,6 +353,7 @@ function handleHealth(res) {
 // ---------------------------------------------------------------------------
 
 async function main() {
+  loadMultichainConfig();
   validateConfig();
 
   const provider = new RpcProvider({ nodeUrl: STARKNET_RPC_URL });

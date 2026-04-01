@@ -10,6 +10,13 @@ type DepositStatus = 'idle' | 'generating' | 'ready' | 'locking' | 'confirming' 
 
 const FIELD_PRIME = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
 
+const ALLOWED_DENOMINATIONS = new Set([
+  100000000000000n,     // 0.0001
+  1000000000000000n,    // 0.001
+  10000000000000000n,   // 0.01
+  100000000000000000n,  // 0.1
+]);
+
 function randomFieldElement(): bigint {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
@@ -67,6 +74,12 @@ export function useDeposit() {
       try {
         setStatus('locking');
         setError(null);
+
+        if (!ALLOWED_DENOMINATIONS.has(amount)) {
+          setError(`Invalid denomination: ${amount}. Use 0.0001, 0.001, 0.01, or 0.1`);
+          setStatus('error');
+          return;
+        }
 
         const bridgeAddress = getBridgeAddress(chainId ?? 545);
         if (!bridgeAddress) {
