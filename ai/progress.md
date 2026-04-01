@@ -3,11 +3,13 @@
 ## STATUS (2026-04-01)
 
 ### What Changed (Plain English)
-- Fixed a React bug where the deposit confirmation could cause flickering
-- Note Manager now checks on-chain if each deposit actually exists (shows Confirmed/Pending)
-- Withdrawal page no longer scans millions of blocks -- starts from when the contract was deployed
-- After depositing, the app suggests using the Note Manager for encrypted backup
-- All previous fixes from this session still in place
+- The landing page now has the "Transit" design: a visual chain map showing all 6 networks with dots and arrows pointing to Starknet
+- The protocol steps (Lock, Prove, Verify, Claim) are now shown as a horizontal flow with green arrows between them
+- Security info is split into two columns: "Verified" (green checkmarks) and "Disclosed" (amber warnings) so visitors can quickly see what's solid and what's not
+- A compact specs bar at the bottom shows circuit size, tree depth, test count, and chain count in one line
+- The header now shows an "EVM > ZK > Starknet" flow indicator
+- On mobile, the layout stacks vertically and the chain map scrolls horizontally
+- All previous fixes from prior sessions still in place
 
 ### Deployed EVM Contracts (5/6)
 | Chain | ChainID | Bridge Address |
@@ -47,6 +49,8 @@
 - Per-denomination deposit counts in Dashboard
 
 ### Deploy wallet: 0x8902C8b707EB26Ed383F4Aeb86b6058b13190390
+19. Transit design ported: globals.css + page.tsx rewritten with chain map, protocol flow, security dossier, specs bar
+
 ### NEXT STEP: Generate 3 design proposals
 - Read ai/design-research.md for the full research brief
 - Read ai/design-progress.md for design workflow state (Round 3, Phase 2 in progress)
