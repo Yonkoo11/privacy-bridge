@@ -1,34 +1,39 @@
 # Privacy Bridge -- Progress
 
-## Current Session: Multichain Expansion
-- **Date:** 2026-03-31
-- **Plan:** /Users/yonko/.claude/plans/lovely-discovering-flute.md
-- **Status:** Plan approved, starting implementation
-- **Steps completed:** 0/19
+## Current Status (2026-04-01)
 
-## Implementation Checklist
-- [ ] Step 1: Cairo token constructor (name/symbol params)
-- [ ] Step 2: Chain config registry (app/src/lib/chains.ts)
-- [ ] Step 3: Restructure constants (app/src/lib/constants.ts)
-- [ ] Step 4: Update wagmi config (layout.tsx)
-- [ ] Step 5: ChainSelector component
-- [ ] Step 6: Update DepositForm
-- [ ] Step 7: Update WalletConnect
-- [ ] Step 8: Update useDeposit hook
-- [ ] Step 9: Add sourceChainId to NoteData
-- [ ] Step 10: Update WithdrawForm
-- [ ] Step 11: Update useWithdraw
-- [ ] Step 12: Update landing page
-- [ ] Step 13: Update Dashboard
-- [ ] Step 14: Generalize EVM deploy script
-- [ ] Step 15: Starknet multichain deploy script
-- [ ] Step 16: Update watcher
-- [ ] Step 17: Update relayer
-- [ ] Step 18: Deploy to new chains
-- [ ] Step 19: Update SDK + README
+### Deployed Contracts (5/6 chains live)
+| Chain | Bridge Address | Status |
+|-------|---------------|--------|
+| Flow EVM (545) | 0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca | Live, 2 deposits |
+| Ethereum Sepolia (11155111) | 0x2eaEF8016D2a7Dc01677E57183a167649cB07402 | Live |
+| Base Sepolia (84532) | 0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca | Live |
+| Arbitrum Sepolia (421614) | 0x2eaEF8016D2a7Dc01677E57183a167649cB07402 | Live |
+| Optimism Sepolia (11155420) | 0x2eaEF8016D2a7Dc01677E57183a167649cB07402 | Live |
+| Polygon Amoy (80002) | -- | Needs ~1.2 POL (have 0.53) |
 
-## Prior Work (verified 2026-03-31)
-- 93/93 tests passing on fresh devnet
-- Security fixes: privacy leak, field reduction, ABI mismatches, CORS, rate limiter
-- Font sizes fixed, chain switching added
+### Frontend
 - GitHub Pages live at yonkoo11.github.io/privacy-bridge
+- ChainSelector component with 6 chains
+- Dynamic denominations per chain
+- Notes save sourceChainId
+- WithdrawForm reads source chain from note
+- Build: `cd app && NEXT_PUBLIC_BASE_PATH="/privacy-bridge" npx next build` (~7 min)
+
+### What's Done
+- Multichain frontend (6 chains, 5 deployed)
+- Security fixes: field reduction, ABI alignment, CORS, rate limiter, privacy leak
+- 93/93 tests passing on devnet
+- Honest trust model documentation
+- deploy-evm.mjs generalized deploy script
+
+### Deploy wallet
+- Address: 0x8902C8b707EB26Ed383F4Aeb86b6058b13190390
+- Key must be provided via /tmp/.deploy-pk file
+
+### What Still Needs Work
+- [ ] Polygon Amoy deploy (needs more POL)
+- [ ] Demo video
+- [ ] Hackathon submission
+- [ ] Test a real deposit on Sepolia from the live frontend
+- [ ] Update progress.md before compacting
