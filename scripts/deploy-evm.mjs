@@ -23,7 +23,7 @@ const CHAINS = {
   'sepolia': { rpc: 'https://ethereum-sepolia-rpc.publicnode.com', chainId: 11155111, name: 'Ethereum Sepolia', symbol: 'ETH' },
   'base-sepolia': { rpc: 'https://sepolia.base.org', chainId: 84532, name: 'Base Sepolia', symbol: 'ETH' },
   'arbitrum-sepolia': { rpc: 'https://sepolia-rollup.arbitrum.io/rpc', chainId: 421614, name: 'Arbitrum Sepolia', symbol: 'ETH' },
-  'polygon-amoy': { rpc: 'https://rpc-amoy.polygon.technology', chainId: 80002, name: 'Polygon Amoy', symbol: 'POL' },
+  'polygon-amoy': { rpc: 'https://polygon-amoy-bor-rpc.publicnode.com', chainId: 80002, name: 'Polygon Amoy', symbol: 'POL' },
   'optimism-sepolia': { rpc: 'https://sepolia.optimism.io', chainId: 11155420, name: 'Optimism Sepolia', symbol: 'ETH' },
 };
 
