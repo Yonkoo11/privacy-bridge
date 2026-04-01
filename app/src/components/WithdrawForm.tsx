@@ -123,9 +123,10 @@ export default function WithdrawForm() {
         ],
       };
       const CHUNK = 9999n;
+      const startBlock = chainConfig.deployBlock ?? 0n;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const allLogs: any[] = [];
-      for (let from = 0n; from <= currentBlock; from += CHUNK + 1n) {
+      for (let from = startBlock; from <= currentBlock; from += CHUNK + 1n) {
         const to = from + CHUNK > currentBlock ? currentBlock : from + CHUNK;
         const chunk = await sourceClient.getLogs({
           address: bridgeAddress,

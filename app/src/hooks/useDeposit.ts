@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { poseidon2 } from 'poseidon-lite';
 import { getBridgeAddress, PRIVACY_BRIDGE_ABI } from '@/lib/constants';
@@ -114,9 +114,11 @@ export function useDeposit() {
     [writeContract]
   );
 
-  if (isConfirmed && status === 'confirming') {
-    setStatus('done');
-  }
+  useEffect(() => {
+    if (isConfirmed && status === 'confirming') {
+      setStatus('done');
+    }
+  }, [isConfirmed, status]);
 
   return {
     generateNote,

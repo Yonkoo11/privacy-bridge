@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { createPublicClient, http } from 'viem';
 import { encryptNote, decryptNote, type NoteData } from '@/lib/encryption';
+import { getBridgeAddress, PRIVACY_BRIDGE_ABI } from '@/lib/constants';
+import { getChainConfig } from '@/lib/chains';
 
 const STORAGE_KEY = 'privacy-bridge-notes';
 
@@ -15,6 +18,7 @@ interface NoteWithStatus extends NoteData {
   id: string;
   createdAt: number;
   spent?: boolean;
+  confirmed?: boolean; // deposit confirmed on source chain
 }
 
 export function useNotes() {
@@ -78,6 +82,15 @@ export function useNotes() {
         }
 
         setNotes(decrypted);
+
+        // Check on-chain deposit status for each note (non-blocking)
+        for (const note of decrypted) {
+          checkNoteStatus(note).then(onChain => {
+            setNotes(prev => prev.map(n =>
+              n.id === note.id ? { ...n, confirmed: onChain } : n
+            ));
+          });
+        }
         return decrypted;
       } catch (err) {
         setError(
@@ -100,9 +113,28 @@ export function useNotes() {
 
   const checkNoteStatus = useCallback(
     async (note: NoteWithStatus): Promise<boolean> => {
-      // Placeholder: in production, query the nullifier set on-chain
-      // For now, return false (not spent)
-      return false;
+      try {
+        const chainId = note.sourceChainId ?? 545;
+        const bridgeAddress = getBridgeAddress(chainId);
+        const chainConfig = getChainConfig(chainId);
+        if (!bridgeAddress || !chainConfig) return false;
+
+        const client = createPublicClient({
+          chain: chainConfig.chain,
+          transport: http(chainConfig.chain.rpcUrls.default.http[0]),
+        });
+
+        const exists = await client.readContract({
+          address: bridgeAddress,
+          abi: PRIVACY_BRIDGE_ABI,
+          functionName: 'commitmentExists',
+          args: [BigInt(note.commitment)],
+        });
+
+        return !!exists;
+      } catch {
+        return false;
+      }
     },
     []
   );

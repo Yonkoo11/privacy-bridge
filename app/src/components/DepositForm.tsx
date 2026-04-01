@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAccount, useConnect, useSwitchChain } from 'wagmi';
 import { injected } from 'wagmi/connectors';
+import Link from 'next/link';
 import { useDeposit } from '@/hooks/useDeposit';
 import { getDenominations, getDenomHints } from '@/lib/constants';
 import { SUPPORTED_CHAIN_IDS, getChainConfig, getExplorerTxUrl } from '@/lib/chains';
@@ -206,7 +207,7 @@ export default function DepositForm() {
         )}
 
         {status === 'done' && isConfirmed && (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-3">
             <div className="text-[15px]" style={{ color: '#34d399' }}>
               Deposit confirmed on {chainName}
             </div>
@@ -215,12 +216,24 @@ export default function DepositForm() {
                 href={getExplorerTxUrl(chainId, txHash)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm"
-                style={{ color: 'var(--text-stamp)', borderBottom: '1px solid var(--border-strong)' }}
+                className="text-sm block"
+                style={{ color: 'var(--text-stamp)', borderBottom: '1px solid var(--border-strong)', display: 'inline' }}
               >
                 View on Explorer
               </a>
             )}
+            <div className="p-3 mt-2" style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+              <p className="text-[13px] mb-2" style={{ color: 'var(--text-label)' }}>
+                Your note file is the only way to withdraw. For encrypted backup:
+              </p>
+              <Link
+                href="/bridge/notes"
+                className="text-[13px] font-medium"
+                style={{ color: 'var(--text-stamp)', borderBottom: '1px solid var(--border-strong)' }}
+              >
+                Go to Note Manager
+              </Link>
+            </div>
           </div>
         )}
 

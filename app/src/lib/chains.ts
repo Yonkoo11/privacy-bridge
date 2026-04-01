@@ -64,6 +64,7 @@ export interface ChainConfig {
   chain: Chain;
   bridgeAddress: `0x${string}` | null;
   tokenSymbol: string;
+  deployBlock?: bigint; // block number when bridge was deployed (for efficient log scanning)
 }
 
 export const CHAIN_CONFIG: Record<number, ChainConfig> = {
@@ -71,21 +72,25 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     chain: flowEvmTestnet,
     bridgeAddress: '0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca',
     tokenSymbol: 'pFLOW',
+    deployBlock: 0n, // Flow EVM testnet is low-block-count, scan from 0
   },
   [sepolia.id]: {
     chain: sepolia,
     bridgeAddress: '0x2eaEF8016D2a7Dc01677E57183a167649cB07402',
     tokenSymbol: 'pETH',
+    deployBlock: 10550000n, // Deployed 2026-03-31
   },
   [baseSepolia.id]: {
     chain: baseSepolia,
     bridgeAddress: '0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca',
     tokenSymbol: 'pBASE',
+    deployBlock: 39540000n, // Deployed 2026-03-31
   },
   [arbitrumSepolia.id]: {
     chain: arbitrumSepolia,
     bridgeAddress: '0x2eaEF8016D2a7Dc01677E57183a167649cB07402',
     tokenSymbol: 'pARB',
+    deployBlock: 254850000n, // Deployed 2026-03-31
   },
   [polygonAmoy.id]: {
     chain: polygonAmoy,
@@ -96,6 +101,7 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     chain: optimismSepolia,
     bridgeAddress: '0x2eaEF8016D2a7Dc01677E57183a167649cB07402',
     tokenSymbol: 'pOP',
+    deployBlock: 41520000n, // Deployed 2026-03-31
   },
 };
 

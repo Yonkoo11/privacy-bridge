@@ -180,12 +180,24 @@ export default function NoteManager() {
                           className="text-xs px-2 py-0.5"
                           style={{
                             fontFamily: 'var(--font-mono)',
-                            background: note.spent ? 'var(--surface-raised)' : 'rgba(52,211,153,0.1)',
-                            color: note.spent ? 'var(--text-label)' : '#34d399',
-                            border: note.spent ? '1px solid var(--border)' : '1px solid rgba(52,211,153,0.3)',
+                            background: note.confirmed === undefined
+                              ? 'var(--surface-raised)'
+                              : note.confirmed
+                                ? 'rgba(52,211,153,0.1)'
+                                : 'rgba(251,191,36,0.1)',
+                            color: note.confirmed === undefined
+                              ? 'var(--text-label)'
+                              : note.confirmed
+                                ? '#34d399'
+                                : '#fbbf24',
+                            border: note.confirmed === undefined
+                              ? '1px solid var(--border)'
+                              : note.confirmed
+                                ? '1px solid rgba(52,211,153,0.3)'
+                                : '1px solid rgba(251,191,36,0.3)',
                           }}
                         >
-                          {note.spent ? 'Spent' : 'Active'}
+                          {note.confirmed === undefined ? 'Checking...' : note.confirmed ? 'Confirmed' : 'Pending'}
                         </span>
                         <button
                           onClick={() => deleteNote(note.id)}
