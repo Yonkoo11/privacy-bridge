@@ -1,0 +1,24 @@
+node_modules/
+.env
+build/
+out/
+.next/
+*.ptau
+*.zkey
+*.wasm
+*.r1cs
+*.sym
+
+# Circuit artifacts served at runtime, not bundled (causes OOM in next build)
+# Copy from circuits/target/ to app/public/ only for local dev
+target/
+.snfoundry_cache/
+
+# Secret note files (contain deposit secrets — never commit)
+note-*.json
+proof-*.json
+receipt-*.json
+
+# Deployment files (contain local addresses, regen with deploy scripts)
+deploy.json
+deploy-flow.json
