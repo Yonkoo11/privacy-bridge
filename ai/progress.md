@@ -47,6 +47,14 @@
 - Per-denomination deposit counts in Dashboard
 
 ### Deploy wallet: 0x8902C8b707EB26Ed383F4Aeb86b6058b13190390
+### Design Status
+- Round 3 of /design workflow in progress
+- Phase 1.5 (research) complete -- see ai/design-research.md
+- Phase 2 (3 proposals) next -- need to generate 3 HTML proposal files
+- Research covered: Tornado Cash, Railgun, Aztec, LayerSwap, Stargate, Across, Wormhole
+- Key design innovations to incorporate: anonymity set display, Source->Dest panels, 1-click withdrawal
+- Current "Redact" theme (zero border-radius, classified docs, stamps) is our brand -- evolve it, don't replace
+
 ### Build: cd app && NEXT_PUBLIC_BASE_PATH="/privacy-bridge" npx next build
 ### Deploy: cd app && npx gh-pages -d out
 ### Live: https://yonkoo11.github.io/privacy-bridge/

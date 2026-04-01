@@ -26,3 +26,14 @@ Ported to Next.js app, build passes 8/8 pages, deployed to GitHub Pages.
 ### Phase 5: Final QA
 Status: completed
 Fixes applied: 9 (hero CTA, font size bumps, mobile stamp, WCAG contrast across 6 files)
+
+## Round 3 -- Multichain Evolution (2026-04-01)
+
+Context: Product expanded from 1 chain to 6. Competitor research done (Tornado Cash, Railgun, Aztec, LayerSwap, Stargate, Across, Wormhole). Key insights: anonymity set display, Source->Dest panel layout, 1-click withdrawal, classified document aesthetic carries through to bridge app.
+
+### Phase 1.5: Design Research
+Status: completed
+Output: ai/design-research.md
+
+### Phase 2: Creative (3 Proposals)
+Status: in progress
