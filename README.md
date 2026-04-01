@@ -14,6 +14,49 @@ Multichain ZK privacy bridge. Lock tokens on any supported EVM chain, generate a
 
 3. **Mint** -- Submit the proof to the Starknet bridge contract for that source chain. The garaga verifier checks the Groth16 proof on-chain. If valid, shielded tokens (SNIP-2 ERC20) are minted to the recipient and the nullifier is marked spent. A relayer can submit proofs on your behalf for a fee.
 
+## Hackathon Changelog (PL Genesis 2026)
+
+This project existed before the hackathon as a single-chain Flow EVM to Starknet privacy bridge. During PL Genesis, the following features were built:
+
+### Multichain Expansion (5 new source chains)
+- Deployed identical PrivacyBridge.sol contracts on Ethereum Sepolia, Base Sepolia, Arbitrum Sepolia, Optimism Sepolia, and Polygon Amoy (pending funds)
+- Added chain configuration registry with per-chain RPC, block explorer, deploy block, and denomination labels
+- Updated wagmi config to support all 6 EVM chains simultaneously
+- Each source chain gets its own Starknet bridge+token pair (same circuit, separate anonymity pools)
+
+### Frontend Redesign ("Transit" Design System)
+- Landing page with directional flow hero: "Deposit on any chain" connected by dashed line to "Withdraw on Starknet"
+- Chain transit map showing all 6 networks as station nodes with arrow pointing to Starknet destination
+- Horizontal protocol sequence (Lock, Prove, Verify, Claim) with green flow arrows
+- Vertical denomination selector with real-time on-chain pool size indicator
+- Single-click "Declassify" withdrawal button that runs all 4 steps (load, prove, calldata, relay) automatically with elapsed time tracking
+- Security dossier with verified/disclosed split columns
+- "I have backed up my note" checkbox gate before deposit execution
+
+### Flow Blockchain Integration (Sponsor Bounty)
+- Flow EVM Testnet is the primary source chain with full deposit and withdrawal support
+- PrivacyBridge.sol deployed at `0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca` on Flow EVM (chain ID 545)
+- PoseidonT3 library deployed at `0xa49dF7B02806B4661d2D7064fE857af9BDc9a82a` on Flow EVM
+- Real-time on-chain deposit count and Merkle root queries via Flow EVM RPC
+- Block explorer integration with FlowScan for transaction verification
+
+### Storacha Integration (Sponsor Bounty)
+- Withdrawal receipts stored on IPFS via Storacha (w3up-client)
+- Each relay transaction uploads proof metadata as a verifiable receipt
+- Multichain-aware: receipts include source chain identifier for cross-chain audit trail
+
+### On-chain Data Integration
+- Dashboard reads real deposit counts and latest Merkle root from each chain's bridge contract
+- Deposit form shows live pool size pulled from on-chain `getDepositCount()`
+- Log scanning optimized with deploy block hints (starts from contract deployment, not genesis)
+- Note Manager checks on-chain commitment existence to show Confirmed/Pending status
+
+### Infrastructure
+- Multichain relayer routing (accepts source chain in POST body, routes to correct Starknet bridge)
+- Starknet multichain deploy script for deploying bridge+token pairs per source chain
+- Custom 404 and error pages with branded design
+- Static export deployed to GitHub Pages
+
 ## Architecture
 
 ```
