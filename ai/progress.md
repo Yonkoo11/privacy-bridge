@@ -3,17 +3,11 @@
 ## STATUS (2026-04-01)
 
 ### What Changed (Plain English)
-- Circuit files now load correctly on the live website (were missing before)
-- Dashboard shows real deposit counts and Merkle roots from each chain's contract
-- Withdrawal page shows correct currency name per chain (not always "FLOW")
-- Landing page shows all 5 deployed chain addresses
-- Added honest warning when Starknet withdrawal isn't available for a chain yet
-- Relayer can now route to different Starknet bridges per source chain
-- Frontend tells the relayer which chain a deposit came from
-- Invalid deposit amounts are caught before the wallet pops up
-- Custom 404 and error pages match the site design
-- Sepolia RPC switched to publicnode (old one was unreliable)
-- Fixed a watcher config bug where fallback referenced itself
+- Fixed a React bug where the deposit confirmation could cause flickering
+- Note Manager now checks on-chain if each deposit actually exists (shows Confirmed/Pending)
+- Withdrawal page no longer scans millions of blocks -- starts from when the contract was deployed
+- After depositing, the app suggests using the Note Manager for encrypted backup
+- All previous fixes from this session still in place
 
 ### Deployed EVM Contracts (5/6)
 | Chain | ChainID | Bridge Address |
@@ -23,48 +17,36 @@
 | Base Sepolia | 84532 | 0xd1959eA3d6ca0631f2e617ac7CE71e297E5328Ca |
 | Arbitrum Sepolia | 421614 | 0x2eaEF8016D2a7Dc01677E57183a167649cB07402 |
 | Optimism Sepolia | 11155420 | 0x2eaEF8016D2a7Dc01677E57183a167649cB07402 |
-| Polygon Amoy | 80002 | NOT DEPLOYED (need ~1.2 POL) |
+| Polygon Amoy | 80002 | NOT DEPLOYED |
 
-### Done
-- Multichain frontend with ChainSelector (6 chains, 5 with EVM contracts)
-- 93/93 tests on devnet
-- Security fixes (field reduction, ABI, CORS, rate limiter, privacy leak)
-- deploy-evm.mjs generalized EVM deploy script
-- deploy-starknet-multichain.mjs for all 5 Starknet bridge+token pairs
-- GitHub Pages live at yonkoo11.github.io/privacy-bridge
-- Circuit artifacts in app/public/, basePath-aware prover paths
-- Dashboard reads live on-chain data (deposit count, latest Merkle root)
-- WithdrawForm shows correct currency per source chain
-- Landing page shows all 5 chain contracts
-- README updated with all chain addresses
-- Honest disclosure on WithdrawForm for non-Flow chains
-- Relayer supports multichain Starknet routing via deploy-multichain.json
-- Frontend passes sourceChain to relayer
-- Denomination validation in deposit hook
-- Custom 404 and error pages
-- Sepolia RPC fixed (publicnode)
-- Watcher config self-reference bug fixed
+### All Fixes This Session
+1. Circuit artifacts copied to app/public/ (withdrawals would have 404'd)
+2. Prover paths basePath-aware for GitHub Pages
+3. Dashboard wired to on-chain getDepositCount + getLatestRoot
+4. WithdrawForm shows correct currency per source chain
+5. Landing page shows all 5 chain contracts
+6. Sepolia RPC switched to publicnode
+7. Watcher config self-reference bug fixed
+8. Relayer supports multichain Starknet routing
+9. Frontend passes sourceChain to relayer
+10. Denomination validation before wallet popup
+11. Custom 404 and error pages
+12. Multi-chain Starknet deploy script created
+13. Storacha receipt uses actual source chain
+14. React state-during-render fixed (useEffect)
+15. Note Manager checks on-chain deposit status
+16. Log scanning optimized with deploy block hints
+17. Post-deposit link to Note Manager
+18. README updated with all chain addresses
 
 ### NOT Done (honest gaps)
-- Starknet bridge+token pairs for non-Flow chains not deployed (script ready, needs running devnet)
+- Starknet bridge+token pairs for non-Flow chains not deployed
 - Zero real deposits tested from live frontend
 - No demo video, no submission
-- Relayer/calldata services default to localhost (no production deployment)
-- Per-denomination deposit counts in Dashboard (requires event indexing)
-- Polygon Amoy EVM contract not deployed (insufficient testnet funds)
-
-### What I Did NOT Do
-- Did not deploy to Starknet Sepolia (no funded account)
-- Did not run the multi-chain devnet deploy script (needs devnet running)
-- Did not test end-to-end withdrawal flow on any chain
-- Did not create demo video
-
-### Confidence Level
-- EVM deposit side: HIGH -- 5 contracts verified, frontend reads live data
-- Circuit/crypto alignment: HIGH -- verified circuit matches frontend commitment scheme
-- Starknet withdrawal: LOW for non-Flow -- pairs not deployed, no tested withdrawal
-- Overall demo quality: MEDIUM -- polished frontend, but full round trip untested
+- Relayer/calldata services not deployed to production
+- Per-denomination deposit counts in Dashboard
 
 ### Deploy wallet: 0x8902C8b707EB26Ed383F4Aeb86b6058b13190390
 ### Build: cd app && NEXT_PUBLIC_BASE_PATH="/privacy-bridge" npx next build
 ### Deploy: cd app && npx gh-pages -d out
+### Live: https://yonkoo11.github.io/privacy-bridge/
