@@ -1,18 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount, useConnect, useSwitchChain } from 'wagmi';
+import { useAccount, useConnect } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import Link from 'next/link';
 import { useDeposit } from '@/hooks/useDeposit';
-import { getDenominations, getDenomHints } from '@/lib/constants';
+import { getDenominations } from '@/lib/constants';
 import { SUPPORTED_CHAIN_IDS, getChainConfig, getExplorerTxUrl } from '@/lib/chains';
 import ChainSelector from './ChainSelector';
 
 export default function DepositForm() {
   const { isConnected, chain } = useAccount();
   const { connect } = useConnect();
-  const { switchChain } = useSwitchChain();
 
   const chainId = chain?.id ?? 0;
   const chainConfig = getChainConfig(chainId);
@@ -21,7 +20,6 @@ export default function DepositForm() {
   const chainName = chain?.name ?? 'Unknown';
 
   const denominations = getDenominations(chainId);
-  const denomHints = getDenomHints(chainId);
 
   const {
     generateNote, lockDeposit, noteData, status, error, txHash, isConfirmed,

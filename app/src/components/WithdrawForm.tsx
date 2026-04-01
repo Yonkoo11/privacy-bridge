@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { usePublicClient } from 'wagmi';
+import { useState, useRef } from 'react';
 import { createPublicClient, http } from 'viem';
 import { useWithdraw } from '@/hooks/useWithdraw';
 import { getBridgeAddress, PRIVACY_BRIDGE_ABI } from '@/lib/constants';
@@ -25,7 +24,7 @@ export default function WithdrawForm() {
   const [autoRunning, setAutoRunning] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const startTimeRef = useRef<number>(0);
-  const publicClient = usePublicClient();
+
 
   // Determine current step from status
   const getStepIndex = () => {

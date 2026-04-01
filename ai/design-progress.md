@@ -36,4 +36,19 @@ Status: completed
 Output: ai/design-research.md
 
 ### Phase 2: Creative (3 Proposals)
+Status: completed
+Proposals: proposal-7-dossier.html, proposal-8-dispatch.html, proposal-9-transit.html
+DNA Codes: DNA-DOSSIER-DUAL-SPLIT-GRID-STILL, DNA-DISPATCH-MONO-CENTER-DENSE-PULSE, DNA-TRANSIT-DUAL-FLOW-EDGE-MOTION
+
+### Phase 3: Selection
+Status: completed
+Selected: Proposal 9 "Transit" (DNA-TRANSIT-DUAL-FLOW-EDGE-MOTION) with elements from Proposal 8 "Dispatch"
+Reason: Best spatial storytelling. Header flow indicator (EVM > ZK > Starknet) communicates product instantly. Chain transit map is visually distinctive. Vertical denomination list with inline anonymity bars is the best UX for the key innovation. Dispatch-style progress tracker with elapsed times stolen from Proposal 8.
+
+### Phase 4: Production Polish
+Status: completed
+Ported to Next.js app. Build passes 8/8 pages.
+Files changed: globals.css, page.tsx, bridge/layout.tsx, ChainSelector.tsx, DepositForm.tsx, WithdrawForm.tsx, Dashboard.tsx
+
+### Phase 5: Final QA
 Status: in progress
